@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import bnb.lord.LordRunner;
-import bnb.vassal.VassalServer;
+import bnb.vassal.VassalRunner;
 
 public class TspMain {
 	public static void main(String[] args) throws IOException {
@@ -16,7 +16,7 @@ public class TspMain {
 		System.out.println("numCores: " + numCores);
 
 		LordRunner lordRunner = new LordRunner();
-		VassalServer vassalServer = new VassalServer(lordRunner, numCores);
+		VassalRunner vassalServer = new VassalRunner(lordRunner, numCores);
 		City[] cities = read(f);
 		TspTreeNode root = new TspTreeNode(cities, cities[0], 1, null);
 		lordRunner.runJob(root, new TspProblemSpec(), /*Double.MAX_VALUE*/300, Arrays.asList(vassalServer));

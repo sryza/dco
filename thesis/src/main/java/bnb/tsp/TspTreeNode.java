@@ -6,9 +6,9 @@ import java.util.Set;
 
 import bnb.ProblemSpec;
 import bnb.Solution;
-import bnb.TreeNode;
+import bnb.BnbNode;
 
-public class TspTreeNode implements TreeNode {
+public class TspTreeNode implements BnbNode {
 	
 	private boolean isEvaluated;
 	
@@ -61,7 +61,7 @@ public class TspTreeNode implements TreeNode {
 	}
 
 	@Override
-	public TreeNode nextChild() {
+	public BnbNode nextChild() {
 		if (!hasNextChild()) {
 			throw new NoSuchElementException("Node has no next child.");
 		}

@@ -3,11 +3,11 @@ package bnb.vassal;
 import java.util.LinkedList;
 import java.util.List;
 
-import bnb.TreeNode;
+import bnb.BnbNode;
 
 public class LDSNodePool implements VassalNodePool {
 
-	private LinkedList<TreeNode> nodes;
+	private LinkedList<BnbNode> nodes;
 	private LinkedList<Integer> nodeDiscrepancies;
 	private int discrepancies;
 	
@@ -16,19 +16,19 @@ public class LDSNodePool implements VassalNodePool {
 	}
 	
 	@Override
-	public TreeNode nextNode() {
+	public BnbNode nextNode() {
 		
 		return null;
 	}
 
 	@Override
-	public void postEvaluated(TreeNode node) {
+	public void postEvaluated(BnbNode node) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public List<TreeNode> stealNodes() {
+	public List<BnbNode> stealNodes() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -1,26 +1,32 @@
 package bnb.vassal;
 
+import java.io.IOException;
+
+import org.apache.log4j.Logger;
+
 import bnb.Solution;
-import bnb.lord.VassalProxy;
+import bnb.rpc.LordPublic;
 
 public class VassalJobManager implements Runnable {
+	private static final Logger LOG = Logger.getLogger(VassalJobManager.class);
+	
 	private static final int UPDATE_INTERVAL = 500;
 	
 	private volatile double minCost;
 	private volatile Solution bestSolution;
 	
 	private volatile boolean update;
-	private final LordProxy lordProxy;
-	private final VassalProxy vassalProxy;
+	private final LordPublic lordProxy;
 	private final int jobid;
+	private final int vassalid;
 	
 	private final VassalNodePool nodePool;
 	
-	public VassalJobManager(double initCost, VassalNodePool nodePool, LordProxy lordProxy, VassalProxy vassalProxy, int jobid) {
+	public VassalJobManager(double initCost, VassalNodePool nodePool, LordPublic lordProxy, int vassalid, int jobid) {
 		minCost = initCost;
 		this.lordProxy = lordProxy;
-		this.vassalProxy = vassalProxy;
 		this.jobid = jobid;
+		this.vassalid = vassalid;
 		this.nodePool = nodePool;
 	}
 	
@@ -29,8 +35,7 @@ public class VassalJobManager implements Runnable {
 			try {
 				Thread.sleep(UPDATE_INTERVAL);
 				if (update) {
-					update = false;
-					sendMinCost();
+					update = !sendMinCost();
 				}
 			} catch (InterruptedException ex) {
 				ex.printStackTrace(); //TODO: log4j
@@ -42,8 +47,14 @@ public class VassalJobManager implements Runnable {
 		return nodePool;
 	}
 	
-	private void sendMinCost() {
-		lordProxy.sendBestSolCost(minCost, jobid, vassalProxy);
+	private boolean sendMinCost() {
+		try {
+			lordProxy.sendBestSolCost(minCost, jobid, vassalid);
+			return true;
+		} catch (IOException ex) {
+			LOG.error("Couldn't reach lord to report cost");
+			return false;
+		}
 	}
 	
 	public synchronized void betterLocalSolution(Solution sol, double cost) {

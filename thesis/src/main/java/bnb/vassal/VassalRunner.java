@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.Map;
 
 import bnb.ProblemSpec;
-import bnb.TreeNode;
-import bnb.lord.VassalProxy;
+import bnb.BnbNode;
+import bnb.rpc.LordPublic;
+import bnb.rpc.VassalPublic;
 
-public class VassalServer implements Runnable, VassalProxy {
+public class VassalRunner implements Runnable, VassalPublic {
 
 	private int numSlots;
 	private final Map<Integer, VassalJobManager> jobMap;
-	private final LordProxy lordInfo;
+	private final LordPublic lordInfo;
+	private final int vassalId;
 	
-	public VassalServer(LordProxy lordInfo, int numSlots) {
+	public VassalRunner(LordPublic lordInfo, int numSlots) {
 		this.numSlots = numSlots;
 		jobMap = new HashMap<Integer, VassalJobManager>();
 		this.lordInfo = lordInfo;
@@ -29,19 +31,19 @@ public class VassalServer implements Runnable, VassalProxy {
 	}
 	
 	@Override
-	public void startJobTasks(List<TreeNode> nodes, ProblemSpec spec, double bestCost, int jobid) {
+	public void startJobTasks(List<BnbNode> nodes, ProblemSpec spec, double bestCost, int jobid) {
 		VassalNodePool nodePool = new SimpleVassalNodePool();
-		for (TreeNode node : nodes) {
+		for (BnbNode node : nodes) {
 			nodePool.postEvaluated(node);
 		}
-		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, lordInfo, this, jobid);
+		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, lordInfo, vassalId, jobid);
 		jobMap.put(jobid, jobManager);
 		startVassalRunner(lordInfo, nodePool, spec, jobManager);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 	}
 	
-	public void startVassalRunner(LordProxy lordInfo, VassalNodePool nodePool, ProblemSpec spec,
+	public void startVassalRunner(LordPublic lordInfo, VassalNodePool nodePool, ProblemSpec spec,
 			VassalJobManager jobManager) {
 		TaskRunner runner = new TaskRunner(lordInfo, spec, jobManager);
 		Thread vassalThread = new Thread(runner);

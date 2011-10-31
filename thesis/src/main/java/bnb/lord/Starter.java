@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import bnb.ProblemSpec;
-import bnb.TreeNode;
+import bnb.BnbNode;
 
 public class Starter {
 	/**
@@ -16,22 +16,22 @@ public class Starter {
 	 * 		two lists - the first is a set of evaluated nodes to distribute to processes,
 	 * 		the second of which is the remaining set of unevaluated nodes
 	 */
-	public List<TreeNode>[] startEvaluation(ProblemSpec spec, double bestCost, TreeNode root, int count) {
+	public List<BnbNode>[] startEvaluation(ProblemSpec spec, double bestCost, BnbNode root, int count) {
 		//BFS
 		//TODO: what if we exhaust all the nodes during this part
-		LinkedList<TreeNode> nodes = new LinkedList<TreeNode>();
+		LinkedList<BnbNode> nodes = new LinkedList<BnbNode>();
 		nodes.add(root);
-		LinkedList<TreeNode> unevaluated = new LinkedList<TreeNode>();
+		LinkedList<BnbNode> unevaluated = new LinkedList<BnbNode>();
 		
 		while (nodes.size() < count) {
 			if (!unevaluated.isEmpty()) {
-				TreeNode node = unevaluated.removeFirst();
+				BnbNode node = unevaluated.removeFirst();
 				node.evaluate(spec, bestCost);
 				if (node.hasNextChild()) {
 					nodes.addLast(node);
 				}
 			} else {
-				TreeNode node = nodes.getFirst();
+				BnbNode node = nodes.getFirst();
 				unevaluated.add(node.nextChild());
 			}
 		}

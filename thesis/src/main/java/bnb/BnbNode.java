@@ -1,6 +1,6 @@
 package bnb;
 
-public interface TreeNode {
+public interface BnbNode {
 	/**
 	 * Runs bounding a solving on this node.  Returns a list of the child nodes
 	 * produced in this way, in order of most preferred.
@@ -9,7 +9,7 @@ public interface TreeNode {
 	
 	public boolean isEvaluated();
 	
-	public TreeNode nextChild();
+	public BnbNode nextChild();
 	
 	public boolean hasNextChild();
 	

@@ -4,18 +4,18 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import bnb.TreeNode;
+import bnb.BnbNode;
 
 public class SimpleVassalNodePool implements VassalNodePool {
 
-	private final LinkedList<TreeNode> nodeList;
+	private final LinkedList<BnbNode> nodeList;
 	
 	public SimpleVassalNodePool() {
-		nodeList = new LinkedList<TreeNode>();
+		nodeList = new LinkedList<BnbNode>();
 	}
 	
 	@Override
-	public synchronized List<TreeNode> stealNodes() {
+	public synchronized List<BnbNode> stealNodes() {
 		if (nodeList.isEmpty()) {
 			return null;
 		}
@@ -23,10 +23,10 @@ public class SimpleVassalNodePool implements VassalNodePool {
 	}
 
 	@Override
-	public synchronized TreeNode nextNode() {
+	public synchronized BnbNode nextNode() {
 		//TODO: make sure it's LIFO
 		while (nodeList.size() > 0) {
-			TreeNode lastNode = nodeList.getLast();
+			BnbNode lastNode = nodeList.getLast();
 			if (lastNode.hasNextChild())
 				return lastNode.nextChild();
 			else
@@ -37,7 +37,7 @@ public class SimpleVassalNodePool implements VassalNodePool {
 	}
 
 	@Override
-	public synchronized void postEvaluated(TreeNode node) {
+	public synchronized void postEvaluated(BnbNode node) {
 		nodeList.add(node);
 	}	
 }

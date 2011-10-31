@@ -1,14 +1,15 @@
 package bnb.vassal;
 
 import bnb.ProblemSpec;
-import bnb.TreeNode;
+import bnb.BnbNode;
+import bnb.rpc.LordPublic;
 
 public class TaskRunner implements Runnable {
-	private final LordProxy lordInfo;
+	private final LordPublic lordInfo;
 	private final ProblemSpec problemSpec;
 	private final VassalJobManager jobManager;
 	
-	public TaskRunner(LordProxy lordInfo, ProblemSpec spec, VassalJobManager jobManager) {
+	public TaskRunner(LordPublic lordInfo, ProblemSpec spec, VassalJobManager jobManager) {
 		this.lordInfo = lordInfo;
 		this.problemSpec = spec;
 		this.jobManager = jobManager;
@@ -16,7 +17,7 @@ public class TaskRunner implements Runnable {
 	
 	public void run() {
 		while (true) {
-			TreeNode node = jobManager.getNodePool().nextNode();
+			BnbNode node = jobManager.getNodePool().nextNode();
 			if (node == null) {
 				if (!stealWork()) {
 					break;
@@ -34,7 +35,7 @@ public class TaskRunner implements Runnable {
 	}
 	
 	private boolean stealWork() {
-		TreeNode work = lordInfo.askForWork();
+		BnbNode work = lordInfo.askForWork();
 		if (work == null) {
 			System.out.println("Out of work at " + System.currentTimeMillis());
 			return false;
