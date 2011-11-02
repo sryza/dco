@@ -4,28 +4,53 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TTransportException;
+
 import bnb.ProblemSpec;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
+import bnb.rpc.Ports;
 import bnb.rpc.VassalPublic;
 
-public class VassalRunner implements Runnable, VassalPublic {
-
+public class VassalRunner implements VassalPublic {
+	
+	private static final Logger LOG = Logger.getLogger(VassalRunner.class);
+	
 	private int numSlots;
 	private final Map<Integer, VassalJobManager> jobMap;
 	private final LordPublic lordInfo;
 	private final int vassalId;
+	private TServer server;
+	private final int port;
 	
-	public VassalRunner(LordPublic lordInfo, int numSlots) {
+	public VassalRunner(LordPublic lordInfo, int numSlots, int vassalId, int port) {
 		this.numSlots = numSlots;
 		jobMap = new HashMap<Integer, VassalJobManager>();
 		this.lordInfo = lordInfo;
+		this.vassalId = vassalId;
+		this.port = port;
 	}
 	
-	public void run() {
+	public void start() {
+		startServer(port);
+	}
+	
+	private void startServer(int port) {
+		TServerSocket serverSocket;
+		try {
+			serverSocket = new TServerSocket(port);
+			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket);
+			server = new TThreadPoolServer(args);
+			server.serve();
+		} catch (TTransportException ex) {
+			LOG.error("Trouble making server socket", ex);
+		}
+	}
 		
-	}
-	
 	public int numSlots() {
 		return numSlots;
 	}

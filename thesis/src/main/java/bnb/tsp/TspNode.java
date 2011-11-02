@@ -8,7 +8,7 @@ import bnb.ProblemSpec;
 import bnb.Solution;
 import bnb.BnbNode;
 
-public class TspTreeNode implements BnbNode {
+public class TspNode implements BnbNode {
 	
 	private boolean isEvaluated;
 	
@@ -22,7 +22,7 @@ public class TspTreeNode implements BnbNode {
 	
 	private int nextChildIndex;
 	
-	public TspTreeNode(City[] cities, City city, int numChosen, TspTreeNode parent) {
+	public TspNode(City[] cities, City city, int numChosen, TspNode parent) {
 		this.cities = cities;
 //		System.out.println(numUniqueCities());
 
@@ -65,7 +65,7 @@ public class TspTreeNode implements BnbNode {
 		if (!hasNextChild()) {
 			throw new NoSuchElementException("Node has no next child.");
 		}
-		TspTreeNode child = new TspTreeNode(cities, cities[nextChildIndex], numChosen+1, this);
+		TspNode child = new TspNode(cities, cities[nextChildIndex], numChosen+1, this);
 		nextChildIndex++;
 		return child;
 	}

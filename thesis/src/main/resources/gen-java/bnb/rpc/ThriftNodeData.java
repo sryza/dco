@@ -23,13 +23,16 @@ import org.slf4j.LoggerFactory;
 public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, ThriftNodeData._Fields>, java.io.Serializable, Cloneable {
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftNodeData");
 
-  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.LIST, (short)1);
+  private static final org.apache.thrift.protocol.TField CLASS_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("className", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.LIST, (short)2);
 
+  public String className; // required
   public List<Byte> bytes; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    BYTES((short)1, "bytes");
+    CLASS_NAME((short)1, "className"),
+    BYTES((short)2, "bytes");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -44,7 +47,9 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // BYTES
+        case 1: // CLASS_NAME
+          return CLASS_NAME;
+        case 2: // BYTES
           return BYTES;
         default:
           return null;
@@ -90,6 +95,8 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+    tmpMap.put(_Fields.CLASS_NAME, new org.apache.thrift.meta_data.FieldMetaData("className", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.BYTES, new org.apache.thrift.meta_data.FieldMetaData("bytes", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BYTE))));
@@ -101,9 +108,11 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
   }
 
   public ThriftNodeData(
+    String className,
     List<Byte> bytes)
   {
     this();
+    this.className = className;
     this.bytes = bytes;
   }
 
@@ -111,6 +120,9 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
    * Performs a deep copy on <i>other</i>.
    */
   public ThriftNodeData(ThriftNodeData other) {
+    if (other.isSetClassName()) {
+      this.className = other.className;
+    }
     if (other.isSetBytes()) {
       List<Byte> __this__bytes = new ArrayList<Byte>();
       for (Byte other_element : other.bytes) {
@@ -126,7 +138,32 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
 
   @Override
   public void clear() {
+    this.className = null;
     this.bytes = null;
+  }
+
+  public String getClassName() {
+    return this.className;
+  }
+
+  public ThriftNodeData setClassName(String className) {
+    this.className = className;
+    return this;
+  }
+
+  public void unsetClassName() {
+    this.className = null;
+  }
+
+  /** Returns true if field className is set (has been assigned a value) and false otherwise */
+  public boolean isSetClassName() {
+    return this.className != null;
+  }
+
+  public void setClassNameIsSet(boolean value) {
+    if (!value) {
+      this.className = null;
+    }
   }
 
   public int getBytesSize() {
@@ -170,6 +207,14 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
+    case CLASS_NAME:
+      if (value == null) {
+        unsetClassName();
+      } else {
+        setClassName((String)value);
+      }
+      break;
+
     case BYTES:
       if (value == null) {
         unsetBytes();
@@ -183,6 +228,9 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
+    case CLASS_NAME:
+      return getClassName();
+
     case BYTES:
       return getBytes();
 
@@ -197,6 +245,8 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
     }
 
     switch (field) {
+    case CLASS_NAME:
+      return isSetClassName();
     case BYTES:
       return isSetBytes();
     }
@@ -215,6 +265,15 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
   public boolean equals(ThriftNodeData that) {
     if (that == null)
       return false;
+
+    boolean this_present_className = true && this.isSetClassName();
+    boolean that_present_className = true && that.isSetClassName();
+    if (this_present_className || that_present_className) {
+      if (!(this_present_className && that_present_className))
+        return false;
+      if (!this.className.equals(that.className))
+        return false;
+    }
 
     boolean this_present_bytes = true && this.isSetBytes();
     boolean that_present_bytes = true && that.isSetBytes();
@@ -241,6 +300,16 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
     int lastComparison = 0;
     ThriftNodeData typedOther = (ThriftNodeData)other;
 
+    lastComparison = Boolean.valueOf(isSetClassName()).compareTo(typedOther.isSetClassName());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetClassName()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.className, typedOther.className);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     lastComparison = Boolean.valueOf(isSetBytes()).compareTo(typedOther.isSetBytes());
     if (lastComparison != 0) {
       return lastComparison;
@@ -268,7 +337,14 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
         break;
       }
       switch (field.id) {
-        case 1: // BYTES
+        case 1: // CLASS_NAME
+          if (field.type == org.apache.thrift.protocol.TType.STRING) {
+            this.className = iprot.readString();
+          } else { 
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
+        case 2: // BYTES
           if (field.type == org.apache.thrift.protocol.TType.LIST) {
             {
               org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
@@ -300,6 +376,11 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
+    if (this.className != null) {
+      oprot.writeFieldBegin(CLASS_NAME_FIELD_DESC);
+      oprot.writeString(this.className);
+      oprot.writeFieldEnd();
+    }
     if (this.bytes != null) {
       oprot.writeFieldBegin(BYTES_FIELD_DESC);
       {
@@ -321,6 +402,14 @@ public class ThriftNodeData implements org.apache.thrift.TBase<ThriftNodeData, T
     StringBuilder sb = new StringBuilder("ThriftNodeData(");
     boolean first = true;
 
+    sb.append("className:");
+    if (this.className == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.className);
+    }
+    first = false;
+    if (!first) sb.append(", ");
     sb.append("bytes:");
     if (this.bytes == null) {
       sb.append("null");

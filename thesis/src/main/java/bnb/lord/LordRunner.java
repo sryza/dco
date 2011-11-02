@@ -7,29 +7,53 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TTransportException;
 
 import bnb.ProblemSpec;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 import bnb.rpc.VassalPublic;
-import bnb.tsp.TspTreeNode;
+import bnb.tsp.TspNode;
 import bnb.vassal.VassalRunner;
 
-public class LordRunner implements Runnable, LordPublic {
+public class LordRunner implements LordPublic {
 	
 	private static final Logger LOG = Logger.getLogger(LordRunner.class);
 	
 	private int nextJobid;
 	private final Map<Integer, LordJobManager> jobMap;
 	private final Map<Integer, VassalPublic> vassalMap;
+	private final int port;
 	
-	public LordRunner() {
+	private TServer server;
+	
+	public LordRunner(int port) {
 		jobMap = new HashMap<Integer, LordJobManager>();
 		vassalMap = new HashMap<Integer, VassalPublic>();
+		this.port = port;
 	}
 	
-	public void run() {
+	public void start() {
+		startServer(port);
+	}
+	
+	public void registerVassal(String host, int port, int id) {
 		
+	}
+	
+	private void startServer(int port) {
+		TServerSocket serverSocket;
+		try {
+			serverSocket = new TServerSocket(port);
+			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket);
+			server = new TThreadPoolServer(args);
+			server.serve();
+		} catch (TTransportException ex) {
+			LOG.error("Trouble making server socket", ex);
+		}
 	}
 	
 	public void runJob(BnbNode root, ProblemSpec spec, double bestCost, List<VassalRunner> vassalServers) {
@@ -48,7 +72,7 @@ public class LordRunner implements Runnable, LordPublic {
 		for (VassalRunner server : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
 			BnbNode node = startNodesIter.next();
-			((TspTreeNode)node).copyCities();
+			((TspNode)node).copyCities();
 			nodePool.add(node);
 			server.startJobTasks(nodePool, spec, bestCost, jobid);
 		}
@@ -70,8 +94,7 @@ public class LordRunner implements Runnable, LordPublic {
 	}
 
 	@Override
-	public BnbNode askForWork() {
-		// TODO Auto-generated method stub
+	public BnbNode askForWork(int jobid) {
 		return null;
 	}
 }

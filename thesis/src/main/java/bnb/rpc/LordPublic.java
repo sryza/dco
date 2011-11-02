@@ -7,5 +7,5 @@ import bnb.BnbNode;
 public interface LordPublic {
 	public void sendBestSolCost(double cost, int jobid, int vassalId) throws IOException;
 	
-	public BnbNode askForWork();
+	public BnbNode askForWork(int jobid) throws IOException;
 }
