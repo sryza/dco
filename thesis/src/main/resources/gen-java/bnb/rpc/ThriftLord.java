@@ -26,7 +26,7 @@ public class ThriftLord {
 
     public void sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException;
 
-    public ThriftNodeData askForWork(int jobid) throws org.apache.thrift.TException;
+    public List<ThriftNodeData> askForWork(int jobid) throws org.apache.thrift.TException;
 
   }
 
@@ -80,7 +80,7 @@ public class ThriftLord {
       return;
     }
 
-    public ThriftNodeData askForWork(int jobid) throws org.apache.thrift.TException
+    public List<ThriftNodeData> askForWork(int jobid) throws org.apache.thrift.TException
     {
       send_askForWork(jobid);
       return recv_askForWork();
@@ -93,7 +93,7 @@ public class ThriftLord {
       sendBase("askForWork", args);
     }
 
-    public ThriftNodeData recv_askForWork() throws org.apache.thrift.TException
+    public List<ThriftNodeData> recv_askForWork() throws org.apache.thrift.TException
     {
       askForWork_result result = new askForWork_result();
       receiveBase(result, "askForWork");
@@ -181,7 +181,7 @@ public class ThriftLord {
         prot.writeMessageEnd();
       }
 
-      public ThriftNodeData getResult() throws org.apache.thrift.TException {
+      public List<ThriftNodeData> getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -1209,9 +1209,9 @@ public class ThriftLord {
   public static class askForWork_result implements org.apache.thrift.TBase<askForWork_result, askForWork_result._Fields>, java.io.Serializable, Cloneable   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("askForWork_result");
 
-    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRUCT, (short)0);
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
 
-    public ThriftNodeData success; // required
+    public List<ThriftNodeData> success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1277,7 +1277,8 @@ public class ThriftLord {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftNodeData.class)));
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftNodeData.class))));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(askForWork_result.class, metaDataMap);
     }
@@ -1286,7 +1287,7 @@ public class ThriftLord {
     }
 
     public askForWork_result(
-      ThriftNodeData success)
+      List<ThriftNodeData> success)
     {
       this();
       this.success = success;
@@ -1297,7 +1298,11 @@ public class ThriftLord {
      */
     public askForWork_result(askForWork_result other) {
       if (other.isSetSuccess()) {
-        this.success = new ThriftNodeData(other.success);
+        List<ThriftNodeData> __this__success = new ArrayList<ThriftNodeData>();
+        for (ThriftNodeData other_element : other.success) {
+          __this__success.add(new ThriftNodeData(other_element));
+        }
+        this.success = __this__success;
       }
     }
 
@@ -1310,11 +1315,26 @@ public class ThriftLord {
       this.success = null;
     }
 
-    public ThriftNodeData getSuccess() {
+    public int getSuccessSize() {
+      return (this.success == null) ? 0 : this.success.size();
+    }
+
+    public java.util.Iterator<ThriftNodeData> getSuccessIterator() {
+      return (this.success == null) ? null : this.success.iterator();
+    }
+
+    public void addToSuccess(ThriftNodeData elem) {
+      if (this.success == null) {
+        this.success = new ArrayList<ThriftNodeData>();
+      }
+      this.success.add(elem);
+    }
+
+    public List<ThriftNodeData> getSuccess() {
       return this.success;
     }
 
-    public askForWork_result setSuccess(ThriftNodeData success) {
+    public askForWork_result setSuccess(List<ThriftNodeData> success) {
       this.success = success;
       return this;
     }
@@ -1340,7 +1360,7 @@ public class ThriftLord {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((ThriftNodeData)value);
+          setSuccess((List<ThriftNodeData>)value);
         }
         break;
 
@@ -1435,9 +1455,19 @@ public class ThriftLord {
         }
         switch (field.id) {
           case 0: // SUCCESS
-            if (field.type == org.apache.thrift.protocol.TType.STRUCT) {
-              this.success = new ThriftNodeData();
-              this.success.read(iprot);
+            if (field.type == org.apache.thrift.protocol.TType.LIST) {
+              {
+                org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
+                this.success = new ArrayList<ThriftNodeData>(_list16.size);
+                for (int _i17 = 0; _i17 < _list16.size; ++_i17)
+                {
+                  ThriftNodeData _elem18; // required
+                  _elem18 = new ThriftNodeData();
+                  _elem18.read(iprot);
+                  this.success.add(_elem18);
+                }
+                iprot.readListEnd();
+              }
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
@@ -1458,7 +1488,14 @@ public class ThriftLord {
 
       if (this.isSetSuccess()) {
         oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
-        this.success.write(oprot);
+        {
+          oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.success.size()));
+          for (ThriftNodeData _iter19 : this.success)
+          {
+            _iter19.write(oprot);
+          }
+          oprot.writeListEnd();
+        }
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
