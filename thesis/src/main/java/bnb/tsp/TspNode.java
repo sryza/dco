@@ -8,7 +8,7 @@ import bnb.ProblemSpec;
 import bnb.Solution;
 import bnb.BnbNode;
 
-public class TspNode implements BnbNode {
+public class TspNode extends BnbNode {
 	
 	private boolean isEvaluated;
 	

@@ -1,6 +1,6 @@
 package bnb;
 
-public interface BnbNode {
+public abstract class BnbNode {
 	
 	/**
 	 * Should have an empty constructor after which this can be called.
@@ -13,17 +13,17 @@ public interface BnbNode {
 	 * Runs bounding a solving on this node.  Returns a list of the child nodes
 	 * produced in this way, in order of most preferred.
 	 */
-	public void evaluate(ProblemSpec spec, double bound);
+	public abstract void evaluate(ProblemSpec spec, double bound);
 	
-	public boolean isEvaluated();
+	public abstract boolean isEvaluated();
 	
-	public BnbNode nextChild();
+	public abstract BnbNode nextChild();
 	
-	public boolean hasNextChild();
+	public abstract boolean hasNextChild();
 	
-	public boolean isSolution();
+	public abstract boolean isSolution();
 	
-	public double getCost();
+	public abstract double getCost();
 	
-	public Solution getSolution();
+	public abstract Solution getSolution();
 }

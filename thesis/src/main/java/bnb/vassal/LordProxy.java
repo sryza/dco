@@ -11,6 +11,7 @@ import org.apache.thrift.transport.TSocket;
 
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
+import bnb.rpc.RpcUtil;
 import bnb.rpc.ThriftLord;
 import bnb.rpc.ThriftNodeData;
 
@@ -39,18 +40,15 @@ public class LordProxy implements LordPublic {
 			List<ThriftNodeData> nodesData = lordClient.askForWork(jobid);
 			List<BnbNode> nodes = new LinkedList<BnbNode>();
 			for (ThriftNodeData nodeData : nodesData) {
-				Object o = Class.forName(nodeData.className);
-				BnbNode node = (BnbNode)o;
-				node.initFromBytes(nodeData.bytes);
-				nodes.add(node);
+				nodes.add(RpcUtil.fromThriftNode(nodeData));
 			}
 			return nodes;
 		} catch (TException ex) {
 			throw new IOException("send exception", ex);
 		} catch (ClassCastException ex) {
-			//TODO
+			throw new IOException("given class doesn't extend bnbnode");
 		} catch (ClassNotFoundException ex) {
-			//TODO
+			throw new IOException("invalid class");
 		}
 	}
 }

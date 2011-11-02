@@ -12,4 +12,6 @@ public interface VassalPublic {
 	public void startJobTasks(List<BnbNode> nodes, ProblemSpec spec, double bestCost, int jobid) throws IOException;
 	
 	public int getNumSlots() throws IOException;
+	
+    public List<BnbNode> stealWork(int jobid) throws IOException;
 }

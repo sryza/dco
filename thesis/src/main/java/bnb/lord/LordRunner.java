@@ -15,6 +15,8 @@ import org.apache.thrift.transport.TTransportException;
 import bnb.ProblemSpec;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
+import bnb.rpc.ThriftLord;
+import bnb.rpc.LordThriftWrapper;
 import bnb.rpc.VassalPublic;
 import bnb.tsp.TspNode;
 import bnb.vassal.VassalRunner;
@@ -49,6 +51,8 @@ public class LordRunner implements LordPublic {
 		try {
 			serverSocket = new TServerSocket(port);
 			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket);
+			LordThriftWrapper lordThriftWrapper = new LordThriftWrapper(this);
+			args.processor(new ThriftLord.Processor<LordThriftWrapper>(lordThriftWrapper));
 			server = new TThreadPoolServer(args);
 			server.serve();
 		} catch (TTransportException ex) {
@@ -94,7 +98,7 @@ public class LordRunner implements LordPublic {
 	}
 
 	@Override
-	public BnbNode askForWork(int jobid) {
+	public List<BnbNode> askForWork(int jobid) {
 		return null;
 	}
 }

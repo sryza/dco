@@ -1,6 +1,7 @@
 package bnb.lord;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.thrift.TException;
@@ -10,7 +11,9 @@ import org.apache.thrift.transport.TSocket;
 
 import bnb.BnbNode;
 import bnb.ProblemSpec;
+import bnb.rpc.RpcUtil;
 import bnb.rpc.ThriftLord;
+import bnb.rpc.ThriftNodeData;
 import bnb.rpc.ThriftVassal;
 import bnb.rpc.VassalPublic;
 
@@ -60,4 +63,19 @@ public class VassalProxy implements VassalPublic {
 		}
 	}
 
+	@Override
+	public List<BnbNode> stealWork(int jobid) throws IOException {
+		try {
+			List<ThriftNodeData> nodesData = vassalClient.stealWork(jobid);
+			List<BnbNode> nodes = new ArrayList<BnbNode>();
+			for (ThriftNodeData nodeData : nodesData) {
+				nodes.add(RpcUtil.fromThriftNode(nodeData));
+			}
+			return nodes;
+		} catch (TException ex) {
+			throw new IOException("send exception", ex);
+		} catch (ClassNotFoundException ex) {
+			throw new IOException("class not found", ex);
+		}
+	}
 }
