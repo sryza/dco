@@ -1,13 +1,13 @@
 package vrpwtw;
 
-import bnb.ProblemSpec;
+import bnb.Problem;
 import bnb.Solution;
 import bnb.BnbNode;
 
 public class VrpNode implements BnbNode {
 
 	@Override
-	public void evaluate(ProblemSpec spec, double bound) {
+	public void evaluate(Problem spec, double bound) {
 		// TODO Auto-generated method stub
 		
 	}

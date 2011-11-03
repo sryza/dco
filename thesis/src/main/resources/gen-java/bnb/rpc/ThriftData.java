@@ -20,16 +20,19 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemData, ThriftProblemData._Fields>, java.io.Serializable, Cloneable {
-  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftProblemData");
+public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftData._Fields>, java.io.Serializable, Cloneable {
+  private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftData");
 
-  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.LIST, (short)1);
+  private static final org.apache.thrift.protocol.TField CLASS_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("className", org.apache.thrift.protocol.TType.STRING, (short)1);
+  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.LIST, (short)2);
 
+  public String className; // required
   public List<Byte> bytes; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-    BYTES((short)1, "bytes");
+    CLASS_NAME((short)1, "className"),
+    BYTES((short)2, "bytes");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -44,7 +47,9 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
      */
     public static _Fields findByThriftId(int fieldId) {
       switch(fieldId) {
-        case 1: // BYTES
+        case 1: // CLASS_NAME
+          return CLASS_NAME;
+        case 2: // BYTES
           return BYTES;
         default:
           return null;
@@ -90,27 +95,34 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
   public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+    tmpMap.put(_Fields.CLASS_NAME, new org.apache.thrift.meta_data.FieldMetaData("className", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.BYTES, new org.apache.thrift.meta_data.FieldMetaData("bytes", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
             new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BYTE))));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
-    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(ThriftProblemData.class, metaDataMap);
+    org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(ThriftData.class, metaDataMap);
   }
 
-  public ThriftProblemData() {
+  public ThriftData() {
   }
 
-  public ThriftProblemData(
+  public ThriftData(
+    String className,
     List<Byte> bytes)
   {
     this();
+    this.className = className;
     this.bytes = bytes;
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public ThriftProblemData(ThriftProblemData other) {
+  public ThriftData(ThriftData other) {
+    if (other.isSetClassName()) {
+      this.className = other.className;
+    }
     if (other.isSetBytes()) {
       List<Byte> __this__bytes = new ArrayList<Byte>();
       for (Byte other_element : other.bytes) {
@@ -120,13 +132,38 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
     }
   }
 
-  public ThriftProblemData deepCopy() {
-    return new ThriftProblemData(this);
+  public ThriftData deepCopy() {
+    return new ThriftData(this);
   }
 
   @Override
   public void clear() {
+    this.className = null;
     this.bytes = null;
+  }
+
+  public String getClassName() {
+    return this.className;
+  }
+
+  public ThriftData setClassName(String className) {
+    this.className = className;
+    return this;
+  }
+
+  public void unsetClassName() {
+    this.className = null;
+  }
+
+  /** Returns true if field className is set (has been assigned a value) and false otherwise */
+  public boolean isSetClassName() {
+    return this.className != null;
+  }
+
+  public void setClassNameIsSet(boolean value) {
+    if (!value) {
+      this.className = null;
+    }
   }
 
   public int getBytesSize() {
@@ -148,7 +185,7 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
     return this.bytes;
   }
 
-  public ThriftProblemData setBytes(List<Byte> bytes) {
+  public ThriftData setBytes(List<Byte> bytes) {
     this.bytes = bytes;
     return this;
   }
@@ -170,6 +207,14 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
 
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
+    case CLASS_NAME:
+      if (value == null) {
+        unsetClassName();
+      } else {
+        setClassName((String)value);
+      }
+      break;
+
     case BYTES:
       if (value == null) {
         unsetBytes();
@@ -183,6 +228,9 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
 
   public Object getFieldValue(_Fields field) {
     switch (field) {
+    case CLASS_NAME:
+      return getClassName();
+
     case BYTES:
       return getBytes();
 
@@ -197,6 +245,8 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
     }
 
     switch (field) {
+    case CLASS_NAME:
+      return isSetClassName();
     case BYTES:
       return isSetBytes();
     }
@@ -207,14 +257,23 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
   public boolean equals(Object that) {
     if (that == null)
       return false;
-    if (that instanceof ThriftProblemData)
-      return this.equals((ThriftProblemData)that);
+    if (that instanceof ThriftData)
+      return this.equals((ThriftData)that);
     return false;
   }
 
-  public boolean equals(ThriftProblemData that) {
+  public boolean equals(ThriftData that) {
     if (that == null)
       return false;
+
+    boolean this_present_className = true && this.isSetClassName();
+    boolean that_present_className = true && that.isSetClassName();
+    if (this_present_className || that_present_className) {
+      if (!(this_present_className && that_present_className))
+        return false;
+      if (!this.className.equals(that.className))
+        return false;
+    }
 
     boolean this_present_bytes = true && this.isSetBytes();
     boolean that_present_bytes = true && that.isSetBytes();
@@ -233,14 +292,24 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
     return 0;
   }
 
-  public int compareTo(ThriftProblemData other) {
+  public int compareTo(ThriftData other) {
     if (!getClass().equals(other.getClass())) {
       return getClass().getName().compareTo(other.getClass().getName());
     }
 
     int lastComparison = 0;
-    ThriftProblemData typedOther = (ThriftProblemData)other;
+    ThriftData typedOther = (ThriftData)other;
 
+    lastComparison = Boolean.valueOf(isSetClassName()).compareTo(typedOther.isSetClassName());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetClassName()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.className, typedOther.className);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     lastComparison = Boolean.valueOf(isSetBytes()).compareTo(typedOther.isSetBytes());
     if (lastComparison != 0) {
       return lastComparison;
@@ -268,16 +337,23 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
         break;
       }
       switch (field.id) {
-        case 1: // BYTES
+        case 1: // CLASS_NAME
+          if (field.type == org.apache.thrift.protocol.TType.STRING) {
+            this.className = iprot.readString();
+          } else { 
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
+        case 2: // BYTES
           if (field.type == org.apache.thrift.protocol.TType.LIST) {
             {
-              org.apache.thrift.protocol.TList _list4 = iprot.readListBegin();
-              this.bytes = new ArrayList<Byte>(_list4.size);
-              for (int _i5 = 0; _i5 < _list4.size; ++_i5)
+              org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
+              this.bytes = new ArrayList<Byte>(_list0.size);
+              for (int _i1 = 0; _i1 < _list0.size; ++_i1)
               {
-                byte _elem6; // required
-                _elem6 = iprot.readByte();
-                this.bytes.add(_elem6);
+                byte _elem2; // required
+                _elem2 = iprot.readByte();
+                this.bytes.add(_elem2);
               }
               iprot.readListEnd();
             }
@@ -300,13 +376,18 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
+    if (this.className != null) {
+      oprot.writeFieldBegin(CLASS_NAME_FIELD_DESC);
+      oprot.writeString(this.className);
+      oprot.writeFieldEnd();
+    }
     if (this.bytes != null) {
       oprot.writeFieldBegin(BYTES_FIELD_DESC);
       {
         oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.BYTE, this.bytes.size()));
-        for (byte _iter7 : this.bytes)
+        for (byte _iter3 : this.bytes)
         {
-          oprot.writeByte(_iter7);
+          oprot.writeByte(_iter3);
         }
         oprot.writeListEnd();
       }
@@ -318,9 +399,17 @@ public class ThriftProblemData implements org.apache.thrift.TBase<ThriftProblemD
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("ThriftProblemData(");
+    StringBuilder sb = new StringBuilder("ThriftData(");
     boolean first = true;
 
+    sb.append("className:");
+    if (this.className == null) {
+      sb.append("null");
+    } else {
+      sb.append(this.className);
+    }
+    first = false;
+    if (!first) sb.append(", ");
     sb.append("bytes:");
     if (this.bytes == null) {
       sb.append("null");

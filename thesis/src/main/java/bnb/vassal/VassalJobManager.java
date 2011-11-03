@@ -1,9 +1,11 @@
 package bnb.vassal;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import bnb.BnbNode;
 import bnb.Solution;
 import bnb.rpc.LordPublic;
 
@@ -47,6 +49,10 @@ public class VassalJobManager implements Runnable {
 		return nodePool;
 	}
 	
+	public int getJobID() {
+		return jobid;
+	}
+	
 	private boolean sendMinCost() {
 		try {
 			lordProxy.sendBestSolCost(minCost, jobid, vassalid);
@@ -83,5 +89,9 @@ public class VassalJobManager implements Runnable {
 	
 	public Solution getBestSolution() {
 		return bestSolution;
+	}
+	
+	public List<BnbNode> stealWork() {
+		return nodePool.stealNodes();
 	}
 }

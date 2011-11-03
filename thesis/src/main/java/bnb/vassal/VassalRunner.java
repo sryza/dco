@@ -1,5 +1,6 @@
 package bnb.vassal;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,10 +11,9 @@ import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 
-import bnb.ProblemSpec;
+import bnb.Problem;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
-import bnb.rpc.Ports;
 import bnb.rpc.VassalPublic;
 
 public class VassalRunner implements VassalPublic {
@@ -56,28 +56,41 @@ public class VassalRunner implements VassalPublic {
 	}
 	
 	@Override
-	public void startJobTasks(List<BnbNode> nodes, ProblemSpec spec, double bestCost, int jobid) {
+	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid) 
+		throws IOException {
 		VassalNodePool nodePool = new SimpleVassalNodePool();
 		for (BnbNode node : nodes) {
 			nodePool.postEvaluated(node);
 		}
 		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, lordInfo, vassalId, jobid);
 		jobMap.put(jobid, jobManager);
-		startVassalRunner(lordInfo, nodePool, spec, jobManager);
+		startVassalRunner(lordInfo, nodePool, jobManager);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 	}
 	
-	public void startVassalRunner(LordPublic lordInfo, VassalNodePool nodePool, ProblemSpec spec,
+	public void startVassalRunner(LordPublic lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager) {
-		TaskRunner runner = new TaskRunner(lordInfo, spec, jobManager);
+		TaskRunner runner = new TaskRunner(lordInfo, jobManager);
 		Thread vassalThread = new Thread(runner);
 		vassalThread.start();
 		numSlots--;
 	}
 
 	@Override
-	public void updateBestSolCost(double bestCost, int jobid) {
+	public void updateBestSolCost(double bestCost, int jobid) throws IOException {
 		jobMap.get(jobid).updateGlobalMinCost(bestCost);
+	}
+
+	@Override
+	public int getNumSlots() throws IOException {
+		return numSlots;
+	}
+
+	@Override
+	public List<BnbNode> stealWork(int jobid) throws IOException {
+		LOG.info("Work being stolen from job " + jobid);
+		VassalJobManager jobManager = jobMap.get(jobid);
+		return jobManager.stealWork();
 	}
 }

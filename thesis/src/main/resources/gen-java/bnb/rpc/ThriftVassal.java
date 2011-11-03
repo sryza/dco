@@ -26,9 +26,9 @@ public class ThriftVassal {
 
     public void updateBestSolCost(double bestCost, int jobid) throws org.apache.thrift.TException;
 
-    public void startJobTasks(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid) throws org.apache.thrift.TException;
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException;
 
-    public List<ThriftNodeData> stealWork(int jobid) throws org.apache.thrift.TException;
+    public List<ThriftData> stealWork(int jobid) throws org.apache.thrift.TException;
 
     public int getNumSlots() throws org.apache.thrift.TException;
 
@@ -38,7 +38,7 @@ public class ThriftVassal {
 
     public void updateBestSolCost(double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.updateBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void startJobTasks(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.startJobTasks_call> resultHandler) throws org.apache.thrift.TException;
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.startJobTasks_call> resultHandler) throws org.apache.thrift.TException;
 
     public void stealWork(int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.stealWork_call> resultHandler) throws org.apache.thrift.TException;
 
@@ -79,13 +79,13 @@ public class ThriftVassal {
       sendBase("updateBestSolCost", args);
     }
 
-    public void startJobTasks(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
     {
       send_startJobTasks(nodeData, problemData, bestCost, jobid);
       recv_startJobTasks();
     }
 
-    public void send_startJobTasks(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
+    public void send_startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
     {
       startJobTasks_args args = new startJobTasks_args();
       args.setNodeData(nodeData);
@@ -102,7 +102,7 @@ public class ThriftVassal {
       return;
     }
 
-    public List<ThriftNodeData> stealWork(int jobid) throws org.apache.thrift.TException
+    public List<ThriftData> stealWork(int jobid) throws org.apache.thrift.TException
     {
       send_stealWork(jobid);
       return recv_stealWork();
@@ -115,7 +115,7 @@ public class ThriftVassal {
       sendBase("stealWork", args);
     }
 
-    public List<ThriftNodeData> recv_stealWork() throws org.apache.thrift.TException
+    public List<ThriftData> recv_stealWork() throws org.apache.thrift.TException
     {
       stealWork_result result = new stealWork_result();
       receiveBase(result, "stealWork");
@@ -199,7 +199,7 @@ public class ThriftVassal {
       }
     }
 
-    public void startJobTasks(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler) throws org.apache.thrift.TException {
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
       startJobTasks_call method_call = new startJobTasks_call(nodeData, problemData, bestCost, jobid, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
@@ -207,11 +207,11 @@ public class ThriftVassal {
     }
 
     public static class startJobTasks_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private List<ThriftNodeData> nodeData;
-      private ThriftProblemData problemData;
+      private List<ThriftData> nodeData;
+      private ThriftData problemData;
       private double bestCost;
       private int jobid;
-      public startJobTasks_call(List<ThriftNodeData> nodeData, ThriftProblemData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public startJobTasks_call(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.nodeData = nodeData;
         this.problemData = problemData;
@@ -262,7 +262,7 @@ public class ThriftVassal {
         prot.writeMessageEnd();
       }
 
-      public List<ThriftNodeData> getResult() throws org.apache.thrift.TException {
+      public List<ThriftData> getResult() throws org.apache.thrift.TException {
         if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
           throw new IllegalStateException("Method call not finished!");
         }
@@ -776,8 +776,8 @@ public class ThriftVassal {
     private static final org.apache.thrift.protocol.TField BEST_COST_FIELD_DESC = new org.apache.thrift.protocol.TField("bestCost", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
     private static final org.apache.thrift.protocol.TField JOBID_FIELD_DESC = new org.apache.thrift.protocol.TField("jobid", org.apache.thrift.protocol.TType.I32, (short)4);
 
-    public List<ThriftNodeData> nodeData; // required
-    public ThriftProblemData problemData; // required
+    public List<ThriftData> nodeData; // required
+    public ThriftData problemData; // required
     public double bestCost; // required
     public int jobid; // required
 
@@ -858,9 +858,9 @@ public class ThriftVassal {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.NODE_DATA, new org.apache.thrift.meta_data.FieldMetaData("nodeData", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftNodeData.class))));
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftData.class))));
       tmpMap.put(_Fields.PROBLEM_DATA, new org.apache.thrift.meta_data.FieldMetaData("problemData", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftProblemData.class)));
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftData.class)));
       tmpMap.put(_Fields.BEST_COST, new org.apache.thrift.meta_data.FieldMetaData("bestCost", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
       tmpMap.put(_Fields.JOBID, new org.apache.thrift.meta_data.FieldMetaData("jobid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
@@ -873,8 +873,8 @@ public class ThriftVassal {
     }
 
     public startJobTasks_args(
-      List<ThriftNodeData> nodeData,
-      ThriftProblemData problemData,
+      List<ThriftData> nodeData,
+      ThriftData problemData,
       double bestCost,
       int jobid)
     {
@@ -894,14 +894,14 @@ public class ThriftVassal {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       if (other.isSetNodeData()) {
-        List<ThriftNodeData> __this__nodeData = new ArrayList<ThriftNodeData>();
-        for (ThriftNodeData other_element : other.nodeData) {
-          __this__nodeData.add(new ThriftNodeData(other_element));
+        List<ThriftData> __this__nodeData = new ArrayList<ThriftData>();
+        for (ThriftData other_element : other.nodeData) {
+          __this__nodeData.add(new ThriftData(other_element));
         }
         this.nodeData = __this__nodeData;
       }
       if (other.isSetProblemData()) {
-        this.problemData = new ThriftProblemData(other.problemData);
+        this.problemData = new ThriftData(other.problemData);
       }
       this.bestCost = other.bestCost;
       this.jobid = other.jobid;
@@ -925,22 +925,22 @@ public class ThriftVassal {
       return (this.nodeData == null) ? 0 : this.nodeData.size();
     }
 
-    public java.util.Iterator<ThriftNodeData> getNodeDataIterator() {
+    public java.util.Iterator<ThriftData> getNodeDataIterator() {
       return (this.nodeData == null) ? null : this.nodeData.iterator();
     }
 
-    public void addToNodeData(ThriftNodeData elem) {
+    public void addToNodeData(ThriftData elem) {
       if (this.nodeData == null) {
-        this.nodeData = new ArrayList<ThriftNodeData>();
+        this.nodeData = new ArrayList<ThriftData>();
       }
       this.nodeData.add(elem);
     }
 
-    public List<ThriftNodeData> getNodeData() {
+    public List<ThriftData> getNodeData() {
       return this.nodeData;
     }
 
-    public startJobTasks_args setNodeData(List<ThriftNodeData> nodeData) {
+    public startJobTasks_args setNodeData(List<ThriftData> nodeData) {
       this.nodeData = nodeData;
       return this;
     }
@@ -960,11 +960,11 @@ public class ThriftVassal {
       }
     }
 
-    public ThriftProblemData getProblemData() {
+    public ThriftData getProblemData() {
       return this.problemData;
     }
 
-    public startJobTasks_args setProblemData(ThriftProblemData problemData) {
+    public startJobTasks_args setProblemData(ThriftData problemData) {
       this.problemData = problemData;
       return this;
     }
@@ -1036,7 +1036,7 @@ public class ThriftVassal {
         if (value == null) {
           unsetNodeData();
         } else {
-          setNodeData((List<ThriftNodeData>)value);
+          setNodeData((List<ThriftData>)value);
         }
         break;
 
@@ -1044,7 +1044,7 @@ public class ThriftVassal {
         if (value == null) {
           unsetProblemData();
         } else {
-          setProblemData((ThriftProblemData)value);
+          setProblemData((ThriftData)value);
         }
         break;
 
@@ -1229,14 +1229,14 @@ public class ThriftVassal {
           case 1: // NODE_DATA
             if (field.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
-                this.nodeData = new ArrayList<ThriftNodeData>(_list8.size);
-                for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+                org.apache.thrift.protocol.TList _list4 = iprot.readListBegin();
+                this.nodeData = new ArrayList<ThriftData>(_list4.size);
+                for (int _i5 = 0; _i5 < _list4.size; ++_i5)
                 {
-                  ThriftNodeData _elem10; // required
-                  _elem10 = new ThriftNodeData();
-                  _elem10.read(iprot);
-                  this.nodeData.add(_elem10);
+                  ThriftData _elem6; // required
+                  _elem6 = new ThriftData();
+                  _elem6.read(iprot);
+                  this.nodeData.add(_elem6);
                 }
                 iprot.readListEnd();
               }
@@ -1246,7 +1246,7 @@ public class ThriftVassal {
             break;
           case 2: // PROBLEM_DATA
             if (field.type == org.apache.thrift.protocol.TType.STRUCT) {
-              this.problemData = new ThriftProblemData();
+              this.problemData = new ThriftData();
               this.problemData.read(iprot);
             } else { 
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
@@ -1287,9 +1287,9 @@ public class ThriftVassal {
         oprot.writeFieldBegin(NODE_DATA_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.nodeData.size()));
-          for (ThriftNodeData _iter11 : this.nodeData)
+          for (ThriftData _iter7 : this.nodeData)
           {
-            _iter11.write(oprot);
+            _iter7.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -1356,8 +1356,6 @@ public class ThriftVassal {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
       try {
-        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
-        __isset_bit_vector = new BitSet(1);
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -1854,8 +1852,6 @@ public class ThriftVassal {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
       try {
-        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
-        __isset_bit_vector = new BitSet(1);
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -1869,7 +1865,7 @@ public class ThriftVassal {
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
 
-    public List<ThriftNodeData> success; // required
+    public List<ThriftData> success; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -1936,7 +1932,7 @@ public class ThriftVassal {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftNodeData.class))));
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftData.class))));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(stealWork_result.class, metaDataMap);
     }
@@ -1945,7 +1941,7 @@ public class ThriftVassal {
     }
 
     public stealWork_result(
-      List<ThriftNodeData> success)
+      List<ThriftData> success)
     {
       this();
       this.success = success;
@@ -1956,9 +1952,9 @@ public class ThriftVassal {
      */
     public stealWork_result(stealWork_result other) {
       if (other.isSetSuccess()) {
-        List<ThriftNodeData> __this__success = new ArrayList<ThriftNodeData>();
-        for (ThriftNodeData other_element : other.success) {
-          __this__success.add(new ThriftNodeData(other_element));
+        List<ThriftData> __this__success = new ArrayList<ThriftData>();
+        for (ThriftData other_element : other.success) {
+          __this__success.add(new ThriftData(other_element));
         }
         this.success = __this__success;
       }
@@ -1977,22 +1973,22 @@ public class ThriftVassal {
       return (this.success == null) ? 0 : this.success.size();
     }
 
-    public java.util.Iterator<ThriftNodeData> getSuccessIterator() {
+    public java.util.Iterator<ThriftData> getSuccessIterator() {
       return (this.success == null) ? null : this.success.iterator();
     }
 
-    public void addToSuccess(ThriftNodeData elem) {
+    public void addToSuccess(ThriftData elem) {
       if (this.success == null) {
-        this.success = new ArrayList<ThriftNodeData>();
+        this.success = new ArrayList<ThriftData>();
       }
       this.success.add(elem);
     }
 
-    public List<ThriftNodeData> getSuccess() {
+    public List<ThriftData> getSuccess() {
       return this.success;
     }
 
-    public stealWork_result setSuccess(List<ThriftNodeData> success) {
+    public stealWork_result setSuccess(List<ThriftData> success) {
       this.success = success;
       return this;
     }
@@ -2018,7 +2014,7 @@ public class ThriftVassal {
         if (value == null) {
           unsetSuccess();
         } else {
-          setSuccess((List<ThriftNodeData>)value);
+          setSuccess((List<ThriftData>)value);
         }
         break;
 
@@ -2115,14 +2111,14 @@ public class ThriftVassal {
           case 0: // SUCCESS
             if (field.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list12 = iprot.readListBegin();
-                this.success = new ArrayList<ThriftNodeData>(_list12.size);
-                for (int _i13 = 0; _i13 < _list12.size; ++_i13)
+                org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
+                this.success = new ArrayList<ThriftData>(_list8.size);
+                for (int _i9 = 0; _i9 < _list8.size; ++_i9)
                 {
-                  ThriftNodeData _elem14; // required
-                  _elem14 = new ThriftNodeData();
-                  _elem14.read(iprot);
-                  this.success.add(_elem14);
+                  ThriftData _elem10; // required
+                  _elem10 = new ThriftData();
+                  _elem10.read(iprot);
+                  this.success.add(_elem10);
                 }
                 iprot.readListEnd();
               }
@@ -2148,9 +2144,9 @@ public class ThriftVassal {
         oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.success.size()));
-          for (ThriftNodeData _iter15 : this.success)
+          for (ThriftData _iter11 : this.success)
           {
-            _iter15.write(oprot);
+            _iter11.write(oprot);
           }
           oprot.writeListEnd();
         }

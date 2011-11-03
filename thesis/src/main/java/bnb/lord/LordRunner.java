@@ -1,5 +1,6 @@
 package bnb.lord;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,7 +13,7 @@ import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
 
-import bnb.ProblemSpec;
+import bnb.Problem;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 import bnb.rpc.ThriftLord;
@@ -43,7 +44,8 @@ public class LordRunner implements LordPublic {
 	}
 	
 	public void registerVassal(String host, int port, int id) {
-		
+		VassalProxy proxy = new VassalProxy(host, port);
+		vassalMap.put(id, proxy);
 	}
 	
 	private void startServer(int port) {
@@ -60,12 +62,17 @@ public class LordRunner implements LordPublic {
 		}
 	}
 	
-	public void runJob(BnbNode root, ProblemSpec spec, double bestCost, List<VassalRunner> vassalServers) {
+	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalPublic> vassalServers) {
 		int jobid = nextJobid++;
 		
 		int totalSlots = 0;
-		for (VassalRunner runner : vassalServers) {
-			totalSlots += runner.numSlots();
+		for (VassalPublic runner : vassalServers) {
+			try {
+				totalSlots += runner.getNumSlots();
+			} catch (IOException ex) {
+				//TODO: don't use this runner
+				LOG.error("Couldn't reach runner to find number of slots", ex);
+			}
 		}
 		//TODO: what happens if slots free up during this?
 		Starter starter = new Starter();
@@ -73,17 +80,22 @@ public class LordRunner implements LordPublic {
 		LordJobManager jobManager = new LordJobManager(jobid, startNodes[1]);
 		jobMap.put(jobid, jobManager);
 		Iterator<BnbNode> startNodesIter = startNodes[0].iterator();
-		for (VassalRunner server : vassalServers) {
+		for (VassalPublic vassal : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
 			BnbNode node = startNodesIter.next();
 			((TspNode)node).copyCities();
 			nodePool.add(node);
-			server.startJobTasks(nodePool, spec, bestCost, jobid);
+			
+			try {
+				vassal.startJobTasks(nodePool, spec, bestCost, jobid);
+			} catch (IOException ex) {
+				LOG.error("Failed to start job tasks on vassal", ex);
+			}
 		}
 	}
 
 	@Override
-	public void sendBestSolCost(double cost, int jobid, int vassalid) {
+	public void sendBestSolCost(double cost, int jobid, int vassalid) throws IOException {
 		VassalPublic vassal = vassalMap.get(vassalid);
 		if (vassal == null) {
 			LOG.error("Lord couldn't locate vassal with id " + vassalid);

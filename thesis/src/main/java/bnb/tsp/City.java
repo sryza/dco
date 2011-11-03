@@ -4,14 +4,16 @@ public class City {
 
 	public int x;
 	public int y;
+	public int id;
 	public volatile int index; //into the city array
 	
 	public int cost; //for held & karp bounds
 	
-	public City(int x, int y, int index) {
+	public City(int x, int y, int index, int id) {
 		this.x = x;
 		this.y = y;
 		this.index = index;
+		this.id = id;
 	}
 	
 	public int dist(City other) {
@@ -25,6 +27,6 @@ public class City {
 	}
 	
 	public City copy() {
-		return new City(x, y, index);
+		return new City(x, y, index, id);
 	}
 }

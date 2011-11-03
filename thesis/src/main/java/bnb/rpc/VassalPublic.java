@@ -3,13 +3,13 @@ package bnb.rpc;
 import java.io.IOException;
 import java.util.List;
 
-import bnb.ProblemSpec;
 import bnb.BnbNode;
+import bnb.Problem;
 
 public interface VassalPublic {
 	public void updateBestSolCost(double bestCost, int jobid) throws IOException;
 	
-	public void startJobTasks(List<BnbNode> nodes, ProblemSpec spec, double bestCost, int jobid) throws IOException;
+	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid) throws IOException;
 	
 	public int getNumSlots() throws IOException;
 	

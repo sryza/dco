@@ -1,17 +1,22 @@
 package bnb.vassal;
 
-import bnb.ProblemSpec;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import bnb.Problem;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 
 public class TaskRunner implements Runnable {
+	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
+	
 	private final LordPublic lordInfo;
-	private final ProblemSpec problemSpec;
 	private final VassalJobManager jobManager;
 	
-	public TaskRunner(LordPublic lordInfo, ProblemSpec spec, VassalJobManager jobManager) {
+	public TaskRunner(LordPublic lordInfo, VassalJobManager jobManager) {
 		this.lordInfo = lordInfo;
-		this.problemSpec = spec;
 		this.jobManager = jobManager;
 	}
 	
@@ -23,7 +28,7 @@ public class TaskRunner implements Runnable {
 					break;
 				}
 			} else {
-				node.evaluate(problemSpec, jobManager.getMinCost());
+				node.evaluate(jobManager.getMinCost());
 				if (node.isSolution() && node.getCost() < jobManager.getMinCost()) {
 					System.out.println(node.getCost());
 					System.out.println(node.getSolution());
@@ -34,13 +39,25 @@ public class TaskRunner implements Runnable {
 		}
 	}
 	
+	/**
+	 * @return
+	 * 		true if the operation succeeded
+	 */
 	private boolean stealWork() {
-		BnbNode work = lordInfo.askForWork();
+		List<BnbNode> work;
+		try {
+			work = lordInfo.askForWork(jobManager.getJobID());
+		} catch (IOException ex) {
+			LOG.error("Couldn't steal work", ex);
+			return false;
+		}
 		if (work == null) {
 			System.out.println("Out of work at " + System.currentTimeMillis());
 			return false;
 		} else {
-			jobManager.getNodePool().postEvaluated(work);
+			for (BnbNode node : work) {
+				jobManager.getNodePool().postEvaluated(node);
+			}
 			return true;
 		}
 	}

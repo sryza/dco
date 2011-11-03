@@ -10,10 +10,9 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 
 import bnb.BnbNode;
-import bnb.ProblemSpec;
+import bnb.Problem;
 import bnb.rpc.RpcUtil;
-import bnb.rpc.ThriftLord;
-import bnb.rpc.ThriftNodeData;
+import bnb.rpc.ThriftData;
 import bnb.rpc.ThriftVassal;
 import bnb.rpc.VassalPublic;
 
@@ -52,11 +51,15 @@ public class VassalProxy implements VassalPublic {
 	}
 
 	@Override
-	public void startJobTasks(List<BnbNode> nodes, ProblemSpec spec,
-			double bestCost, int jobid) {
+	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid) throws IOException {
 		if (numSlotsCache == -1) {
 			try {
-				vassalClient.startJobTasks(nodes, spec, bestCost, jobid);
+				List<ThriftData> nodesData = new ArrayList<ThriftData>(nodes.size());
+				for (BnbNode node : nodes) {
+					nodesData.add(RpcUtil.toThriftData(node));
+				}
+				ThriftData problemData = RpcUtil.toThriftData(spec);
+				vassalClient.startJobTasks(nodesData, problemData, bestCost, jobid);
 			} catch (TException ex) {
 				throw new IOException("send exception", ex);
 			}
@@ -66,10 +69,10 @@ public class VassalProxy implements VassalPublic {
 	@Override
 	public List<BnbNode> stealWork(int jobid) throws IOException {
 		try {
-			List<ThriftNodeData> nodesData = vassalClient.stealWork(jobid);
+			List<ThriftData> nodesData = vassalClient.stealWork(jobid);
 			List<BnbNode> nodes = new ArrayList<BnbNode>();
-			for (ThriftNodeData nodeData : nodesData) {
-				nodes.add(RpcUtil.fromThriftNode(nodeData));
+			for (ThriftData nodeData : nodesData) {
+				nodes.add((BnbNode)RpcUtil.fromThriftData(nodeData));
 			}
 			return nodes;
 		} catch (TException ex) {

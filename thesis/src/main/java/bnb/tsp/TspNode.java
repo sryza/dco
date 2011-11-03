@@ -1,26 +1,43 @@
 package bnb.tsp;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.List;
 
-import bnb.ProblemSpec;
+import org.apache.log4j.Logger;
+
+import bnb.Problem;
 import bnb.Solution;
 import bnb.BnbNode;
 
 public class TspNode extends BnbNode {
+	private static final Logger LOG = Logger.getLogger(TspNode.class);
 	
 	private boolean isEvaluated;
 	
 	private boolean bounded;
-	private double parentTourCost;
-	private double tourCost;
+	private double parentTourCost = -1.0;
+	private double tourCost = -1.0;
 	
 	private City[] cities;
 	private int numChosen;
 	private City city;
 	
+	private final TspProblem problem;
+	
 	private int nextChildIndex;
+	
+	private List<City> exploredChildren;
+	
+	public TspNode(TspProblem problem) {
+		this.problem = problem;
+	}
 	
 	public TspNode(City[] cities, City city, int numChosen, TspNode parent) {
 		this.cities = cities;
@@ -66,6 +83,12 @@ public class TspNode extends BnbNode {
 			throw new NoSuchElementException("Node has no next child.");
 		}
 		TspNode child = new TspNode(cities, cities[nextChildIndex], numChosen+1, this);
+		//TODO: take this out
+		System.out.println("we're checking for explored children");
+		if (exploredChildren.contains(cities[nextChildIndex])) {
+			LOG.error("about to explore node that's already been explored.  your understanding's wrong, sandy.");
+		}
+		exploredChildren.add(cities[nextChildIndex]);
 		nextChildIndex++;
 		return child;
 	}
@@ -76,9 +99,9 @@ public class TspNode extends BnbNode {
 	}
 	
 	@Override
-	public void evaluate(ProblemSpec spec, double bound) {
+	public void evaluate(double bound) {
 
-		if (!doEvaluate(spec, bound)) {
+		if (!doEvaluate(bound)) {
 			bounded = true;
 //			System.out.println("bounded");
 		}
@@ -107,7 +130,7 @@ public class TspNode extends BnbNode {
 	 * @return
 	 * 		true if not bounded, false is yes bounded
 	 */
-	private boolean doEvaluate(ProblemSpec spec, double minCost) {
+	private boolean doEvaluate(Problem spec, double minCost) {
 		if (isEvaluated) {
 			System.out.println("already evaluated");
 		}
@@ -168,6 +191,66 @@ public class TspNode extends BnbNode {
 		
 		return true;
 	}
+	
+	@Override
+	public void initFromBytes(byte[] bytes) {
+		try {
+			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+			DataInputStream dis = new DataInputStream(bais);
+			int numCities = dis.readInt();
+			
+			//TODO: how do we reconstruct this in the best way?
+			cities = new City[numCities];
+			City[] problemCities = problem.getCities();
+			for (int i = 0; i < numCities; i++) {
+				int id = dis.readInt();
+				cities[i] = problemCities[id].copy();
+			}
+			
+
+		} catch (IOException ex) {
+			LOG.error("IOException reading from byte array, this should never happen", ex);
+		}
+	}
+	
+	@Override
+	public byte[] toBytes() {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+
+			//TODO: check for off by ones
+			
+			//num nodes in path
+			dos.writeInt(numChosen);
+			//nodes in path
+			for (int i = 0; i < numChosen; i++) {
+				dos.writeInt(cities[i].id);
+			}
+			//num explored children
+			dos.writeInt(exploredChildren.size());
+			//explored children
+			for (City child : exploredChildren) {
+				dos.writeInt(child.id);
+			}
+			
+			return baos.toByteArray();
+		} catch (IOException ex) {
+			LOG.error("IOException writing to byte array, this should never happen", ex);
+			return null;
+		}
+	}
+	
+	@Override
+	public double getCost() {
+		return tourCost;
+	}
+	
+	@Override
+	public Solution getSolution() {
+		return new TspSolution(cities);
+	}
+	
 /*	
 	private int bound(City[] nodes, boolean[] remainingVector, int numChosen, Collection<Edge> edges)
 	{
@@ -304,16 +387,6 @@ public class TspNode extends BnbNode {
 		}
 		return lowerBound;
 	}*/
-
-	@Override
-	public double getCost() {
-		return tourCost;
-	}
-	
-	@Override
-	public Solution getSolution() {
-		return new TspSolution(cities);
-	}
 }
 
 
