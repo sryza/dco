@@ -29,12 +29,24 @@ public class TspProblem implements Problem {
 	
 	public byte[] toBytes() {
 		//TODO: tell it how big a buffer to use
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-		
-		//numcities
-		dos.writeInt(cities.length);
-		
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(baos);
+			
+			//numcities
+			dos.writeInt(cities.length);
+			
+			//write out all the city attrs
+			for (City city : cities) {
+				dos.writeInt(city.x);
+				dos.writeInt(city.y);
+				dos.writeInt(city.id);
+			}
+			return baos.toByteArray();
+		} catch (IOException ex) {
+			LOG.error("shouldn't get exception writing to byte array");
+			return null;
+		}
 	}
 	
 	public void initFromBytes(byte[] bytes) {
@@ -48,7 +60,7 @@ public class TspProblem implements Problem {
 				int x = dis.readInt();
 				int y = dis.readInt();
 				int id = dis.readInt();
-				cities[i] = new City(x, y, id, id);
+				cities[i] = new City(x, y, id);
 			}
 		} catch (IOException ex) {
 			LOG.error("IOException reading from byte array, this should never happen", ex);

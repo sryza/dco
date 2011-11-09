@@ -1457,14 +1457,14 @@ public class ThriftLord {
           case 0: // SUCCESS
             if (field.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list12 = iprot.readListBegin();
-                this.success = new ArrayList<ThriftData>(_list12.size);
-                for (int _i13 = 0; _i13 < _list12.size; ++_i13)
+                org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
+                this.success = new ArrayList<ThriftData>(_list8.size);
+                for (int _i9 = 0; _i9 < _list8.size; ++_i9)
                 {
-                  ThriftData _elem14; // required
-                  _elem14 = new ThriftData();
-                  _elem14.read(iprot);
-                  this.success.add(_elem14);
+                  ThriftData _elem10; // required
+                  _elem10 = new ThriftData();
+                  _elem10.read(iprot);
+                  this.success.add(_elem10);
                 }
                 iprot.readListEnd();
               }
@@ -1490,9 +1490,9 @@ public class ThriftLord {
         oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.success.size()));
-          for (ThriftData _iter15 : this.success)
+          for (ThriftData _iter11 : this.success)
           {
-            _iter15.write(oprot);
+            _iter11.write(oprot);
           }
           oprot.writeListEnd();
         }

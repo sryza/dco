@@ -79,6 +79,10 @@ public class VassalProxy implements VassalPublic {
 			throw new IOException("send exception", ex);
 		} catch (ClassNotFoundException ex) {
 			throw new IOException("class not found", ex);
+		} catch (InstantiationException e) {
+			throw new IOException("trouble instantiating", e);
+		} catch (IllegalAccessException e) {
+			throw new IOException("illegal access what?", e);
 		}
 	}
 }

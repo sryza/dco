@@ -1,29 +1,34 @@
 package bnb.rpc;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
+
+import bnb.BnbNode;
+import bnb.Problem;
 
 public class RpcUtil {
-	public static Byteable fromThriftData(ThriftData nodeData) throws ClassNotFoundException, 
+	//TODO do we need a separate method for ProblemSpec data?
+	
+	public static Problem problemFromThriftData(ThriftData problemData) throws ClassNotFoundException, 
 		InstantiationException, IllegalAccessException {
-		Object o = Class.forName(nodeData.className).newInstance();
-		Byteable node = (Byteable)o;
-		//TODO: this is really not a good use of time/space
-		//should not have to copy into another buffer
-		byte[] bytes = new byte[nodeData.bytes.size()];
-		for (int i = 0; i < nodeData.bytes.size(); i++) {
-			bytes[i] = nodeData.bytes.get(i);
-		}
-		node.initFromBytes(bytes);
+		Object o = Class.forName(problemData.className).newInstance();
+		Problem problem = (Problem)o;
+		problem.initFromBytes(problemData.bytes.array());
+		return problem;
+	}
+
+	public static BnbNode nodeFromThriftData(ThriftData nodeData, Problem problem)
+		throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, 
+		InvocationTargetException, NoSuchMethodException, SecurityException {
+		//have to pass in Problem to newInstance
+		BnbNode node = (BnbNode)Class.forName(nodeData.className).newInstance();
+		node.initFromBytes(nodeData.bytes.array(), problem);
 		return node;
 	}
+
 	
 	public static ThriftData toThriftData(Byteable byteable) {
-		byte[] nodeBytes = byteable.toBytes();
-		List<Byte> bytesList = new ArrayList<Byte>(nodeBytes.length);
-		for (Byte b : nodeBytes) {
-			bytesList.add(b);
-		}
-		return new ThriftData(byteable.getClass().getName(), bytesList);
+		return new ThriftData(byteable.getClass().getName(), 
+				ByteBuffer.wrap(byteable.toBytes()));
 	}
 }

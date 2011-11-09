@@ -1229,14 +1229,14 @@ public class ThriftVassal {
           case 1: // NODE_DATA
             if (field.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list4 = iprot.readListBegin();
-                this.nodeData = new ArrayList<ThriftData>(_list4.size);
-                for (int _i5 = 0; _i5 < _list4.size; ++_i5)
+                org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
+                this.nodeData = new ArrayList<ThriftData>(_list0.size);
+                for (int _i1 = 0; _i1 < _list0.size; ++_i1)
                 {
-                  ThriftData _elem6; // required
-                  _elem6 = new ThriftData();
-                  _elem6.read(iprot);
-                  this.nodeData.add(_elem6);
+                  ThriftData _elem2; // required
+                  _elem2 = new ThriftData();
+                  _elem2.read(iprot);
+                  this.nodeData.add(_elem2);
                 }
                 iprot.readListEnd();
               }
@@ -1287,9 +1287,9 @@ public class ThriftVassal {
         oprot.writeFieldBegin(NODE_DATA_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.nodeData.size()));
-          for (ThriftData _iter7 : this.nodeData)
+          for (ThriftData _iter3 : this.nodeData)
           {
-            _iter7.write(oprot);
+            _iter3.write(oprot);
           }
           oprot.writeListEnd();
         }
@@ -2111,14 +2111,14 @@ public class ThriftVassal {
           case 0: // SUCCESS
             if (field.type == org.apache.thrift.protocol.TType.LIST) {
               {
-                org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
-                this.success = new ArrayList<ThriftData>(_list8.size);
-                for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+                org.apache.thrift.protocol.TList _list4 = iprot.readListBegin();
+                this.success = new ArrayList<ThriftData>(_list4.size);
+                for (int _i5 = 0; _i5 < _list4.size; ++_i5)
                 {
-                  ThriftData _elem10; // required
-                  _elem10 = new ThriftData();
-                  _elem10.read(iprot);
-                  this.success.add(_elem10);
+                  ThriftData _elem6; // required
+                  _elem6 = new ThriftData();
+                  _elem6.read(iprot);
+                  this.success.add(_elem6);
                 }
                 iprot.readListEnd();
               }
@@ -2144,9 +2144,9 @@ public class ThriftVassal {
         oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
         {
           oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, this.success.size()));
-          for (ThriftData _iter11 : this.success)
+          for (ThriftData _iter7 : this.success)
           {
-            _iter11.write(oprot);
+            _iter7.write(oprot);
           }
           oprot.writeListEnd();
         }

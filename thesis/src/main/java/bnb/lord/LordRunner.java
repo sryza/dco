@@ -19,8 +19,6 @@ import bnb.rpc.LordPublic;
 import bnb.rpc.ThriftLord;
 import bnb.rpc.LordThriftWrapper;
 import bnb.rpc.VassalPublic;
-import bnb.tsp.TspNode;
-import bnb.vassal.VassalRunner;
 
 public class LordRunner implements LordPublic {
 	
@@ -83,7 +81,6 @@ public class LordRunner implements LordPublic {
 		for (VassalPublic vassal : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
 			BnbNode node = startNodesIter.next();
-			((TspNode)node).copyCities();
 			nodePool.add(node);
 			
 			try {

@@ -5,14 +5,13 @@ public class City {
 	public int x;
 	public int y;
 	public int id;
-	public volatile int index; //into the city array
+	public ThreadLocal<Boolean> threadLocalMark = new ThreadLocal<Boolean>();
 	
 	public int cost; //for held & karp bounds
 	
-	public City(int x, int y, int index, int id) {
+	public City(int x, int y, int id) {
 		this.x = x;
 		this.y = y;
-		this.index = index;
 		this.id = id;
 	}
 	
@@ -23,10 +22,10 @@ public class City {
 	}
 	
 	public String toString() {
-		return "City[x=" + x + ",y=" + y + ",index=" + index + "]";
+		return "City[x=" + x + ",y=" + y + ",id=" + id + "]";
 	}
 	
 	public City copy() {
-		return new City(x, y, index, id);
+		return new City(x, y, id);
 	}
 }

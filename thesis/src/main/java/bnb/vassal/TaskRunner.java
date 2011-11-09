@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import bnb.Problem;
 import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 
@@ -29,6 +28,9 @@ public class TaskRunner implements Runnable {
 				}
 			} else {
 				node.evaluate(jobManager.getMinCost());
+				if (node.getParent() != null) {
+					node.getParent().childDone();
+				}
 				if (node.isSolution() && node.getCost() < jobManager.getMinCost()) {
 					System.out.println(node.getCost());
 					System.out.println(node.getSolution());

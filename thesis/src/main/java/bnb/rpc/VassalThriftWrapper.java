@@ -46,6 +46,10 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 		} catch (ClassNotFoundException ex) {
 			LOG.error("Node class not found");
 			throw new TException(ex);
+		} catch (InstantiationException e) {
+			throw new TException("trouble instantiating", e);
+		} catch (IllegalAccessException e) {
+			throw new TException("illegal access what?", e);
 		}
 	}
 

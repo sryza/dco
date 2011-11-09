@@ -24,10 +24,10 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
   private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("ThriftData");
 
   private static final org.apache.thrift.protocol.TField CLASS_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("className", org.apache.thrift.protocol.TType.STRING, (short)1);
-  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.LIST, (short)2);
+  private static final org.apache.thrift.protocol.TField BYTES_FIELD_DESC = new org.apache.thrift.protocol.TField("bytes", org.apache.thrift.protocol.TType.STRING, (short)2);
 
   public String className; // required
-  public List<Byte> bytes; // required
+  public ByteBuffer bytes; // required
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -98,8 +98,7 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
     tmpMap.put(_Fields.CLASS_NAME, new org.apache.thrift.meta_data.FieldMetaData("className", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.BYTES, new org.apache.thrift.meta_data.FieldMetaData("bytes", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-        new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
-            new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.BYTE))));
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING        , true)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(ThriftData.class, metaDataMap);
   }
@@ -109,7 +108,7 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
 
   public ThriftData(
     String className,
-    List<Byte> bytes)
+    ByteBuffer bytes)
   {
     this();
     this.className = className;
@@ -124,11 +123,8 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
       this.className = other.className;
     }
     if (other.isSetBytes()) {
-      List<Byte> __this__bytes = new ArrayList<Byte>();
-      for (Byte other_element : other.bytes) {
-        __this__bytes.add(other_element);
-      }
-      this.bytes = __this__bytes;
+      this.bytes = org.apache.thrift.TBaseHelper.copyBinary(other.bytes);
+;
     }
   }
 
@@ -166,26 +162,21 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
     }
   }
 
-  public int getBytesSize() {
-    return (this.bytes == null) ? 0 : this.bytes.size();
+  public byte[] getBytes() {
+    setBytes(org.apache.thrift.TBaseHelper.rightSize(bytes));
+    return bytes == null ? null : bytes.array();
   }
 
-  public java.util.Iterator<Byte> getBytesIterator() {
-    return (this.bytes == null) ? null : this.bytes.iterator();
+  public ByteBuffer bufferForBytes() {
+    return bytes;
   }
 
-  public void addToBytes(byte elem) {
-    if (this.bytes == null) {
-      this.bytes = new ArrayList<Byte>();
-    }
-    this.bytes.add(elem);
+  public ThriftData setBytes(byte[] bytes) {
+    setBytes(bytes == null ? (ByteBuffer)null : ByteBuffer.wrap(bytes));
+    return this;
   }
 
-  public List<Byte> getBytes() {
-    return this.bytes;
-  }
-
-  public ThriftData setBytes(List<Byte> bytes) {
+  public ThriftData setBytes(ByteBuffer bytes) {
     this.bytes = bytes;
     return this;
   }
@@ -219,7 +210,7 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
       if (value == null) {
         unsetBytes();
       } else {
-        setBytes((List<Byte>)value);
+        setBytes((ByteBuffer)value);
       }
       break;
 
@@ -345,18 +336,8 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
           }
           break;
         case 2: // BYTES
-          if (field.type == org.apache.thrift.protocol.TType.LIST) {
-            {
-              org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
-              this.bytes = new ArrayList<Byte>(_list0.size);
-              for (int _i1 = 0; _i1 < _list0.size; ++_i1)
-              {
-                byte _elem2; // required
-                _elem2 = iprot.readByte();
-                this.bytes.add(_elem2);
-              }
-              iprot.readListEnd();
-            }
+          if (field.type == org.apache.thrift.protocol.TType.STRING) {
+            this.bytes = iprot.readBinary();
           } else { 
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
           }
@@ -383,14 +364,7 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
     }
     if (this.bytes != null) {
       oprot.writeFieldBegin(BYTES_FIELD_DESC);
-      {
-        oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.BYTE, this.bytes.size()));
-        for (byte _iter3 : this.bytes)
-        {
-          oprot.writeByte(_iter3);
-        }
-        oprot.writeListEnd();
-      }
+      oprot.writeBinary(this.bytes);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -414,7 +388,7 @@ public class ThriftData implements org.apache.thrift.TBase<ThriftData, ThriftDat
     if (this.bytes == null) {
       sb.append("null");
     } else {
-      sb.append(this.bytes);
+      org.apache.thrift.TBaseHelper.toString(this.bytes, sb);
     }
     first = false;
     sb.append(")");

@@ -18,3 +18,4 @@ best first search:
 do DFS on a node.  at any point we have a best lower bound (less than our best solution cost).  when we get to a node that's 10% greater than that, we post back to the master node and ask for the node with the smallest lower bound.
 is that right?
 
+consider nodes sending data directly to other nodes (instead of through the master)

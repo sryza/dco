@@ -2,7 +2,7 @@ namespace java bnb.rpc
 
 struct ThriftData {
 	1:string className,
-	2:list<byte> bytes
+	2:binary bytes
 }
 
 service ThriftVassal {

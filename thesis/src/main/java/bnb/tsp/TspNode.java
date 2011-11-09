@@ -5,10 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.List;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 
@@ -25,39 +27,40 @@ public class TspNode extends BnbNode {
 	private double parentTourCost = -1.0;
 	private double tourCost = -1.0;
 	
-	private City[] cities;
 	private int numChosen;
 	private City city;
 	
-	private final TspProblem problem;
+	private TspProblem problem;
 	
-	private int nextChildIndex;
-	
+	//children that are returned with nextChild are added to this list
+	//TODO: take this into account when constructing a node
 	private List<City> exploredChildren;
 	
-	public TspNode(TspProblem problem) {
-		this.problem = problem;
+	private List<City> remainingCities;
+	
+	private int numChildrenReleased;
+	
+	private City startCity;
+	
+	//exactly one of these should not be null
+	private TspNode parentNode;
+	private ArrayList<City> prevCities;
+	
+	public TspNode() {
+		super(null);
 	}
 	
-	public TspNode(City[] cities, City city, int numChosen, TspNode parent) {
-		this.cities = cities;
-//		System.out.println(numUniqueCities());
-
+	public TspNode(City startCity, City city, int numChosen, TspNode parent, List<City> remCities, TspProblem problem) {
+		super(parent);
+		this.startCity = startCity;
 		this.city = city;
+		this.remainingCities = remCities;
+		
 		this.numChosen = numChosen;
-		nextChildIndex = numChosen;
 		if (parent != null) {
 			parentTourCost = parent.getTourCost();
 		}
-	}
-	
-	// for while we don't have serialization
-	public void copyCities() {
-		City[] temp = new City[cities.length];
-		for (int i = 0; i < cities.length; i++) {
-			temp[i] = cities[i].copy();
-		}
-		cities = temp;
+		this.problem = problem;
 	}
 	
 	@Override
@@ -70,32 +73,41 @@ public class TspNode extends BnbNode {
 		if (!isEvaluated) {
 			throw new IllegalStateException("Tsp node not yet evaluated.");
 		}
-		return !bounded && numChosen == cities.length;
+		return !bounded && numChosen == problem.getNumCities();
 	}
 	
 	public double getTourCost() {
 		return tourCost;
 	}
-
-	@Override
-	public BnbNode nextChild() {
-		if (!hasNextChild()) {
-			throw new NoSuchElementException("Node has no next child.");
+	
+	
+	private List<City> buildRemainingCities(Iterator<City> iter) {
+		//build a new remainingCities
+		for (City city : problem.getCities()) {
+			city.threadLocalMark.set(false);
 		}
-		TspNode child = new TspNode(cities, cities[nextChildIndex], numChosen+1, this);
-		//TODO: take this out
-		System.out.println("we're checking for explored children");
-		if (exploredChildren.contains(cities[nextChildIndex])) {
-			LOG.error("about to explore node that's already been explored.  your understanding's wrong, sandy.");
+		while (iter.hasNext()) {
+			iter.next().threadLocalMark.set(true);
 		}
-		exploredChildren.add(cities[nextChildIndex]);
-		nextChildIndex++;
-		return child;
+		List<City> remCities = new LinkedList<City>();
+		for (City city : problem.getCities()) {
+			if (city.threadLocalMark.get() == false) {
+				remCities.add(city);
+			}
+		}
+		return remCities;
 	}
-
-	@Override
-	public boolean hasNextChild() {
-		return !bounded && nextChildIndex < cities.length;
+	
+	public TspNode getParent() {
+		return parentNode;
+	}
+	
+	public City getCity() {
+		return city;
+	}
+	
+	public ArrayList<City> getPrevCities() {
+		return prevCities;
 	}
 	
 	@Override
@@ -106,61 +118,50 @@ public class TspNode extends BnbNode {
 //			System.out.println("bounded");
 		}
 		isEvaluated = true;
+		remainingCities.add(city);
+		exploredChildren = new LinkedList<City>();
 	}
-	
-	private int numUniqueCities() {
-		Set<City> citySet = new HashSet<City>();
-		for (City city : cities) {
-			citySet.add(city);
-		}
-		return citySet.size();
-	}
-	
-	private boolean indexesRight() {
-		for (int i = 0; i < cities.length; i++) {
-			if (cities[i].index != i) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
+		
 	/**
 	 * 
 	 * @return
 	 * 		true if not bounded, false is yes bounded
 	 */
-	private boolean doEvaluate(Problem spec, double minCost) {
+	private boolean doEvaluate(double minCost) {
 		if (isEvaluated) {
 			System.out.println("already evaluated");
 		}
-		//evaluates whether the placement of the last node makes sense
-		int before = numUniqueCities();
-		TspUtils.placeCity(cities, city, numChosen-1);
-		int after = numUniqueCities();
-		if (after != before) {
-			System.out.println(before + " != " + after);
-			System.exit(0);
-		}
-		if (!indexesRight()) {
-			before += 0;
-			after += 0;
-			System.out.println("indexes wrong " + numChosen);
-			System.exit(0);
-		}
 		
 		if (numChosen == 2) {
-			tourCost = 2 * cities[0].dist(cities[1]);
+			tourCost = 2 * startCity.dist(city);
 		} else if (numChosen > 2) {
-			tourCost = parentTourCost - cities[numChosen-2].dist(cities[0]) + 
-				cities[numChosen-2].dist(cities[numChosen-1]) + cities[numChosen-1].dist(cities[0]);
+			Iterator<City> iter = new ParentCityIterator(this);
+			iter.next();
+			City prevCity = iter.next();
+			tourCost = parentTourCost - prevCity.dist(startCity) + 
+				prevCity.dist(city) + city.dist(startCity);
 		}
 		
 		if (tourCost >= minCost) {
 			return false;
 		}
 		
-		//if 2 or 3 opt give us better solutions, continue
+/*		//if 2 or 3 opt give us better solutions, continue
+		ParentCityIterator iter = new ParentCityIterator(this);
+		iter.next();
+		City prevCity = iter.next();
+		City temp = iter.next();
+		while (iter.hasNext()) {
+			City next = temp;
+			if (!iter.hasNext()) {
+				//don't use last city
+				break;
+			}
+			temp = iter.next();
+			
+			TspUtils.cost2opt(prevCity, city, temp, next);
+			TspUtils.cost2opt(next, temp2, index2);
+		}
 		for (int j = 1; j < numChosen-3; j++)
 		{
 			if (TspUtils.cost2opt(cities, numChosen-2, j) < 0 || TspUtils.cost2opt(cities, j, numChosen-2) < 0)
@@ -188,26 +189,67 @@ public class TspNode extends BnbNode {
 				}
 			}
 		}
-		
+		*/
 		return true;
 	}
 	
 	@Override
-	public void initFromBytes(byte[] bytes) {
+	public boolean hasNextChild() {
+		//TODO: make sure we're incrememnting numChildrenReleased whenever we call nextChild
+		return !bounded && !isSolution() && numChildrenReleased < problem.getNumCities();
+	}
+	
+	@Override
+	public BnbNode nextChild() {
+		if (!hasNextChild()) {
+			throw new NoSuchElementException("Node has no next child.");
+		}
+		List<City> remCities = remainingCities;
+		int count = activeChildCount.incrementAndGet();
+		if (count > 0) {
+			buildRemainingCities(new ParentCityIterator(this));
+		}
+		City city = remCities.remove(0);
+		exploredChildren.add(city);
+		TspNode child = new TspNode(startCity, city, numChosen+1, this, remCities, problem);
+		return child;
+	}
+
+	
+	@Override
+	public void initFromBytes(byte[] bytes, Problem prob) {
+		if (!(prob instanceof TspProblem)) {
+			throw new IllegalArgumentException("problem must be TspProblem");
+		}
+		problem = (TspProblem)prob;
 		try {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 			DataInputStream dis = new DataInputStream(bais);
 			int numCities = dis.readInt();
 			
 			//TODO: how do we reconstruct this in the best way?
-			cities = new City[numCities];
-			City[] problemCities = problem.getCities();
+			prevCities = new ArrayList<City>(numCities);
 			for (int i = 0; i < numCities; i++) {
+				prevCities.add(null);
+			}
+			City[] problemCities = problem.getCities();
+			for (int i = numCities-1; i >= 0; i--) {
 				int id = dis.readInt();
-				cities[i] = problemCities[id].copy();
+				prevCities.set(i, problemCities[id].copy());
+				if (i == 0) {
+					city = problemCities[id].copy();
+				}
+				//TODO: do we need to copy here?
 			}
 			
-
+			startCity = problemCities[0];
+			remainingCities = buildRemainingCities(prevCities.iterator());
+			
+			//remove what's set to city. we only kept it in as a shortcut to add it
+			//to the list for buildRemainingCities
+			prevCities.remove(prevCities.size()-1);
+			
+			//TODO: explored children
 		} catch (IOException ex) {
 			LOG.error("IOException reading from byte array, this should never happen", ex);
 		}
@@ -223,16 +265,24 @@ public class TspNode extends BnbNode {
 			
 			//num nodes in path
 			dos.writeInt(numChosen);
+
 			//nodes in path
+			Stack<City> stack = new Stack<City>();
+			ParentCityIterator iter = new ParentCityIterator(this);
+			while (iter.hasNext()) {
+				stack.add(iter.next());
+			}
+			for (City city : stack) {
+				dos.writeInt(city.id);
+			}
 			for (int i = 0; i < numChosen; i++) {
-				dos.writeInt(cities[i].id);
 			}
-			//num explored children
-			dos.writeInt(exploredChildren.size());
-			//explored children
-			for (City child : exploredChildren) {
-				dos.writeInt(child.id);
-			}
+//			//num explored children
+//			dos.writeInt(exploredChildren.size());
+//			//explored children
+//			for (City child : exploredChildren) {
+//				dos.writeInt(child.id);
+//			}
 			
 			return baos.toByteArray();
 		} catch (IOException ex) {
@@ -248,7 +298,7 @@ public class TspNode extends BnbNode {
 	
 	@Override
 	public Solution getSolution() {
-		return new TspSolution(cities);
+		return new TspSolution(new ParentCityIterator(this), problem.getNumCities());
 	}
 	
 /*	

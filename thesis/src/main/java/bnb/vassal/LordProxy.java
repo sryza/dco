@@ -40,7 +40,7 @@ public class LordProxy implements LordPublic {
 			List<ThriftData> nodesData = lordClient.askForWork(jobid);
 			List<BnbNode> nodes = new LinkedList<BnbNode>();
 			for (ThriftData nodeData : nodesData) {
-				nodes.add((BnbNode)RpcUtil.fromThriftData(nodeData));
+				nodes.add((BnbNode)RpcUtil.nodeFromThriftData(nodeData));
 			}
 			return nodes;
 		} catch (TException ex) {

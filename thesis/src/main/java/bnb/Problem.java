@@ -7,5 +7,5 @@ import bnb.rpc.Byteable;
  * and stored at each VassalRunner
  */
 public interface Problem extends Byteable {
-	
+	public void initFromBytes(byte[] bytes);
 }
