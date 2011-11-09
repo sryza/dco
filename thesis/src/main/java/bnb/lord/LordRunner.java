@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.thrift.TProcessor;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
@@ -18,7 +19,6 @@ import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 import bnb.rpc.ThriftLord;
 import bnb.rpc.LordThriftWrapper;
-import bnb.rpc.VassalPublic;
 
 public class LordRunner implements LordPublic {
 	
@@ -52,39 +52,47 @@ public class LordRunner implements LordPublic {
 			serverSocket = new TServerSocket(port);
 			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket);
 			LordThriftWrapper lordThriftWrapper = new LordThriftWrapper(this);
-			args.processor(new ThriftLord.Processor<LordThriftWrapper>(lordThriftWrapper));
+			TProcessor processor = new ThriftLord.Processor<LordThriftWrapper>(lordThriftWrapper);
+			args.processor(processor);
+//			args.processorFactory(new TProcessorFactory(processor));
 			server = new TThreadPoolServer(args);
-			server.serve();
+			Thread serverThread = new Thread("Lord Thrift Server") {
+				public void run() {
+					server.serve();
+				}
+			};
+			serverThread.start();
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
 	}
 	
-	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalPublic> vassalServers) {
+	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalProxy> vassalServers) {
 		int jobid = nextJobid++;
 		
 		int totalSlots = 0;
-		for (VassalPublic runner : vassalServers) {
+		for (VassalProxy vassal : vassalServers) {
 			try {
-				totalSlots += runner.getNumSlots();
+				totalSlots += vassal.getNumSlots();
 			} catch (IOException ex) {
 				//TODO: don't use this runner
-				LOG.error("Couldn't reach runner to find number of slots", ex);
+				LOG.error("Couldn't reach vassal runner to find number of slots", ex);
 			}
 		}
 		//TODO: what happens if slots free up during this?
 		Starter starter = new Starter();
-		List<BnbNode>[] startNodes = starter.startEvaluation(spec, bestCost, root, totalSlots);
+		//used to be using totalSlots for the last arg, but not for now
+		List<BnbNode>[] startNodes = starter.startEvaluation(spec, bestCost, root, vassalServers.size());
 		LordJobManager jobManager = new LordJobManager(jobid, startNodes[1], spec);
 		jobMap.put(jobid, jobManager);
 		Iterator<BnbNode> startNodesIter = startNodes[0].iterator();
-		for (VassalPublic vassal : vassalServers) {
+		for (VassalProxy vassal : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
 			BnbNode node = startNodesIter.next();
 			nodePool.add(node);
 			
 			try {
-				vassal.startJobTasks(nodePool, spec, bestCost, jobid);
+				vassal.startJobTasks(nodePool, spec, bestCost, jobid, vassal.getNumSlots());
 			} catch (IOException ex) {
 				LOG.error("Failed to start job tasks on vassal", ex);
 			}
@@ -108,6 +116,9 @@ public class LordRunner implements LordPublic {
 
 	@Override
 	public List<BnbNode> askForWork(int jobid) {
-		return null;
+		LordJobManager jobManager = jobMap.get(jobid);
+		//TODO: if jobManager is null we should throw an exception
+		
+		return jobManager.askForWork();
 	}
 }

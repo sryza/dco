@@ -32,7 +32,7 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 
 	@Override
 	public void startJobTasks(List<ThriftData> nodesData, ThriftData problemData,
-			double bestCost, int jobid)
+			double bestCost, int jobid, int nthreads)
 			throws TException {
 		try {
 			Problem problem = (Problem)RpcUtil.problemFromThriftData(problemData);
@@ -40,7 +40,7 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 			for (ThriftData nodeData : nodesData) {
 				nodes.add((BnbNode)RpcUtil.nodeFromThriftData(nodeData, problem));
 			}
-			vassal.startJobTasks(nodes, problem, bestCost, jobid);
+			vassal.startJobTasks(nodes, problem, bestCost, jobid, nthreads);
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);
 			throw new TException(ex);

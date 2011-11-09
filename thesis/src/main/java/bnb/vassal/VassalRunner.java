@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.thrift.TProcessor;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
@@ -13,8 +14,9 @@ import org.apache.thrift.transport.TTransportException;
 
 import bnb.Problem;
 import bnb.BnbNode;
-import bnb.rpc.LordPublic;
+import bnb.rpc.ThriftVassal;
 import bnb.rpc.VassalPublic;
+import bnb.rpc.VassalThriftWrapper;
 
 public class VassalRunner implements VassalPublic {
 	
@@ -44,8 +46,16 @@ public class VassalRunner implements VassalPublic {
 		try {
 			serverSocket = new TServerSocket(port);
 			TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket);
+			VassalThriftWrapper vassalThriftWrapper = new VassalThriftWrapper(this);
+			TProcessor processor = new ThriftVassal.Processor<VassalThriftWrapper>(vassalThriftWrapper);
+			args.processor(processor);
 			server = new TThreadPoolServer(args);
-			server.serve();
+			Thread serverThread = new Thread("Lord Thrift Server") {
+				public void run() {
+					server.serve();
+				}
+			};
+			serverThread.start();
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
@@ -56,24 +66,31 @@ public class VassalRunner implements VassalPublic {
 	}
 	
 	@Override
-	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid) 
+	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid, int numThreads) 
 		throws IOException {
 		VassalNodePool nodePool = new SimpleVassalNodePool();
 		for (BnbNode node : nodes) {
+			//TODO: should this be happening here?
+			if (!node.isEvaluated()) {
+				node.evaluate(bestCost);
+			}
 			nodePool.postEvaluated(node);
 		}
 		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordInfo, vassalId, jobid);
-		jobMap.put(jobid, jobManager);
-		startVassalRunner(lordInfo, nodePool, jobManager);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
+
+		jobMap.put(jobid, jobManager);
+		for (int i = 0; i < numThreads; i++) {
+			startTaskRunner(lordInfo, nodePool, jobManager);
+		}
 	}
 	
-	public void startVassalRunner(LordProxy lordInfo, VassalNodePool nodePool,
+	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager) {
 		TaskRunner runner = new TaskRunner(lordInfo, jobManager);
-		Thread vassalThread = new Thread(runner);
-		vassalThread.start();
+		Thread taskThread = new Thread(runner);
+		taskThread.start();
 		numSlots--;
 	}
 

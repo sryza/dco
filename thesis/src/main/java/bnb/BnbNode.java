@@ -6,7 +6,7 @@ import bnb.rpc.Byteable;
 
 public abstract class BnbNode implements Byteable {
 	private BnbNode parent;
-	protected AtomicInteger activeChildCount;
+	protected AtomicInteger activeChildCount = new AtomicInteger(0);
 	
 	/**
 	 * A BnbNode should have an empty constructor after which initFromBytes can be called
@@ -26,13 +26,26 @@ public abstract class BnbNode implements Byteable {
 		int newCount = activeChildCount.decrementAndGet();
 		if (newCount == 0 && !hasNextChild()) {
 			//let our parent node know we're done
-			getParent().childDone();
+			whenAllChildrenDone();
+			if (getParent() != null) {
+				getParent().childDone();
+			}
 		}
+		
+		//TODO: it's really here that we want to add city back to remainingCities
+		//city should be added back to whatever list it was taken from when
+		//no further children will be processed
+		
 	}
 	
 	public BnbNode getParent() {
 		return parent;
 	}
+	
+	/**
+	 * Code to be executed when the last of the children is done being computed on
+	 */
+	public abstract void whenAllChildrenDone();
 	
 	/**
 	 * Runs bounding a solving on this node.  Returns a list of the child nodes
@@ -45,6 +58,8 @@ public abstract class BnbNode implements Byteable {
 	public abstract BnbNode nextChild();
 	
 	public abstract boolean hasNextChild();
+	
+	public abstract boolean isLeaf();
 	
 	public abstract boolean isSolution();
 	

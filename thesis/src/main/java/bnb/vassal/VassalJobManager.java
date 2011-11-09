@@ -8,12 +8,11 @@ import org.apache.log4j.Logger;
 import bnb.BnbNode;
 import bnb.Problem;
 import bnb.Solution;
-import bnb.rpc.LordPublic;
 
 public class VassalJobManager implements Runnable {
 	private static final Logger LOG = Logger.getLogger(VassalJobManager.class);
 	
-	private static final int UPDATE_INTERVAL = 500;
+	private static final int UPDATE_INTERVAL = 5000;
 	
 	private volatile double minCost;
 	private volatile Solution bestSolution;
@@ -41,7 +40,8 @@ public class VassalJobManager implements Runnable {
 			try {
 				Thread.sleep(UPDATE_INTERVAL);
 				if (update) {
-					update = !sendMinCost();
+					//TODO: send min cost
+//					update = !sendMinCost();
 				}
 			} catch (InterruptedException ex) {
 				ex.printStackTrace(); //TODO: log4j

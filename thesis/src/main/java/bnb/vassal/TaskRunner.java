@@ -1,12 +1,12 @@
 package bnb.vassal;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import bnb.BnbNode;
-import bnb.rpc.LordPublic;
 
 public class TaskRunner implements Runnable {
 	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
@@ -20,6 +20,7 @@ public class TaskRunner implements Runnable {
 	}
 	
 	public void run() {
+		LOG.info("running task");
 		while (true) {
 			BnbNode node = jobManager.getNodePool().nextNode();
 			if (node == null) {
@@ -28,15 +29,23 @@ public class TaskRunner implements Runnable {
 				}
 			} else {
 				node.evaluate(jobManager.getMinCost());
-				if (node.getParent() != null) {
-					node.getParent().childDone();
+				if (node.isSolution()) {
+					if (node.getCost() < jobManager.getMinCost()) {
+						LOG.info("new best cost: " + node.getCost());
+						LOG.info("new best solution: " + node.getSolution());
+						jobManager.betterLocalSolution(node.getSolution(), node.getCost());
+					}
 				}
-				if (node.isSolution() && node.getCost() < jobManager.getMinCost()) {
-					System.out.println(node.getCost());
-					System.out.println(node.getSolution());
-					jobManager.betterLocalSolution(node.getSolution(), node.getCost());
+				if (!node.isLeaf()) {
+					jobManager.getNodePool().postEvaluated(node);
+				} else {
+					//if we're not posting the node to do work with, let its parent
+					//know that we're done doing computation on it
+					node.whenAllChildrenDone();
+					if (node.getParent() != null) {
+						node.getParent().childDone();
+					}
 				}
-				jobManager.getNodePool().postEvaluated(node);
 			}
 		}
 	}
@@ -53,8 +62,8 @@ public class TaskRunner implements Runnable {
 			LOG.error("Couldn't steal work", ex);
 			return false;
 		}
-		if (work == null) {
-			System.out.println("Out of work at " + System.currentTimeMillis());
+		if (work.isEmpty()) {
+			LOG.info("Out of work at " + new Date());
 			return false;
 		} else {
 			for (BnbNode node : work) {

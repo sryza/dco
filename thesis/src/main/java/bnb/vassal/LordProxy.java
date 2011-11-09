@@ -11,7 +11,6 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 
 import bnb.BnbNode;
-import bnb.rpc.LordPublic;
 import bnb.rpc.RpcUtil;
 import bnb.rpc.ThriftData;
 import bnb.rpc.ThriftLord;
@@ -19,15 +18,19 @@ import bnb.rpc.ThriftLord;
 public class LordProxy {
 
 	private ThriftLord.Client lordClient;
+	private TSocket socket;
 
 	public LordProxy(String host, int port) {
-		TSocket socket = new TSocket(host, port);
+		socket = new TSocket(host, port);
 		TProtocol protocol = new TBinaryProtocol(socket);
 		lordClient = new ThriftLord.Client(protocol);
 	}
 	
 	public void sendBestSolCost(double cost, int jobid, int vassalid) throws IOException {
 		try {
+			if (!socket.isOpen()) {
+				socket.open();
+			}
 			lordClient.sendBestSolCost(cost, jobid, vassalid);
 		} catch (TException ex) {
 			throw new IOException("send exception", ex);
@@ -36,6 +39,10 @@ public class LordProxy {
 
 	public List<BnbNode> askForWork(VassalJobManager jobManager) throws IOException {
 		try {
+			if (!socket.isOpen()) {
+				socket.open();
+			}
+
 			int jobid = jobManager.getJobID();
 			List<ThriftData> nodesData = lordClient.askForWork(jobid);
 			List<BnbNode> nodes = new LinkedList<BnbNode>();

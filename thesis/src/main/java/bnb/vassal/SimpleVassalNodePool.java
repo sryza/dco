@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import bnb.BnbNode;
 
 public class SimpleVassalNodePool implements VassalNodePool {
-
+	private static final Logger LOG = Logger.getLogger(VassalNodePool.class);
+	
 	private final LinkedList<BnbNode> nodeList;
 	
 	public SimpleVassalNodePool() {

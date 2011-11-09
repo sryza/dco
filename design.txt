@@ -19,3 +19,5 @@ do DFS on a node.  at any point we have a best lower bound (less than our best s
 is that right?
 
 consider nodes sending data directly to other nodes (instead of through the master)
+
+we still have to break the symmetry of going around in the opposite direction

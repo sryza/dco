@@ -7,8 +7,6 @@ import bnb.BnbNode;
 import bnb.Problem;
 
 public class RpcUtil {
-	//TODO do we need a separate method for ProblemSpec data?
-	
 	public static Problem problemFromThriftData(ThriftData problemData) throws ClassNotFoundException, 
 		InstantiationException, IllegalAccessException {
 		Object o = Class.forName(problemData.className).newInstance();

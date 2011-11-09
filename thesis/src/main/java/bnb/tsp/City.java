@@ -5,7 +5,7 @@ public class City {
 	public int x;
 	public int y;
 	public int id;
-	public ThreadLocal<Boolean> threadLocalMark = new ThreadLocal<Boolean>();
+	public ThreadLocal<Integer> threadLocalMark = new ThreadLocal<Integer>();
 	
 	public int cost; //for held & karp bounds
 	
@@ -23,9 +23,5 @@ public class City {
 	
 	public String toString() {
 		return "City[x=" + x + ",y=" + y + ",id=" + id + "]";
-	}
-	
-	public City copy() {
-		return new City(x, y, id);
 	}
 }

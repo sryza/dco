@@ -26,7 +26,7 @@ public class ThriftVassal {
 
     public void updateBestSolCost(double bestCost, int jobid) throws org.apache.thrift.TException;
 
-    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException;
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads) throws org.apache.thrift.TException;
 
     public List<ThriftData> stealWork(int jobid) throws org.apache.thrift.TException;
 
@@ -38,7 +38,7 @@ public class ThriftVassal {
 
     public void updateBestSolCost(double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.updateBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.startJobTasks_call> resultHandler) throws org.apache.thrift.TException;
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.startJobTasks_call> resultHandler) throws org.apache.thrift.TException;
 
     public void stealWork(int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.stealWork_call> resultHandler) throws org.apache.thrift.TException;
 
@@ -79,19 +79,20 @@ public class ThriftVassal {
       sendBase("updateBestSolCost", args);
     }
 
-    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads) throws org.apache.thrift.TException
     {
-      send_startJobTasks(nodeData, problemData, bestCost, jobid);
+      send_startJobTasks(nodeData, problemData, bestCost, jobid, nthreads);
       recv_startJobTasks();
     }
 
-    public void send_startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid) throws org.apache.thrift.TException
+    public void send_startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads) throws org.apache.thrift.TException
     {
       startJobTasks_args args = new startJobTasks_args();
       args.setNodeData(nodeData);
       args.setProblemData(problemData);
       args.setBestCost(bestCost);
       args.setJobid(jobid);
+      args.setNthreads(nthreads);
       sendBase("startJobTasks", args);
     }
 
@@ -199,9 +200,9 @@ public class ThriftVassal {
       }
     }
 
-    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler) throws org.apache.thrift.TException {
+    public void startJobTasks(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      startJobTasks_call method_call = new startJobTasks_call(nodeData, problemData, bestCost, jobid, resultHandler, this, ___protocolFactory, ___transport);
+      startJobTasks_call method_call = new startJobTasks_call(nodeData, problemData, bestCost, jobid, nthreads, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -211,12 +212,14 @@ public class ThriftVassal {
       private ThriftData problemData;
       private double bestCost;
       private int jobid;
-      public startJobTasks_call(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int nthreads;
+      public startJobTasks_call(List<ThriftData> nodeData, ThriftData problemData, double bestCost, int jobid, int nthreads, org.apache.thrift.async.AsyncMethodCallback<startJobTasks_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.nodeData = nodeData;
         this.problemData = problemData;
         this.bestCost = bestCost;
         this.jobid = jobid;
+        this.nthreads = nthreads;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -226,6 +229,7 @@ public class ThriftVassal {
         args.setProblemData(problemData);
         args.setBestCost(bestCost);
         args.setJobid(jobid);
+        args.setNthreads(nthreads);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -347,7 +351,7 @@ public class ThriftVassal {
 
       protected startJobTasks_result getResult(I iface, startJobTasks_args args) throws org.apache.thrift.TException {
         startJobTasks_result result = new startJobTasks_result();
-        iface.startJobTasks(args.nodeData, args.problemData, args.bestCost, args.jobid);
+        iface.startJobTasks(args.nodeData, args.problemData, args.bestCost, args.jobid, args.nthreads);
         return result;
       }
     }
@@ -775,18 +779,21 @@ public class ThriftVassal {
     private static final org.apache.thrift.protocol.TField PROBLEM_DATA_FIELD_DESC = new org.apache.thrift.protocol.TField("problemData", org.apache.thrift.protocol.TType.STRUCT, (short)2);
     private static final org.apache.thrift.protocol.TField BEST_COST_FIELD_DESC = new org.apache.thrift.protocol.TField("bestCost", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
     private static final org.apache.thrift.protocol.TField JOBID_FIELD_DESC = new org.apache.thrift.protocol.TField("jobid", org.apache.thrift.protocol.TType.I32, (short)4);
+    private static final org.apache.thrift.protocol.TField NTHREADS_FIELD_DESC = new org.apache.thrift.protocol.TField("nthreads", org.apache.thrift.protocol.TType.I32, (short)5);
 
     public List<ThriftData> nodeData; // required
     public ThriftData problemData; // required
     public double bestCost; // required
     public int jobid; // required
+    public int nthreads; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       NODE_DATA((short)1, "nodeData"),
       PROBLEM_DATA((short)2, "problemData"),
       BEST_COST((short)3, "bestCost"),
-      JOBID((short)4, "jobid");
+      JOBID((short)4, "jobid"),
+      NTHREADS((short)5, "nthreads");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -809,6 +816,8 @@ public class ThriftVassal {
             return BEST_COST;
           case 4: // JOBID
             return JOBID;
+          case 5: // NTHREADS
+            return NTHREADS;
           default:
             return null;
         }
@@ -851,7 +860,8 @@ public class ThriftVassal {
     // isset id assignments
     private static final int __BESTCOST_ISSET_ID = 0;
     private static final int __JOBID_ISSET_ID = 1;
-    private BitSet __isset_bit_vector = new BitSet(2);
+    private static final int __NTHREADS_ISSET_ID = 2;
+    private BitSet __isset_bit_vector = new BitSet(3);
 
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -865,6 +875,8 @@ public class ThriftVassal {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
       tmpMap.put(_Fields.JOBID, new org.apache.thrift.meta_data.FieldMetaData("jobid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.NTHREADS, new org.apache.thrift.meta_data.FieldMetaData("nthreads", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(startJobTasks_args.class, metaDataMap);
     }
@@ -876,7 +888,8 @@ public class ThriftVassal {
       List<ThriftData> nodeData,
       ThriftData problemData,
       double bestCost,
-      int jobid)
+      int jobid,
+      int nthreads)
     {
       this();
       this.nodeData = nodeData;
@@ -885,6 +898,8 @@ public class ThriftVassal {
       setBestCostIsSet(true);
       this.jobid = jobid;
       setJobidIsSet(true);
+      this.nthreads = nthreads;
+      setNthreadsIsSet(true);
     }
 
     /**
@@ -905,6 +920,7 @@ public class ThriftVassal {
       }
       this.bestCost = other.bestCost;
       this.jobid = other.jobid;
+      this.nthreads = other.nthreads;
     }
 
     public startJobTasks_args deepCopy() {
@@ -919,6 +935,8 @@ public class ThriftVassal {
       this.bestCost = 0.0;
       setJobidIsSet(false);
       this.jobid = 0;
+      setNthreadsIsSet(false);
+      this.nthreads = 0;
     }
 
     public int getNodeDataSize() {
@@ -1030,6 +1048,29 @@ public class ThriftVassal {
       __isset_bit_vector.set(__JOBID_ISSET_ID, value);
     }
 
+    public int getNthreads() {
+      return this.nthreads;
+    }
+
+    public startJobTasks_args setNthreads(int nthreads) {
+      this.nthreads = nthreads;
+      setNthreadsIsSet(true);
+      return this;
+    }
+
+    public void unsetNthreads() {
+      __isset_bit_vector.clear(__NTHREADS_ISSET_ID);
+    }
+
+    /** Returns true if field nthreads is set (has been assigned a value) and false otherwise */
+    public boolean isSetNthreads() {
+      return __isset_bit_vector.get(__NTHREADS_ISSET_ID);
+    }
+
+    public void setNthreadsIsSet(boolean value) {
+      __isset_bit_vector.set(__NTHREADS_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case NODE_DATA:
@@ -1064,6 +1105,14 @@ public class ThriftVassal {
         }
         break;
 
+      case NTHREADS:
+        if (value == null) {
+          unsetNthreads();
+        } else {
+          setNthreads((Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -1080,6 +1129,9 @@ public class ThriftVassal {
 
       case JOBID:
         return Integer.valueOf(getJobid());
+
+      case NTHREADS:
+        return Integer.valueOf(getNthreads());
 
       }
       throw new IllegalStateException();
@@ -1100,6 +1152,8 @@ public class ThriftVassal {
         return isSetBestCost();
       case JOBID:
         return isSetJobid();
+      case NTHREADS:
+        return isSetNthreads();
       }
       throw new IllegalStateException();
     }
@@ -1150,6 +1204,15 @@ public class ThriftVassal {
         if (!(this_present_jobid && that_present_jobid))
           return false;
         if (this.jobid != that.jobid)
+          return false;
+      }
+
+      boolean this_present_nthreads = true;
+      boolean that_present_nthreads = true;
+      if (this_present_nthreads || that_present_nthreads) {
+        if (!(this_present_nthreads && that_present_nthreads))
+          return false;
+        if (this.nthreads != that.nthreads)
           return false;
       }
 
@@ -1205,6 +1268,16 @@ public class ThriftVassal {
       }
       if (isSetJobid()) {
         lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.jobid, typedOther.jobid);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetNthreads()).compareTo(typedOther.isSetNthreads());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetNthreads()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.nthreads, typedOther.nthreads);
         if (lastComparison != 0) {
           return lastComparison;
         }
@@ -1268,6 +1341,14 @@ public class ThriftVassal {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 5: // NTHREADS
+            if (field.type == org.apache.thrift.protocol.TType.I32) {
+              this.nthreads = iprot.readI32();
+              setNthreadsIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -1306,6 +1387,9 @@ public class ThriftVassal {
       oprot.writeFieldBegin(JOBID_FIELD_DESC);
       oprot.writeI32(this.jobid);
       oprot.writeFieldEnd();
+      oprot.writeFieldBegin(NTHREADS_FIELD_DESC);
+      oprot.writeI32(this.nthreads);
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1338,6 +1422,10 @@ public class ThriftVassal {
       sb.append("jobid:");
       sb.append(this.jobid);
       first = false;
+      if (!first) sb.append(", ");
+      sb.append("nthreads:");
+      sb.append(this.nthreads);
+      first = false;
       sb.append(")");
       return sb.toString();
     }
@@ -1356,6 +1444,8 @@ public class ThriftVassal {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
       try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bit_vector = new BitSet(1);
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);
@@ -1852,6 +1942,8 @@ public class ThriftVassal {
 
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
       try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bit_vector = new BitSet(1);
         read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
       } catch (org.apache.thrift.TException te) {
         throw new java.io.IOException(te);

@@ -1,6 +1,7 @@
 package bnb.lord;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +26,14 @@ public class LordJobManager {
 		this.problem = problem;
 		System.out.println("unevaluated size: " + unevaluated.size());
 		vassalProxies = new LinkedList<VassalPublic>();
+	}
+	
+	public synchronized List<BnbNode> askForWork() {
+		LOG.info("lord asked for work");
+		if (unevaluated.size() > 0) {
+			return Arrays.asList(unevaluated.remove(0));
+		}
+		return new LinkedList<BnbNode>();
 	}
 	
 	public Problem getProblem() {

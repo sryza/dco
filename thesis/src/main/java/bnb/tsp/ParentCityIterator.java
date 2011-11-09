@@ -22,7 +22,7 @@ public class ParentCityIterator implements Iterator<City> {
 	public City next() {
 		if (node != null) {
 			City city = node.getCity();
-			TspNode parent = node.getParent();
+			TspNode parent = (TspNode)node.getParent();
 			if (parent == null) {
 				prevCities = node.getPrevCities();
 				prevCitiesIndex = prevCities == null ? 0 : prevCities.size();

@@ -38,12 +38,9 @@ public class TspNode extends BnbNode {
 	
 	private List<City> remainingCities;
 	
-	private int numChildrenReleased;
-	
 	private City startCity;
 	
-	//exactly one of these should not be null
-	private TspNode parentNode;
+	//if parent is null, and this isn't the root, this shouldn't be null
 	private ArrayList<City> prevCities;
 	
 	public TspNode() {
@@ -69,6 +66,11 @@ public class TspNode extends BnbNode {
 	}
 	
 	@Override
+	public boolean isLeaf() {
+		return numChosen == problem.getNumCities();
+	}
+	
+	@Override
 	public boolean isSolution() {
 		if (!isEvaluated) {
 			throw new IllegalStateException("Tsp node not yet evaluated.");
@@ -84,22 +86,27 @@ public class TspNode extends BnbNode {
 	private List<City> buildRemainingCities(Iterator<City> iter) {
 		//build a new remainingCities
 		for (City city : problem.getCities()) {
-			city.threadLocalMark.set(false);
+			city.threadLocalMark.set(0);
 		}
 		while (iter.hasNext()) {
-			iter.next().threadLocalMark.set(true);
+			iter.next().threadLocalMark.set(1);
 		}
-		List<City> remCities = new LinkedList<City>();
-		for (City city : problem.getCities()) {
-			if (city.threadLocalMark.get() == false) {
-				remCities.add(city);
+		if (exploredChildren != null) {
+			for (City city : exploredChildren) {
+				city.threadLocalMark.set(2);
 			}
 		}
+		LinkedList<City> remCities = new LinkedList<City>();
+		for (City city : problem.getCities()) {
+			if (city.threadLocalMark.get() == 0) {
+				remCities.addFirst(city);
+			} else if (city.threadLocalMark.get() == 2) {
+				//explored children should get added to the back of the list
+				remCities.addLast(city);
+			}
+		}
+		
 		return remCities;
-	}
-	
-	public TspNode getParent() {
-		return parentNode;
 	}
 	
 	public City getCity() {
@@ -118,7 +125,6 @@ public class TspNode extends BnbNode {
 //			System.out.println("bounded");
 		}
 		isEvaluated = true;
-		remainingCities.add(city);
 		exploredChildren = new LinkedList<City>();
 	}
 		
@@ -129,8 +135,9 @@ public class TspNode extends BnbNode {
 	 */
 	private boolean doEvaluate(double minCost) {
 		if (isEvaluated) {
-			System.out.println("already evaluated");
+			LOG.warn("node about to be reevaluated");
 		}
+		LOG.debug("about to evaluate " + this);
 		
 		if (numChosen == 2) {
 			tourCost = 2 * startCity.dist(city);
@@ -196,7 +203,7 @@ public class TspNode extends BnbNode {
 	@Override
 	public boolean hasNextChild() {
 		//TODO: make sure we're incrementing numChildrenReleased whenever we call nextChild
-		return !bounded && !isSolution() && numChildrenReleased < problem.getNumCities();
+		return !bounded && !isSolution() && numChosen + exploredChildren.size() < problem.getNumCities();
 	}
 	
 	@Override
@@ -215,7 +222,11 @@ public class TspNode extends BnbNode {
 		TspNode child = new TspNode(startCity, city, numChosen+1, this, remCities, problem);
 		return child;
 	}
-
+	
+	@Override
+	public void whenAllChildrenDone() {
+		remainingCities.add(city);
+	}
 	
 	@Override
 	public void initFromBytes(byte[] bytes, Problem prob) {
@@ -226,8 +237,9 @@ public class TspNode extends BnbNode {
 		try {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 			DataInputStream dis = new DataInputStream(bais);
-			int numCities = dis.readInt();
 			
+			isEvaluated = dis.readBoolean();
+			int numCities = dis.readInt();
 			//TODO: how do we reconstruct this in the best way?
 			prevCities = new ArrayList<City>(numCities);
 			for (int i = 0; i < numCities; i++) {
@@ -236,10 +248,11 @@ public class TspNode extends BnbNode {
 			City[] problemCities = problem.getCities();
 			for (int i = numCities-1; i >= 0; i--) {
 				int id = dis.readInt();
-				prevCities.set(i, problemCities[id].copy());
+				prevCities.set(i, problemCities[id]);
 				if (i == 0) {
-					city = problemCities[id].copy();
+					city = problemCities[id];
 				}
+				numChosen++;
 				//TODO: do we need to copy here?
 			}
 			
@@ -263,6 +276,9 @@ public class TspNode extends BnbNode {
 			DataOutputStream dos = new DataOutputStream(baos);
 
 			//TODO: check for off by ones
+			
+			//isEvaluated
+			dos.writeBoolean(isEvaluated);
 			
 			//num nodes in path
 			dos.writeInt(numChosen);
@@ -300,6 +316,21 @@ public class TspNode extends BnbNode {
 	@Override
 	public Solution getSolution() {
 		return new TspSolution(new ParentCityIterator(this), problem.getNumCities());
+	}
+	
+	@Override
+	public String toString() {
+		Stack<Integer> stack = new Stack<Integer>();
+		ParentCityIterator iter = new ParentCityIterator(this);
+		while (iter.hasNext()) {
+			stack.add(iter.next().id);
+		}
+		StringBuilder sb = new StringBuilder();
+		while (!stack.isEmpty()) {
+			sb.append(stack.pop() + ", ");
+		}
+		sb.delete(sb.length() - 2, sb.length());
+		return sb.toString();
 	}
 	
 /*	

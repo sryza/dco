@@ -15,6 +15,13 @@ public class TspProblem implements Problem {
 	//cities arranged where cities[i].id = i
 	private City[] cities;
 	
+	/**
+	 * Should only be called right before initFromBytes
+	 */
+	public TspProblem() {
+		
+	}
+	
 	public TspProblem(City[] cities) {
 		this.cities = cities;
 	}
