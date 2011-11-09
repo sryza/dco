@@ -195,7 +195,7 @@ public class TspNode extends BnbNode {
 	
 	@Override
 	public boolean hasNextChild() {
-		//TODO: make sure we're incrememnting numChildrenReleased whenever we call nextChild
+		//TODO: make sure we're incrementing numChildrenReleased whenever we call nextChild
 		return !bounded && !isSolution() && numChildrenReleased < problem.getNumCities();
 	}
 	
@@ -205,9 +205,10 @@ public class TspNode extends BnbNode {
 			throw new NoSuchElementException("Node has no next child.");
 		}
 		List<City> remCities = remainingCities;
-		int count = activeChildCount.incrementAndGet();
+		int count = activeChildCount.getAndIncrement();
 		if (count > 0) {
-			buildRemainingCities(new ParentCityIterator(this));
+			LOG.info("Splitting, activeChildCount before increment=" + count);
+			remCities = buildRemainingCities(new ParentCityIterator(this));
 		}
 		City city = remCities.remove(0);
 		exploredChildren.add(city);

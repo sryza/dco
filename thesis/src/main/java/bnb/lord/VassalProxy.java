@@ -1,6 +1,7 @@
 package bnb.lord;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import bnb.rpc.ThriftData;
 import bnb.rpc.ThriftVassal;
 import bnb.rpc.VassalPublic;
 
-public class VassalProxy implements VassalPublic {
+public class VassalProxy {
 
 	private ThriftVassal.Client vassalClient;
 	private int numSlotsCache = -1;
@@ -38,7 +39,6 @@ public class VassalProxy implements VassalPublic {
 		return numSlotsCache;
 	}
 	
-	@Override
 	public void updateBestSolCost(double bestCost, int jobid)
 			throws IOException {
 		if (numSlotsCache == -1) {
@@ -50,7 +50,6 @@ public class VassalProxy implements VassalPublic {
 		}
 	}
 
-	@Override
 	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid) throws IOException {
 		if (numSlotsCache == -1) {
 			try {
@@ -66,13 +65,12 @@ public class VassalProxy implements VassalPublic {
 		}
 	}
 
-	@Override
-	public List<BnbNode> stealWork(int jobid) throws IOException {
+	public List<BnbNode> stealWork(LordJobManager jobManager) throws IOException {
 		try {
-			List<ThriftData> nodesData = vassalClient.stealWork(jobid);
+			List<ThriftData> nodesData = vassalClient.stealWork(jobManager.getJobID());
 			List<BnbNode> nodes = new ArrayList<BnbNode>();
 			for (ThriftData nodeData : nodesData) {
-				nodes.add((BnbNode)RpcUtil.fromThriftData(nodeData));
+				nodes.add((BnbNode)RpcUtil.nodeFromThriftData(nodeData, jobManager.getProblem()));
 			}
 			return nodes;
 		} catch (TException ex) {
@@ -83,6 +81,14 @@ public class VassalProxy implements VassalPublic {
 			throw new IOException("trouble instantiating", e);
 		} catch (IllegalAccessException e) {
 			throw new IOException("illegal access what?", e);
+		} catch (IllegalArgumentException e) {
+			throw new IOException("", e);
+		} catch (InvocationTargetException e) {
+			throw new IOException("", e);
+		} catch (NoSuchMethodException e) {
+			throw new IOException("", e);
+		} catch (SecurityException e) {
+			throw new IOException("", e);
 		}
 	}
 }

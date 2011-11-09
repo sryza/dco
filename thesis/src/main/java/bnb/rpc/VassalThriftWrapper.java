@@ -1,6 +1,7 @@
 package bnb.rpc;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,11 +35,11 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 			double bestCost, int jobid)
 			throws TException {
 		try {
+			Problem problem = (Problem)RpcUtil.problemFromThriftData(problemData);
 			List<BnbNode> nodes = new ArrayList<BnbNode>(nodesData.size());
 			for (ThriftData nodeData : nodesData) {
-				nodes.add((BnbNode)RpcUtil.fromThriftData(nodeData));
+				nodes.add((BnbNode)RpcUtil.nodeFromThriftData(nodeData, problem));
 			}
-			Problem problem = (Problem)RpcUtil.fromThriftData(problemData);
 			vassal.startJobTasks(nodes, problem, bestCost, jobid);
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);
@@ -50,6 +51,14 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 			throw new TException("trouble instantiating", e);
 		} catch (IllegalAccessException e) {
 			throw new TException("illegal access what?", e);
+		} catch (IllegalArgumentException e) {
+			throw new TException("", e);
+		} catch (InvocationTargetException e) {
+			throw new TException("", e);
+		} catch (NoSuchMethodException e) {
+			throw new TException("", e);
+		} catch (SecurityException e) {
+			throw new TException("", e);
 		}
 	}
 

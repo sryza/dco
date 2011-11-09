@@ -26,14 +26,14 @@ public class LordRunner implements LordPublic {
 	
 	private int nextJobid;
 	private final Map<Integer, LordJobManager> jobMap;
-	private final Map<Integer, VassalPublic> vassalMap;
+	private final Map<Integer, VassalProxy> vassalMap;
 	private final int port;
 	
 	private TServer server;
 	
 	public LordRunner(int port) {
 		jobMap = new HashMap<Integer, LordJobManager>();
-		vassalMap = new HashMap<Integer, VassalPublic>();
+		vassalMap = new HashMap<Integer, VassalProxy>();
 		this.port = port;
 	}
 	
@@ -75,7 +75,7 @@ public class LordRunner implements LordPublic {
 		//TODO: what happens if slots free up during this?
 		Starter starter = new Starter();
 		List<BnbNode>[] startNodes = starter.startEvaluation(spec, bestCost, root, totalSlots);
-		LordJobManager jobManager = new LordJobManager(jobid, startNodes[1]);
+		LordJobManager jobManager = new LordJobManager(jobid, startNodes[1], spec);
 		jobMap.put(jobid, jobManager);
 		Iterator<BnbNode> startNodesIter = startNodes[0].iterator();
 		for (VassalPublic vassal : vassalServers) {
@@ -93,7 +93,7 @@ public class LordRunner implements LordPublic {
 
 	@Override
 	public void sendBestSolCost(double cost, int jobid, int vassalid) throws IOException {
-		VassalPublic vassal = vassalMap.get(vassalid);
+		VassalProxy vassal = vassalMap.get(vassalid);
 		if (vassal == null) {
 			LOG.error("Lord couldn't locate vassal with id " + vassalid);
 			return;

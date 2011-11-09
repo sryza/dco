@@ -22,15 +22,15 @@ public class VassalRunner implements VassalPublic {
 	
 	private int numSlots;
 	private final Map<Integer, VassalJobManager> jobMap;
-	private final LordPublic lordInfo;
+	private final LordProxy lordInfo;
 	private final int vassalId;
 	private TServer server;
 	private final int port;
 	
-	public VassalRunner(LordPublic lordInfo, int numSlots, int vassalId, int port) {
+	public VassalRunner(LordProxy lordProxy, int numSlots, int vassalId, int port) {
 		this.numSlots = numSlots;
 		jobMap = new HashMap<Integer, VassalJobManager>();
-		this.lordInfo = lordInfo;
+		this.lordInfo = lordProxy;
 		this.vassalId = vassalId;
 		this.port = port;
 	}
@@ -62,14 +62,14 @@ public class VassalRunner implements VassalPublic {
 		for (BnbNode node : nodes) {
 			nodePool.postEvaluated(node);
 		}
-		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, lordInfo, vassalId, jobid);
+		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordInfo, vassalId, jobid);
 		jobMap.put(jobid, jobManager);
 		startVassalRunner(lordInfo, nodePool, jobManager);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 	}
 	
-	public void startVassalRunner(LordPublic lordInfo, VassalNodePool nodePool,
+	public void startVassalRunner(LordProxy lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager) {
 		TaskRunner runner = new TaskRunner(lordInfo, jobManager);
 		Thread vassalThread = new Thread(runner);

@@ -11,10 +11,10 @@ import bnb.rpc.LordPublic;
 public class TaskRunner implements Runnable {
 	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
 	
-	private final LordPublic lordInfo;
+	private final LordProxy lordInfo;
 	private final VassalJobManager jobManager;
 	
-	public TaskRunner(LordPublic lordInfo, VassalJobManager jobManager) {
+	public TaskRunner(LordProxy lordInfo, VassalJobManager jobManager) {
 		this.lordInfo = lordInfo;
 		this.jobManager = jobManager;
 	}
@@ -48,7 +48,7 @@ public class TaskRunner implements Runnable {
 	private boolean stealWork() {
 		List<BnbNode> work;
 		try {
-			work = lordInfo.askForWork(jobManager.getJobID());
+			work = lordInfo.askForWork(jobManager);
 		} catch (IOException ex) {
 			LOG.error("Couldn't steal work", ex);
 			return false;

@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import bnb.BnbNode;
+import bnb.Problem;
 import bnb.Solution;
 import bnb.rpc.LordPublic;
 
@@ -18,18 +19,21 @@ public class VassalJobManager implements Runnable {
 	private volatile Solution bestSolution;
 	
 	private volatile boolean update;
-	private final LordPublic lordProxy;
+	private final LordProxy lordProxy;
 	private final int jobid;
 	private final int vassalid;
+	private final Problem problem;
 	
 	private final VassalNodePool nodePool;
 	
-	public VassalJobManager(double initCost, VassalNodePool nodePool, LordPublic lordProxy, int vassalid, int jobid) {
+	public VassalJobManager(double initCost, VassalNodePool nodePool, 
+			Problem problem, LordProxy lordProxy, int vassalid, int jobid) {
 		minCost = initCost;
 		this.lordProxy = lordProxy;
 		this.jobid = jobid;
 		this.vassalid = vassalid;
 		this.nodePool = nodePool;
+		this.problem = problem;
 	}
 	
 	public void run() {
@@ -47,6 +51,10 @@ public class VassalJobManager implements Runnable {
 	
 	public VassalNodePool getNodePool() {
 		return nodePool;
+	}
+	
+	public Problem getProblem() {
+		return problem;
 	}
 	
 	public int getJobID() {
