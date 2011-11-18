@@ -1,6 +1,9 @@
 package bnb.vassal;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -25,6 +28,10 @@ public class VassalJobManager implements Runnable {
 	
 	private final VassalNodePool nodePool;
 	
+	private final List<TaskRunner> taskRunners;
+	
+	private volatile boolean isCompleted;
+	
 	public VassalJobManager(double initCost, VassalNodePool nodePool, 
 			Problem problem, LordProxy lordProxy, int vassalid, int jobid) {
 		minCost = initCost;
@@ -33,6 +40,11 @@ public class VassalJobManager implements Runnable {
 		this.vassalid = vassalid;
 		this.nodePool = nodePool;
 		this.problem = problem;
+		this.taskRunners = new ArrayList<TaskRunner>();
+	}
+	
+	public void registerTaskRunner(TaskRunner taskRunner) {
+		taskRunners.add(taskRunner);
 	}
 	
 	public void run() {
@@ -59,6 +71,51 @@ public class VassalJobManager implements Runnable {
 	
 	public int getJobID() {
 		return jobid;
+	}
+	
+	/**
+	 * Returns true if no more computation will be done on the job on
+	 * this computer.
+	 */
+	public boolean isCompleted() {
+		return isCompleted;
+	}
+	
+	/**
+	 * Returns true if the operation succeeded.
+	 * The caller should check isCompleted afterward to see whether
+	 * there was any more work to be done.
+	 */
+	public synchronized boolean askForWork(TaskRunner taskRunner) {
+		for (TaskRunner runner : taskRunners) {
+			if (runner.working()) {
+				//work must've been fetched in between when this was called
+				//and when it started executing
+				//or let the next thread handle this
+				taskRunner.setWorking();
+				return true;
+			}
+		}
+		
+		LOG.info("about to ask lord for work");
+		List<BnbNode> work;
+		try {
+			work = lordProxy.askForWork(this);
+		} catch (IOException ex) {
+			LOG.error("Couldn't steal work", ex);
+			return false;
+		}
+		if (work.isEmpty()) {
+			LOG.info("Out of work at " + new Date());
+			isCompleted = true;
+			return true;
+		} else {
+			for (BnbNode node : work) {
+				nodePool.postEvaluated(node);
+			}
+			taskRunner.setWorking();
+			return true;
+		}
 	}
 	
 	private boolean sendMinCost() {

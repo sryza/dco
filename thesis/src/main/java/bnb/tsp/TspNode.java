@@ -137,7 +137,7 @@ public class TspNode extends BnbNode {
 		if (isEvaluated) {
 			LOG.warn("node about to be reevaluated");
 		}
-		LOG.debug("about to evaluate " + this);
+//		LOG.debug("about to evaluate " + this);
 		
 		if (numChosen == 2) {
 			tourCost = 2 * startCity.dist(city);
@@ -214,7 +214,7 @@ public class TspNode extends BnbNode {
 		List<City> remCities = remainingCities;
 		int count = activeChildCount.getAndIncrement();
 		if (count > 0) {
-			LOG.info("Splitting, activeChildCount before increment=" + count);
+//			LOG.info("Splitting, activeChildCount before increment=" + count);
 			remCities = buildRemainingCities(new ParentCityIterator(this));
 		}
 		City city = remCities.remove(0);

@@ -1,6 +1,6 @@
 package bnb;
 
-import bnb.lord.LordPublic;
+import bnb.lord.LordRunner;
 import bnb.rpc.Ports;
 import bnb.vassal.LordProxy;
 import bnb.vassal.VassalRunner;
@@ -9,7 +9,7 @@ public class SimpleTest {
 	public static void main(String[] args) {
 		
 		//start lord
-		LordPublic lord = new LordPublic(Ports.DEFAULT_LORD_PORT);
+		LordRunner lord = new LordRunner(Ports.DEFAULT_LORD_PORT);
 		lord.start();
 		
 		//start vassals

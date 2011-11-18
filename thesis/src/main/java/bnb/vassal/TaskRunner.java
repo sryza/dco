@@ -1,9 +1,5 @@
 package bnb.vassal;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import bnb.BnbNode;
@@ -13,6 +9,10 @@ public class TaskRunner implements Runnable {
 	
 	private final LordProxy lordInfo;
 	private final VassalJobManager jobManager;
+	
+	private int nEvaluated;
+	
+	private volatile boolean working = true;
 	
 	public TaskRunner(LordProxy lordInfo, VassalJobManager jobManager) {
 		this.lordInfo = lordInfo;
@@ -29,6 +29,7 @@ public class TaskRunner implements Runnable {
 				}
 			} else {
 				node.evaluate(jobManager.getMinCost());
+				nEvaluated++;
 				if (node.isSolution()) {
 					if (node.getCost() < jobManager.getMinCost()) {
 						LOG.info("new best cost: " + node.getCost());
@@ -50,26 +51,21 @@ public class TaskRunner implements Runnable {
 		}
 	}
 	
+	public boolean working() {
+		return working;
+	}
+	
+	public void setWorking() {
+		working  = true;
+	}
+	
 	/**
 	 * @return
-	 * 		true if the operation succeeded
+	 * 		true if computation should continue
 	 */
 	private boolean stealWork() {
-		List<BnbNode> work;
-		try {
-			work = lordInfo.askForWork(jobManager);
-		} catch (IOException ex) {
-			LOG.error("Couldn't steal work", ex);
-			return false;
-		}
-		if (work.isEmpty()) {
-			LOG.info("Out of work at " + new Date());
-			return false;
-		} else {
-			for (BnbNode node : work) {
-				jobManager.getNodePool().postEvaluated(node);
-			}
-			return true;
-		}
+		working = false;
+		boolean succ = jobManager.askForWork(this);
+		return !jobManager.isCompleted();
 	}
 }

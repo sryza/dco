@@ -41,6 +41,7 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 			for (BnbNode node : nodes) {
 				nodesData.add(RpcUtil.toThriftData(node));
 			}
+			LOG.debug("sending back work for job " + jobid);
 			return nodesData;
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);

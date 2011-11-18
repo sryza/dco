@@ -19,8 +19,8 @@ public class TspMain {
 	private static final Logger LOG = Logger.getLogger(TspMain.class);
 	
 	public static void main(String[] args) throws IOException {
-		File f = new File("../eil4.txt");
-		int numCores = 2;//Runtime.getRuntime().availableProcessors() * 4;
+		File f = new File("../eil22.txt");
+		int numCores = 4;//Runtime.getRuntime().availableProcessors() * 4;
 		LOG.info("numCores: " + numCores);
 
 		LordRunner lord = new LordRunner(Ports.DEFAULT_LORD_PORT);
@@ -37,7 +37,7 @@ public class TspMain {
 		VassalProxy vassalProxy = new VassalProxy("localhost", Ports.DEFAULT_VASSAL_PORT);
 		LOG.info("started vassal proxy");
 		
-		final int numCities = 4;
+		final int numCities = 8;
 		
 		City[] cities = read(f, numCities);
 		TspProblem problem = new TspProblem(cities);
