@@ -122,10 +122,15 @@ public class LordRunner implements LordPublic {
 	}
 
 	@Override
-	public List<BnbNode> askForWork(int jobid, int vassalid) {
+	public List<BnbNode> askForWork(int jobid, int vassalid, double bestCost) {
 		LordJobManager jobManager = jobMap.get(jobid);
 		//TODO: if jobManager is null we should throw an exception
-		
+		VassalProxy vassal = vassalMap.get(vassalid);
+		if (vassal == null) {
+			LOG.error("Lord couldn't locate vassal with id " + vassalid);
+		} else {
+			jobManager.updateMinCost(bestCost, vassal);
+		}
 		return jobManager.askForWork(vassalid);
 	}
 }

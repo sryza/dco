@@ -26,7 +26,7 @@ public class ThriftLord {
 
     public void sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException;
 
-    public List<ThriftData> askForWork(int jobid, int vassalid) throws org.apache.thrift.TException;
+    public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) throws org.apache.thrift.TException;
 
   }
 
@@ -34,7 +34,7 @@ public class ThriftLord {
 
     public void sendBestSolCost(double bestCost, int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void askForWork(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.askForWork_call> resultHandler) throws org.apache.thrift.TException;
+    public void askForWork(int jobid, int vassalid, double bestCost, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.askForWork_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -80,17 +80,18 @@ public class ThriftLord {
       return;
     }
 
-    public List<ThriftData> askForWork(int jobid, int vassalid) throws org.apache.thrift.TException
+    public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) throws org.apache.thrift.TException
     {
-      send_askForWork(jobid, vassalid);
+      send_askForWork(jobid, vassalid, bestCost);
       return recv_askForWork();
     }
 
-    public void send_askForWork(int jobid, int vassalid) throws org.apache.thrift.TException
+    public void send_askForWork(int jobid, int vassalid, double bestCost) throws org.apache.thrift.TException
     {
       askForWork_args args = new askForWork_args();
       args.setJobid(jobid);
       args.setVassalid(vassalid);
+      args.setBestCost(bestCost);
       sendBase("askForWork", args);
     }
 
@@ -160,9 +161,9 @@ public class ThriftLord {
       }
     }
 
-    public void askForWork(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler) throws org.apache.thrift.TException {
+    public void askForWork(int jobid, int vassalid, double bestCost, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      askForWork_call method_call = new askForWork_call(jobid, vassalid, resultHandler, this, ___protocolFactory, ___transport);
+      askForWork_call method_call = new askForWork_call(jobid, vassalid, bestCost, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -170,10 +171,12 @@ public class ThriftLord {
     public static class askForWork_call extends org.apache.thrift.async.TAsyncMethodCall {
       private int jobid;
       private int vassalid;
-      public askForWork_call(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private double bestCost;
+      public askForWork_call(int jobid, int vassalid, double bestCost, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.jobid = jobid;
         this.vassalid = vassalid;
+        this.bestCost = bestCost;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -181,6 +184,7 @@ public class ThriftLord {
         askForWork_args args = new askForWork_args();
         args.setJobid(jobid);
         args.setVassalid(vassalid);
+        args.setBestCost(bestCost);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -240,7 +244,7 @@ public class ThriftLord {
 
       protected askForWork_result getResult(I iface, askForWork_args args) throws org.apache.thrift.TException {
         askForWork_result result = new askForWork_result();
-        result.success = iface.askForWork(args.jobid, args.vassalid);
+        result.success = iface.askForWork(args.jobid, args.vassalid, args.bestCost);
         return result;
       }
     }
@@ -918,14 +922,17 @@ public class ThriftLord {
 
     private static final org.apache.thrift.protocol.TField JOBID_FIELD_DESC = new org.apache.thrift.protocol.TField("jobid", org.apache.thrift.protocol.TType.I32, (short)1);
     private static final org.apache.thrift.protocol.TField VASSALID_FIELD_DESC = new org.apache.thrift.protocol.TField("vassalid", org.apache.thrift.protocol.TType.I32, (short)2);
+    private static final org.apache.thrift.protocol.TField BEST_COST_FIELD_DESC = new org.apache.thrift.protocol.TField("bestCost", org.apache.thrift.protocol.TType.DOUBLE, (short)3);
 
     public int jobid; // required
     public int vassalid; // required
+    public double bestCost; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       JOBID((short)1, "jobid"),
-      VASSALID((short)2, "vassalid");
+      VASSALID((short)2, "vassalid"),
+      BEST_COST((short)3, "bestCost");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -944,6 +951,8 @@ public class ThriftLord {
             return JOBID;
           case 2: // VASSALID
             return VASSALID;
+          case 3: // BEST_COST
+            return BEST_COST;
           default:
             return null;
         }
@@ -986,7 +995,8 @@ public class ThriftLord {
     // isset id assignments
     private static final int __JOBID_ISSET_ID = 0;
     private static final int __VASSALID_ISSET_ID = 1;
-    private BitSet __isset_bit_vector = new BitSet(2);
+    private static final int __BESTCOST_ISSET_ID = 2;
+    private BitSet __isset_bit_vector = new BitSet(3);
 
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
@@ -995,6 +1005,8 @@ public class ThriftLord {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.VASSALID, new org.apache.thrift.meta_data.FieldMetaData("vassalid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.BEST_COST, new org.apache.thrift.meta_data.FieldMetaData("bestCost", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.DOUBLE)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(askForWork_args.class, metaDataMap);
     }
@@ -1004,13 +1016,16 @@ public class ThriftLord {
 
     public askForWork_args(
       int jobid,
-      int vassalid)
+      int vassalid,
+      double bestCost)
     {
       this();
       this.jobid = jobid;
       setJobidIsSet(true);
       this.vassalid = vassalid;
       setVassalidIsSet(true);
+      this.bestCost = bestCost;
+      setBestCostIsSet(true);
     }
 
     /**
@@ -1021,6 +1036,7 @@ public class ThriftLord {
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.jobid = other.jobid;
       this.vassalid = other.vassalid;
+      this.bestCost = other.bestCost;
     }
 
     public askForWork_args deepCopy() {
@@ -1033,6 +1049,8 @@ public class ThriftLord {
       this.jobid = 0;
       setVassalidIsSet(false);
       this.vassalid = 0;
+      setBestCostIsSet(false);
+      this.bestCost = 0.0;
     }
 
     public int getJobid() {
@@ -1081,6 +1099,29 @@ public class ThriftLord {
       __isset_bit_vector.set(__VASSALID_ISSET_ID, value);
     }
 
+    public double getBestCost() {
+      return this.bestCost;
+    }
+
+    public askForWork_args setBestCost(double bestCost) {
+      this.bestCost = bestCost;
+      setBestCostIsSet(true);
+      return this;
+    }
+
+    public void unsetBestCost() {
+      __isset_bit_vector.clear(__BESTCOST_ISSET_ID);
+    }
+
+    /** Returns true if field bestCost is set (has been assigned a value) and false otherwise */
+    public boolean isSetBestCost() {
+      return __isset_bit_vector.get(__BESTCOST_ISSET_ID);
+    }
+
+    public void setBestCostIsSet(boolean value) {
+      __isset_bit_vector.set(__BESTCOST_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case JOBID:
@@ -1099,6 +1140,14 @@ public class ThriftLord {
         }
         break;
 
+      case BEST_COST:
+        if (value == null) {
+          unsetBestCost();
+        } else {
+          setBestCost((Double)value);
+        }
+        break;
+
       }
     }
 
@@ -1109,6 +1158,9 @@ public class ThriftLord {
 
       case VASSALID:
         return Integer.valueOf(getVassalid());
+
+      case BEST_COST:
+        return Double.valueOf(getBestCost());
 
       }
       throw new IllegalStateException();
@@ -1125,6 +1177,8 @@ public class ThriftLord {
         return isSetJobid();
       case VASSALID:
         return isSetVassalid();
+      case BEST_COST:
+        return isSetBestCost();
       }
       throw new IllegalStateException();
     }
@@ -1157,6 +1211,15 @@ public class ThriftLord {
         if (!(this_present_vassalid && that_present_vassalid))
           return false;
         if (this.vassalid != that.vassalid)
+          return false;
+      }
+
+      boolean this_present_bestCost = true;
+      boolean that_present_bestCost = true;
+      if (this_present_bestCost || that_present_bestCost) {
+        if (!(this_present_bestCost && that_present_bestCost))
+          return false;
+        if (this.bestCost != that.bestCost)
           return false;
       }
 
@@ -1196,6 +1259,16 @@ public class ThriftLord {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetBestCost()).compareTo(typedOther.isSetBestCost());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetBestCost()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.bestCost, typedOther.bestCost);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -1229,6 +1302,14 @@ public class ThriftLord {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 3: // BEST_COST
+            if (field.type == org.apache.thrift.protocol.TType.DOUBLE) {
+              this.bestCost = iprot.readDouble();
+              setBestCostIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -1250,6 +1331,9 @@ public class ThriftLord {
       oprot.writeFieldBegin(VASSALID_FIELD_DESC);
       oprot.writeI32(this.vassalid);
       oprot.writeFieldEnd();
+      oprot.writeFieldBegin(BEST_COST_FIELD_DESC);
+      oprot.writeDouble(this.bestCost);
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1265,6 +1349,10 @@ public class ThriftLord {
       if (!first) sb.append(", ");
       sb.append("vassalid:");
       sb.append(this.vassalid);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("bestCost:");
+      sb.append(this.bestCost);
       first = false;
       sb.append(")");
       return sb.toString();

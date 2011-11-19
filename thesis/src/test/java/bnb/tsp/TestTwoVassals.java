@@ -17,7 +17,7 @@ public class TestTwoVassals {
 	private static final Logger LOG = Logger.getLogger(TestTwoVassals.class);
 	
 	public static void main(String[] args) throws IOException {
-		int numCores = 4;//Runtime.getRuntime().availableProcessors() * 4;
+		int numCores = 1;//Runtime.getRuntime().availableProcessors() * 4;
 		LOG.info("numCores: " + numCores);
 
 		LordRunner lord = new LordRunner(Ports.DEFAULT_LORD_PORT);

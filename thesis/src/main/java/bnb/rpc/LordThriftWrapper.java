@@ -34,9 +34,9 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 	}
 
 	@Override
-	public List<ThriftData> askForWork(int jobid, int vassalid) throws TException {
+	public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) throws TException {
 		try {
-			List<BnbNode> nodes = lord.askForWork(jobid, vassalid);
+			List<BnbNode> nodes = lord.askForWork(jobid, vassalid, bestCost);
 			List<ThriftData> nodesData = new ArrayList<ThriftData>(nodes.size());
 			for (BnbNode node : nodes) {
 				nodesData.add(RpcUtil.toThriftData(node));

@@ -3,7 +3,6 @@ package bnb.vassal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -32,6 +31,11 @@ public class VassalJobManager implements Runnable {
 	
 	private volatile boolean isCompleted;
 	
+	//lock for sending messages to the lord
+	private final Object sendLock = new Object();
+	//lock for updating minCost and bestSolution
+	private final Object bestLock = new Object();
+	
 	public VassalJobManager(double initCost, VassalNodePool nodePool, 
 			Problem problem, LordProxy lordProxy, int vassalid, int jobid) {
 		minCost = initCost;
@@ -52,8 +56,7 @@ public class VassalJobManager implements Runnable {
 			try {
 				Thread.sleep(UPDATE_INTERVAL);
 				if (update) {
-					//TODO: send min cost
-//					update = !sendMinCost();
+					update = !sendMinCost();
 				}
 			} catch (InterruptedException ex) {
 				ex.printStackTrace(); //TODO: log4j
@@ -90,59 +93,68 @@ public class VassalJobManager implements Runnable {
 	 * The caller should check isCompleted afterward to see whether
 	 * there was any more work to be done.
 	 */
-	public synchronized boolean askForWork(TaskRunner taskRunner) {
-		if (isCompleted) {
-			return true;
-		}
-		for (TaskRunner runner : taskRunners) {
-			if (runner.working()) {
-				//work must've been fetched in between when this was called
-				//and when it started executing
-				//or let the next thread handle this
+	public boolean askForWork(TaskRunner taskRunner) {
+		synchronized(sendLock) {
+			if (isCompleted) {
+				return true;
+			}
+			for (TaskRunner runner : taskRunners) {
+				if (runner.working()) {
+					//work must've been fetched in between when this was called
+					//and when it started executing
+					//or let the next thread handle this
+					taskRunner.setWorking();
+					return true;
+				}
+			}
+			
+			LOG.info("about to ask lord for work");
+			List<BnbNode> work;
+			try {
+				work = lordProxy.askForWork(this, minCost);
+			} catch (IOException ex) {
+				LOG.error("Couldn't steal work", ex);
+				return false;
+			}
+			if (work.isEmpty()) {
+				LOG.info("Out of work at " + new Date());
+				isCompleted = true;
+				return true;
+			} else {
+				LOG.debug("received work");
+				for (BnbNode node : work) {
+					nodePool.postEvaluated(node);
+				}
 				taskRunner.setWorking();
 				return true;
 			}
 		}
-		
-		LOG.info("about to ask lord for work");
-		List<BnbNode> work;
-		try {
-			work = lordProxy.askForWork(this);
-		} catch (IOException ex) {
-			LOG.error("Couldn't steal work", ex);
-			return false;
-		}
-		if (work.isEmpty()) {
-			LOG.info("Out of work at " + new Date());
-			isCompleted = true;
-			return true;
-		} else {
-			LOG.debug("received work");
-			for (BnbNode node : work) {
-				nodePool.postEvaluated(node);
-			}
-			taskRunner.setWorking();
-			return true;
-		}
 	}
 	
+	/**
+	 * Returns true on success.
+	 */
 	private boolean sendMinCost() {
-		try {
-			LOG.info("Reporting new minCost " + minCost + " to lord");
-			lordProxy.sendBestSolCost(minCost, jobid, vassalid);
-			return true;
-		} catch (IOException ex) {
-			LOG.error("Couldn't reach lord to report cost");
-			return false;
+		synchronized(sendLock) {
+			try {
+				LOG.info("Reporting new minCost " + minCost + " to lord");
+				lordProxy.sendBestSolCost(minCost, jobid, vassalid);
+				LOG.info("Completed reporting new minCost");
+				return true;
+			} catch (IOException ex) {
+				LOG.error("Couldn't reach lord to report cost");
+				return false;
+			}
 		}
 	}
 	
 	public synchronized void betterLocalSolution(Solution sol, double cost) {
-		if (cost < minCost) {
-			bestSolution = sol;
-			minCost = cost;
-			update = true;
-			sendMinCost();
+		synchronized(bestLock) {
+			if (cost < minCost) {
+				bestSolution = sol;
+				minCost = cost;
+				update = true;
+			}
 		}
 	}
 	
@@ -150,11 +162,13 @@ public class VassalJobManager implements Runnable {
 	 * Called when we receive a remote communication telling us
 	 * of a new best solution.
 	 */
-	public synchronized void updateGlobalMinCost(double cost) {
-		if (cost < minCost) {
-			minCost = cost;
-			bestSolution = null;
-			update = false;
+	public void updateGlobalMinCost(double cost) {
+		synchronized(bestLock) {
+			if (cost < minCost) {
+				minCost = cost;
+				bestSolution = null;
+				update = false;
+			}
 		}
 	}
 	

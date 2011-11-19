@@ -58,16 +58,18 @@ public class LordJobManager {
 		return jobid;
 	}
 	
-	public void updateMinCost(double cost, VassalProxy source) {
+	//TODO: need this synchronization?
+	public synchronized void updateMinCost(double cost, VassalProxy source) {
 		if (cost < minCost) {
-			System.out.println("received better min cost: " + cost);
+			LOG.info("lord received better min cost: " + cost);
 			this.minCost = Math.min(cost, minCost);
 			for (VassalProxy vassalProxy : vassalProxies) {
 				if (vassalProxy != source) {
 					try {
 						vassalProxy.updateBestSolCost(minCost, jobid);
+						LOG.debug("Successfully sent best cost " + minCost + " to " + source.getVassalId());
 					} catch (IOException ex) {
-						LOG.info("Failed to send cost " + minCost + " to vassalProxy", ex);
+						LOG.warn("Failed to send cost " + minCost + " to vassalProxy", ex);
 					}
 				}
 			}
