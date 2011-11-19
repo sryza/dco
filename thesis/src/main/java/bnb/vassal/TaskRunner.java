@@ -7,15 +7,13 @@ import bnb.BnbNode;
 public class TaskRunner implements Runnable {
 	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
 	
-	private final LordProxy lordInfo;
 	private final VassalJobManager jobManager;
 	
 	private int nEvaluated;
 	
 	private volatile boolean working = true;
 	
-	public TaskRunner(LordProxy lordInfo, VassalJobManager jobManager) {
-		this.lordInfo = lordInfo;
+	public TaskRunner(VassalJobManager jobManager) {
 		this.jobManager = jobManager;
 	}
 	

@@ -34,14 +34,13 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 	}
 
 	@Override
-	public List<ThriftData> askForWork(int jobid) throws TException {
+	public List<ThriftData> askForWork(int jobid, int vassalid) throws TException {
 		try {
-			List<BnbNode> nodes = lord.askForWork(jobid);
+			List<BnbNode> nodes = lord.askForWork(jobid, vassalid);
 			List<ThriftData> nodesData = new ArrayList<ThriftData>(nodes.size());
 			for (BnbNode node : nodes) {
 				nodesData.add(RpcUtil.toThriftData(node));
 			}
-			LOG.debug("sending back work for job " + jobid);
 			return nodesData;
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);

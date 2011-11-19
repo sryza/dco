@@ -14,4 +14,6 @@ public interface VassalPublic {
 	public int getNumSlots() throws IOException;
 	
     public List<BnbNode> stealWork(int jobid) throws IOException;
+    
+    public int getId() throws IOException;
 }

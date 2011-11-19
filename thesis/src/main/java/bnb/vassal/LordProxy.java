@@ -44,7 +44,8 @@ public class LordProxy {
 			}
 
 			int jobid = jobManager.getJobID();
-			List<ThriftData> nodesData = lordClient.askForWork(jobid);
+			int vassalid = jobManager.getVassalID();
+			List<ThriftData> nodesData = lordClient.askForWork(jobid, vassalid);
 			List<BnbNode> nodes = new LinkedList<BnbNode>();
 			for (ThriftData nodeData : nodesData) {
 				nodes.add((BnbNode)RpcUtil.nodeFromThriftData(nodeData, jobManager.getProblem()));

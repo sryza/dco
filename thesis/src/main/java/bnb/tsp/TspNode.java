@@ -292,6 +292,7 @@ public class TspNode extends BnbNode {
 			for (City city : stack) {
 				dos.writeInt(city.id);
 			}
+			//TODO: explored children
 			for (int i = 0; i < numChosen; i++) {
 			}
 //			//num explored children

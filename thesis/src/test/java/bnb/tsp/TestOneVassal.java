@@ -1,10 +1,8 @@
 package bnb.tsp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -15,11 +13,10 @@ import bnb.rpc.Ports;
 import bnb.vassal.LordProxy;
 import bnb.vassal.VassalRunner;
 
-public class TspMain {
-	private static final Logger LOG = Logger.getLogger(TspMain.class);
+public class TestOneVassal {
+	private static final Logger LOG = Logger.getLogger(TestOneVassal.class);
 	
 	public static void main(String[] args) throws IOException {
-		File f = new File("../eil22.txt");
 		int numCores = 4;//Runtime.getRuntime().availableProcessors() * 4;
 		LOG.info("numCores: " + numCores);
 
@@ -39,26 +36,13 @@ public class TspMain {
 		
 		final int numCities = 8;
 		
-		City[] cities = read(f, numCities);
+		City[] cities = ProblemGen.genCities(numCities);
 		TspProblem problem = new TspProblem(cities);
-		List<City> remainingCities = Arrays.asList(cities).subList(1, cities.length);
+		List<City> remainingCities = new LinkedList<City>();
+		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
+		
 		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, problem);
 
-		lord.runJob(root, problem, /*Double.MAX_VALUE*/300, Arrays.asList(vassalProxy));
-	}
-	
-	public static City[] read(File f, int maxCities) throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader(f));
-		String line = br.readLine().trim();
-		int numVertices = Integer.parseInt(line);
-		City[] nodes = new City[Math.min(maxCities, numVertices)];
-		for (int i = 0; i < Math.min(maxCities, numVertices); i++)
-		{
-			String[] tokens = br.readLine().trim().replaceAll("[)(]", "").split("[, ]");
-			nodes[i] = new City((int)Double.parseDouble(tokens[0]), (int)Double.parseDouble(tokens[1]), i);
-		}
-		
-		br.close();
-		return nodes;
-	}
+		lord.runJob(root, problem, /*Double.MAX_VALUE*/300, Arrays.asList(vassalProxy), 1);
+	}	
 }

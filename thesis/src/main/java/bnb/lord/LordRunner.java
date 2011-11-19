@@ -2,7 +2,6 @@ package bnb.lord;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,10 @@ public class LordRunner implements LordPublic {
 		vassalMap.put(id, proxy);
 	}
 	
+	public void registerVassal(VassalProxy proxy, int id) {
+		vassalMap.put(id, proxy);
+	}
+	
 	private void startServer(int port) {
 		TServerSocket serverSocket;
 		try {
@@ -67,28 +70,32 @@ public class LordRunner implements LordPublic {
 		}
 	}
 	
-	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalProxy> vassalServers) {
+	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalProxy> vassalServers, 
+			int minNodesToSave) {
 		int jobid = nextJobid++;
 		
-		int totalSlots = 0;
 		for (VassalProxy vassal : vassalServers) {
 			try {
-				totalSlots += vassal.getNumSlots();
+				if (!vassalMap.containsKey(vassal.getVassalId())) {
+					throw new IllegalArgumentException("Trying to run job with unregistered vassal");
+				}
 			} catch (IOException ex) {
 				//TODO: don't use this runner
-				LOG.error("Couldn't reach vassal runner to find number of slots", ex);
+				LOG.error("Couldn't reach vassal", ex);
 			}
 		}
 		//TODO: what happens if slots free up during this?
 		Starter starter = new Starter();
 		//used to be using totalSlots for the last arg, but not for now
-		List<BnbNode>[] startNodes = starter.startEvaluation(spec, bestCost, root, vassalServers.size());
-		LordJobManager jobManager = new LordJobManager(jobid, startNodes[1], spec);
+		List<BnbNode> startNodes = starter.startEvaluation(spec, bestCost, root, 
+				vassalServers.size() + minNodesToSave);
+		LOG.info("extra start nodes: " + (startNodes.size() - vassalServers.size()));
+		
+		LordJobManager jobManager = new LordJobManager(jobid, startNodes, spec, vassalServers);
 		jobMap.put(jobid, jobManager);
-		Iterator<BnbNode> startNodesIter = startNodes[0].iterator();
 		for (VassalProxy vassal : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
-			BnbNode node = startNodesIter.next();
+			BnbNode node = startNodes.remove(0);
 			nodePool.add(node);
 			
 			try {
@@ -108,17 +115,17 @@ public class LordRunner implements LordPublic {
 		}
 		LordJobManager jobManager = jobMap.get(jobid);
 		if (jobManager == null) {
-			LOG.error("Lord couldn't local job with id " + jobid);
+			LOG.error("Lord couldn't locate job with id " + jobid);
 			return;
 		}
 		jobManager.updateMinCost(cost, vassal);
 	}
 
 	@Override
-	public List<BnbNode> askForWork(int jobid) {
+	public List<BnbNode> askForWork(int jobid, int vassalid) {
 		LordJobManager jobManager = jobMap.get(jobid);
 		//TODO: if jobManager is null we should throw an exception
 		
-		return jobManager.askForWork();
+		return jobManager.askForWork(vassalid);
 	}
 }

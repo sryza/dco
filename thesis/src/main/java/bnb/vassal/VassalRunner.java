@@ -50,7 +50,7 @@ public class VassalRunner implements VassalPublic {
 			TProcessor processor = new ThriftVassal.Processor<VassalThriftWrapper>(vassalThriftWrapper);
 			args.processor(processor);
 			server = new TThreadPoolServer(args);
-			Thread serverThread = new Thread("Lord Thrift Server") {
+			Thread serverThread = new Thread("Vassal Thrift Server") {
 				public void run() {
 					server.serve();
 				}
@@ -63,6 +63,10 @@ public class VassalRunner implements VassalPublic {
 		
 	public int numSlots() {
 		return numSlots;
+	}
+	
+	public int getId() {
+		return vassalId;
 	}
 	
 	@Override
@@ -88,8 +92,9 @@ public class VassalRunner implements VassalPublic {
 	
 	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager) {
-		TaskRunner runner = new TaskRunner(lordInfo, jobManager);
+		TaskRunner runner = new TaskRunner(jobManager);
 		Thread taskThread = new Thread(runner);
+		taskThread.setName("Vassal " + vassalId + " TaskRunner");
 		taskThread.start();
 		numSlots--;
 	}

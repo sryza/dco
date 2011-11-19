@@ -30,6 +30,9 @@ public class SimpleVassalNodePool implements VassalNodePool {
 		//TODO: make sure it's LIFO
 		while (nodeList.size() > 0) {
 			BnbNode lastNode = nodeList.getLast();
+			if (!lastNode.isEvaluated()) {
+				return lastNode;
+			}
 			if (lastNode.hasNextChild())
 				return lastNode.nextChild();
 			else

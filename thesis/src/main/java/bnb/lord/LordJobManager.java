@@ -17,23 +17,37 @@ public class LordJobManager {
 	private double minCost = Double.MAX_VALUE;
 	private final int jobid;
 	private final Problem problem;
-	private final List<VassalPublic> vassalProxies;
+	private final List<VassalProxy> vassalProxies;
 	private final List<BnbNode> unevaluated;
+	private int numCompletedVassals;
 	
-	public LordJobManager(int jobid, List<BnbNode> unevaluated, Problem problem) {
+	public LordJobManager(int jobid, List<BnbNode> unevaluated, Problem problem, List<VassalProxy> vassalProxies) {
 		this.jobid = jobid;
 		this.unevaluated = unevaluated;
 		this.problem = problem;
-		System.out.println("unevaluated size: " + unevaluated.size());
-		vassalProxies = new LinkedList<VassalPublic>();
+		this.vassalProxies = vassalProxies;
 	}
 	
-	public synchronized List<BnbNode> askForWork() {
-		LOG.info("lord asked for work");
+	//TODO: this shouldn't be synchronized
+	public synchronized List<BnbNode> askForWork(int vassalId) {
+//		LOG.info("lord about to deal with request for work");
 		if (unevaluated.size() > 0) {
-			return Arrays.asList(unevaluated.remove(0));
+			BnbNode node = unevaluated.remove(0);
+			LOG.info("Sending back work to vassal " + vassalId + "; unevaluated.size()=" + unevaluated.size());
+			return Arrays.asList(node);
+		} else { // no work left
+			numCompletedVassals++;
+			LOG.info("No work to give to vassal " + vassalId + "; numCompletedVassals=" + numCompletedVassals);
+			if (numCompletedVassals == vassalProxies.size()) { // we're done
+				done();
+			}
+			return new LinkedList<BnbNode>();
 		}
-		return new LinkedList<BnbNode>();
+	}
+	
+	private void done() {
+		LOG.info("Computation completed!");
+		LOG.info("Best cost: " + minCost);
 	}
 	
 	public Problem getProblem() {
@@ -48,7 +62,7 @@ public class LordJobManager {
 		if (cost < minCost) {
 			System.out.println("received better min cost: " + cost);
 			this.minCost = Math.min(cost, minCost);
-			for (VassalPublic vassalProxy : vassalProxies) {
+			for (VassalProxy vassalProxy : vassalProxies) {
 				if (vassalProxy != source) {
 					try {
 						vassalProxy.updateBestSolCost(minCost, jobid);

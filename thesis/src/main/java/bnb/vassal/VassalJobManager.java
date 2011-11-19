@@ -73,6 +73,10 @@ public class VassalJobManager implements Runnable {
 		return jobid;
 	}
 	
+	public int getVassalID() {
+		return vassalid;
+	}
+	
 	/**
 	 * Returns true if no more computation will be done on the job on
 	 * this computer.
@@ -87,6 +91,9 @@ public class VassalJobManager implements Runnable {
 	 * there was any more work to be done.
 	 */
 	public synchronized boolean askForWork(TaskRunner taskRunner) {
+		if (isCompleted) {
+			return true;
+		}
 		for (TaskRunner runner : taskRunners) {
 			if (runner.working()) {
 				//work must've been fetched in between when this was called
@@ -110,6 +117,7 @@ public class VassalJobManager implements Runnable {
 			isCompleted = true;
 			return true;
 		} else {
+			LOG.debug("received work");
 			for (BnbNode node : work) {
 				nodePool.postEvaluated(node);
 			}
@@ -120,6 +128,7 @@ public class VassalJobManager implements Runnable {
 	
 	private boolean sendMinCost() {
 		try {
+			LOG.info("Reporting new minCost " + minCost + " to lord");
 			lordProxy.sendBestSolCost(minCost, jobid, vassalid);
 			return true;
 		} catch (IOException ex) {
@@ -133,6 +142,7 @@ public class VassalJobManager implements Runnable {
 			bestSolution = sol;
 			minCost = cost;
 			update = true;
+			sendMinCost();
 		}
 	}
 	

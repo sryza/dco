@@ -86,4 +86,14 @@ public class VassalThriftWrapper implements ThriftVassal.Iface {
 			throw new TException(ex);
 		}
 	}
+	
+	@Override
+	public int getVassalId() throws TException {
+		try {
+			return vassal.getId();
+		} catch (IOException ex) {
+			LOG.error("IOException where we shouldn't really have one", ex);
+			throw new TException(ex);
+		}
+	}
 }

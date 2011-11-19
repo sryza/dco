@@ -8,6 +8,9 @@ import bnb.BnbNode;
 
 public class Starter {
 	/**
+	 * Breadth-first searches through the tree to create an initial partitioning
+	 * of the problem.  Returns a list of nodes with size >= count.
+	 * 
 	 * @param spec
 	 * @param bestCost
 	 * @param root
@@ -16,26 +19,21 @@ public class Starter {
 	 * 		two lists - the first is a set of evaluated nodes to distribute to processes,
 	 * 		the second of which is the remaining set of unevaluated nodes
 	 */
-	public List<BnbNode>[] startEvaluation(Problem spec, double bestCost, BnbNode root, int count) {
-		//BFS
+	public List<BnbNode> startEvaluation(Problem spec, double bestCost, BnbNode root, int count) {
 		//TODO: what if we exhaust all the nodes during this part
 		LinkedList<BnbNode> nodes = new LinkedList<BnbNode>();
 		nodes.add(root);
-		LinkedList<BnbNode> unevaluated = new LinkedList<BnbNode>();
 		
 		while (nodes.size() < count) {
-			if (!unevaluated.isEmpty()) {
-				BnbNode node = unevaluated.removeFirst();
-				node.evaluate(bestCost);
-				if (node.hasNextChild()) {
-					nodes.addLast(node);
-				}
-			} else {
-				BnbNode node = nodes.getFirst();
-				unevaluated.add(node.nextChild());
+			BnbNode node = nodes.removeFirst();
+			node.evaluate(bestCost);
+			//TODO: shouldn't care about recreating remaining children for tsp?
+			while (node.hasNextChild()) {
+				BnbNode child = node.nextChild();
+				nodes.addLast(child);
 			}
 		}
 		
-		return new List[] {nodes, unevaluated};
+		return nodes;
 	}
 }

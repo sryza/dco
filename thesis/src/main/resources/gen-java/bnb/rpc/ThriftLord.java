@@ -26,7 +26,7 @@ public class ThriftLord {
 
     public void sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException;
 
-    public List<ThriftData> askForWork(int jobid) throws org.apache.thrift.TException;
+    public List<ThriftData> askForWork(int jobid, int vassalid) throws org.apache.thrift.TException;
 
   }
 
@@ -34,7 +34,7 @@ public class ThriftLord {
 
     public void sendBestSolCost(double bestCost, int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void askForWork(int jobid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.askForWork_call> resultHandler) throws org.apache.thrift.TException;
+    public void askForWork(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.askForWork_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -80,16 +80,17 @@ public class ThriftLord {
       return;
     }
 
-    public List<ThriftData> askForWork(int jobid) throws org.apache.thrift.TException
+    public List<ThriftData> askForWork(int jobid, int vassalid) throws org.apache.thrift.TException
     {
-      send_askForWork(jobid);
+      send_askForWork(jobid, vassalid);
       return recv_askForWork();
     }
 
-    public void send_askForWork(int jobid) throws org.apache.thrift.TException
+    public void send_askForWork(int jobid, int vassalid) throws org.apache.thrift.TException
     {
       askForWork_args args = new askForWork_args();
       args.setJobid(jobid);
+      args.setVassalid(vassalid);
       sendBase("askForWork", args);
     }
 
@@ -159,24 +160,27 @@ public class ThriftLord {
       }
     }
 
-    public void askForWork(int jobid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler) throws org.apache.thrift.TException {
+    public void askForWork(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      askForWork_call method_call = new askForWork_call(jobid, resultHandler, this, ___protocolFactory, ___transport);
+      askForWork_call method_call = new askForWork_call(jobid, vassalid, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
     public static class askForWork_call extends org.apache.thrift.async.TAsyncMethodCall {
       private int jobid;
-      public askForWork_call(int jobid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private int vassalid;
+      public askForWork_call(int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<askForWork_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.jobid = jobid;
+        this.vassalid = vassalid;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
         prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("askForWork", org.apache.thrift.protocol.TMessageType.CALL, 0));
         askForWork_args args = new askForWork_args();
         args.setJobid(jobid);
+        args.setVassalid(vassalid);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -236,7 +240,7 @@ public class ThriftLord {
 
       protected askForWork_result getResult(I iface, askForWork_args args) throws org.apache.thrift.TException {
         askForWork_result result = new askForWork_result();
-        result.success = iface.askForWork(args.jobid);
+        result.success = iface.askForWork(args.jobid, args.vassalid);
         return result;
       }
     }
@@ -913,12 +917,15 @@ public class ThriftLord {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("askForWork_args");
 
     private static final org.apache.thrift.protocol.TField JOBID_FIELD_DESC = new org.apache.thrift.protocol.TField("jobid", org.apache.thrift.protocol.TType.I32, (short)1);
+    private static final org.apache.thrift.protocol.TField VASSALID_FIELD_DESC = new org.apache.thrift.protocol.TField("vassalid", org.apache.thrift.protocol.TType.I32, (short)2);
 
     public int jobid; // required
+    public int vassalid; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-      JOBID((short)1, "jobid");
+      JOBID((short)1, "jobid"),
+      VASSALID((short)2, "vassalid");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -935,6 +942,8 @@ public class ThriftLord {
         switch(fieldId) {
           case 1: // JOBID
             return JOBID;
+          case 2: // VASSALID
+            return VASSALID;
           default:
             return null;
         }
@@ -976,12 +985,15 @@ public class ThriftLord {
 
     // isset id assignments
     private static final int __JOBID_ISSET_ID = 0;
-    private BitSet __isset_bit_vector = new BitSet(1);
+    private static final int __VASSALID_ISSET_ID = 1;
+    private BitSet __isset_bit_vector = new BitSet(2);
 
     public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.JOBID, new org.apache.thrift.meta_data.FieldMetaData("jobid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.VASSALID, new org.apache.thrift.meta_data.FieldMetaData("vassalid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(askForWork_args.class, metaDataMap);
@@ -991,11 +1003,14 @@ public class ThriftLord {
     }
 
     public askForWork_args(
-      int jobid)
+      int jobid,
+      int vassalid)
     {
       this();
       this.jobid = jobid;
       setJobidIsSet(true);
+      this.vassalid = vassalid;
+      setVassalidIsSet(true);
     }
 
     /**
@@ -1005,6 +1020,7 @@ public class ThriftLord {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.jobid = other.jobid;
+      this.vassalid = other.vassalid;
     }
 
     public askForWork_args deepCopy() {
@@ -1015,6 +1031,8 @@ public class ThriftLord {
     public void clear() {
       setJobidIsSet(false);
       this.jobid = 0;
+      setVassalidIsSet(false);
+      this.vassalid = 0;
     }
 
     public int getJobid() {
@@ -1040,6 +1058,29 @@ public class ThriftLord {
       __isset_bit_vector.set(__JOBID_ISSET_ID, value);
     }
 
+    public int getVassalid() {
+      return this.vassalid;
+    }
+
+    public askForWork_args setVassalid(int vassalid) {
+      this.vassalid = vassalid;
+      setVassalidIsSet(true);
+      return this;
+    }
+
+    public void unsetVassalid() {
+      __isset_bit_vector.clear(__VASSALID_ISSET_ID);
+    }
+
+    /** Returns true if field vassalid is set (has been assigned a value) and false otherwise */
+    public boolean isSetVassalid() {
+      return __isset_bit_vector.get(__VASSALID_ISSET_ID);
+    }
+
+    public void setVassalidIsSet(boolean value) {
+      __isset_bit_vector.set(__VASSALID_ISSET_ID, value);
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case JOBID:
@@ -1050,6 +1091,14 @@ public class ThriftLord {
         }
         break;
 
+      case VASSALID:
+        if (value == null) {
+          unsetVassalid();
+        } else {
+          setVassalid((Integer)value);
+        }
+        break;
+
       }
     }
 
@@ -1057,6 +1106,9 @@ public class ThriftLord {
       switch (field) {
       case JOBID:
         return Integer.valueOf(getJobid());
+
+      case VASSALID:
+        return Integer.valueOf(getVassalid());
 
       }
       throw new IllegalStateException();
@@ -1071,6 +1123,8 @@ public class ThriftLord {
       switch (field) {
       case JOBID:
         return isSetJobid();
+      case VASSALID:
+        return isSetVassalid();
       }
       throw new IllegalStateException();
     }
@@ -1094,6 +1148,15 @@ public class ThriftLord {
         if (!(this_present_jobid && that_present_jobid))
           return false;
         if (this.jobid != that.jobid)
+          return false;
+      }
+
+      boolean this_present_vassalid = true;
+      boolean that_present_vassalid = true;
+      if (this_present_vassalid || that_present_vassalid) {
+        if (!(this_present_vassalid && that_present_vassalid))
+          return false;
+        if (this.vassalid != that.vassalid)
           return false;
       }
 
@@ -1123,6 +1186,16 @@ public class ThriftLord {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetVassalid()).compareTo(typedOther.isSetVassalid());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetVassalid()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.vassalid, typedOther.vassalid);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -1148,6 +1221,14 @@ public class ThriftLord {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 2: // VASSALID
+            if (field.type == org.apache.thrift.protocol.TType.I32) {
+              this.vassalid = iprot.readI32();
+              setVassalidIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -1166,6 +1247,9 @@ public class ThriftLord {
       oprot.writeFieldBegin(JOBID_FIELD_DESC);
       oprot.writeI32(this.jobid);
       oprot.writeFieldEnd();
+      oprot.writeFieldBegin(VASSALID_FIELD_DESC);
+      oprot.writeI32(this.vassalid);
+      oprot.writeFieldEnd();
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -1177,6 +1261,10 @@ public class ThriftLord {
 
       sb.append("jobid:");
       sb.append(this.jobid);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("vassalid:");
+      sb.append(this.vassalid);
       first = false;
       sb.append(")");
       return sb.toString();

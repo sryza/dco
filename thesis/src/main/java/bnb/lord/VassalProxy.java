@@ -21,11 +21,26 @@ public class VassalProxy {
 	private ThriftVassal.Client vassalClient;
 	private TSocket socket;
 	private int numSlotsCache = -1;
+	private int idCache = -1;
 	
 	public VassalProxy(String host, int port) {
 		socket = new TSocket(host, port);
 		TProtocol protocol = new TBinaryProtocol(socket);
 		vassalClient = new ThriftVassal.Client(protocol);
+	}
+	
+	public int getVassalId() throws IOException {
+		if (idCache == -1) {
+			try {
+				if (!socket.isOpen()) {
+					socket.open();
+				}
+				idCache = vassalClient.getVassalId();
+			} catch (TException ex) {
+				throw new IOException("send exception", ex);
+			}
+		}
+		return idCache;
 	}
 	
 	public int getNumSlots() throws IOException {
