@@ -240,7 +240,7 @@ public class TspNode extends BnbNode {
 			
 			isEvaluated = dis.readBoolean();
 			int numCities = dis.readInt();
-			//TODO: how do we reconstruct this in the best way?
+			//TODO: how do we reconstruct this in the most efficient way?
 			prevCities = new ArrayList<City>(numCities);
 			for (int i = 0; i < numCities; i++) {
 				prevCities.add(null);
@@ -249,11 +249,7 @@ public class TspNode extends BnbNode {
 			for (int i = numCities-1; i >= 0; i--) {
 				int id = dis.readInt();
 				prevCities.set(i, problemCities[id]);
-				if (i == 0) {
-					city = problemCities[id];
-				}
 				numChosen++;
-				//TODO: do we need to copy here?
 			}
 			
 			startCity = problemCities[0];
@@ -261,7 +257,7 @@ public class TspNode extends BnbNode {
 			
 			//remove what's set to city. we only kept it in as a shortcut to add it
 			//to the list for buildRemainingCities
-			prevCities.remove(prevCities.size()-1);
+			city = prevCities.remove(prevCities.size()-1);
 			
 			//TODO: explored children
 		} catch (IOException ex) {
