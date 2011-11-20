@@ -103,7 +103,6 @@ public class VassalJobManager implements Runnable {
 					//work must've been fetched in between when this was called
 					//and when it started executing
 					//or let the next thread handle this
-					taskRunner.setWorking();
 					return true;
 				}
 			}
@@ -119,6 +118,7 @@ public class VassalJobManager implements Runnable {
 			if (work.isEmpty()) {
 				LOG.info("Out of work at " + new Date());
 				isCompleted = true;
+				done();
 				return true;
 			} else {
 				LOG.debug("received work");
@@ -170,6 +170,14 @@ public class VassalJobManager implements Runnable {
 				update = false;
 			}
 		}
+	}
+	
+	private void done() {
+		int numEvaluated = 0;
+		for (TaskRunner runner : taskRunners) {
+			numEvaluated += runner.getNumEvaluated();
+		}
+		LOG.info("Vassal " + vassalid + " evaluated " + numEvaluated + " nodes");
 	}
 	
 	public double getMinCost() {

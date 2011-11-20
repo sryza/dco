@@ -93,6 +93,7 @@ public class VassalRunner implements VassalPublic {
 	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager) {
 		TaskRunner runner = new TaskRunner(jobManager);
+		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
 		taskThread.setName("Vassal " + vassalId + " TaskRunner");
 		taskThread.start();

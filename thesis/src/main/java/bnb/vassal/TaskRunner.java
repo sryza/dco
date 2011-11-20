@@ -9,7 +9,7 @@ public class TaskRunner implements Runnable {
 	
 	private final VassalJobManager jobManager;
 	
-	private int nEvaluated;
+	private int numEvaluated;
 	
 	private volatile boolean working = true;
 	
@@ -27,7 +27,7 @@ public class TaskRunner implements Runnable {
 				}
 			} else {
 				node.evaluate(jobManager.getMinCost());
-				nEvaluated++;
+				numEvaluated++;
 				if (node.isSolution()) {
 					if (node.getCost() < jobManager.getMinCost()) {
 						LOG.info("new best cost: " + node.getCost());
@@ -47,10 +47,16 @@ public class TaskRunner implements Runnable {
 				}
 			}
 		}
+		
+//		LOG.info("numEvaluated: " + numEvaluated);
 	}
 	
 	public boolean working() {
 		return working;
+	}
+	
+	public int getNumEvaluated() {
+		return numEvaluated;
 	}
 	
 	public void setWorking() {

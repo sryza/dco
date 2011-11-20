@@ -153,50 +153,45 @@ public class TspNode extends BnbNode {
 			return false;
 		}
 		
-/*		//if 2 or 3 opt give us better solutions, continue
+		if (numChosen <= 3)
+			return true; // otherwise do opt stuff
+			
+		
+		//if 2 or 3 opt give us better solutions, discard this one
 		ParentCityIterator iter = new ParentCityIterator(this);
 		iter.next();
-		City prevCity = iter.next();
-		City temp = iter.next();
-		while (iter.hasNext()) {
-			City next = temp;
-			if (!iter.hasNext()) {
-				//don't use last city
-				break;
-			}
-			temp = iter.next();
-			
-			TspUtils.cost2opt(prevCity, city, temp, next);
-			TspUtils.cost2opt(next, temp2, index2);
-		}
-		for (int j = 1; j < numChosen-3; j++)
+		City cityPred = iter.next();
+		City curSucc = iter.next(); // successor to current city
+		while(iter.hasNext())
 		{
-			if (TspUtils.cost2opt(cities, numChosen-2, j) < 0 || TspUtils.cost2opt(cities, j, numChosen-2) < 0)
+			City temp = iter.next();
+			if (TspUtils.cost2opt(temp, curSucc, city, cityPred) < 0)
 			{
 				//cost2opt gives something better, so discard
 				return false;
 			}
+			curSucc = temp;
 		}
 		
-		for (int j = 1; j < numChosen-3; j++)
-		{
-			for (int k = 1; k < numChosen-3; k++)
-			{
-				if (j == k || (j+1) == k || (j-1) == k)
-					continue;
-				
-				if (TspUtils.cost3opt(cities, j, k, numChosen-2) < 0 || 
-					TspUtils.cost3opt(cities, k, j, numChosen-2) < 0 ||
-					TspUtils.cost3opt(cities, j, numChosen-2, k) < 0 ||
-					TspUtils.cost3opt(cities, numChosen-2, k, j) < 0 ||
-					TspUtils.cost3opt(cities, k, numChosen-2, j) < 0 ||
-					TspUtils.cost3opt(cities, numChosen-2, j, k) < 0)
-				{
-					return false;
-				}
-			}
-		}
-		*/
+//		for (int j = 1; j < numChosen-3; j++)
+//		{
+//			for (int k = 1; k < numChosen-3; k++)
+//			{
+//				if (j == k || (j+1) == k || (j-1) == k)
+//					continue;
+//				
+//				if (TspUtils.cost3opt(cities, j, k, numChosen-2) < 0 || 
+//					TspUtils.cost3opt(cities, k, j, numChosen-2) < 0 ||
+//					TspUtils.cost3opt(cities, j, numChosen-2, k) < 0 ||
+//					TspUtils.cost3opt(cities, numChosen-2, k, j) < 0 ||
+//					TspUtils.cost3opt(cities, k, numChosen-2, j) < 0 ||
+//					TspUtils.cost3opt(cities, numChosen-2, j, k) < 0)
+//				{
+//					return false;
+//				}
+//			}
+//		}
+		
 		return true;
 	}
 	
