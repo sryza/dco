@@ -17,8 +17,8 @@ public class TestTwoVassals {
 	private static final Logger LOG = Logger.getLogger(TestTwoVassals.class);
 	
 	public static void main(String[] args) throws IOException {
-		final int numCores = 1;//Runtime.getRuntime().availableProcessors() * 4;
-		final int numVassals = 1;
+		final int numCores = 4;//Runtime.getRuntime().availableProcessors() * 4;
+		final int numVassals = 2;
 		LOG.info("numCores: " + numCores);
 
 		LordRunner lord = new LordRunner(Ports.DEFAULT_LORD_PORT);
@@ -41,7 +41,7 @@ public class TestTwoVassals {
 			lord.registerVassal(vassalProxies[i], i);
 		}
 		
-		final int numCities = 18;
+		final int numCities = 17;
 		
 		City[] cities = ProblemGen.genCities(numCities);
 		TspProblem problem = new TspProblem(cities);

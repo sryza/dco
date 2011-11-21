@@ -2,6 +2,7 @@ package bnb.lord;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,15 @@ public class LordRunner implements LordPublic {
 	}
 	
 	public void registerVassal(VassalProxy proxy, int id) {
-		vassalMap.put(id, proxy);
+		if (vassalMap.containsKey(id)) {
+			LOG.warn("vassal already registered with id " + id);
+		} else {
+			vassalMap.put(id, proxy);
+		}
+	}
+	
+	public void registerVassal(VassalProxy proxy) throws IOException {
+		vassalMap.put(proxy.getVassalId(), proxy);
 	}
 	
 	private void startServer(int port) {
@@ -68,6 +77,15 @@ public class LordRunner implements LordPublic {
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
+	}
+	
+	public void runJob(BnbNode root, Problem spec, double bestCost, int numVassals, int minNodesToSave) {		
+		List<VassalProxy> vassals = new LinkedList<VassalProxy>();
+		Iterator<VassalProxy> iter = vassalMap.values().iterator();
+		for (int i = 0; i < numVassals; i++) {
+			vassals.add(iter.next());
+		}
+		runJob(root, spec, bestCost, vassals, minNodesToSave);
 	}
 	
 	public void runJob(BnbNode root, Problem spec, double bestCost, List<VassalProxy> vassalServers, 
