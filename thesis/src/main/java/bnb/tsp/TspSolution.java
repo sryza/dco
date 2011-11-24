@@ -19,7 +19,7 @@ public class TspSolution implements Solution {
 	public String toString() {
 		StringBuilder sb =  new StringBuilder();
 		for (City city : cities) {
-			sb.append("(" + city.x + ", " + city.y + "), ");
+			sb.append("(" + city.x + ", " + city.y + ", " + city.id + "), ");
 		}
 		return sb.toString();
 	}

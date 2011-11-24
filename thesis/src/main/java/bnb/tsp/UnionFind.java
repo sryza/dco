@@ -1,19 +1,17 @@
-package tsp;
+package bnb.tsp;
 
-import java.util.Arrays;
 import java.util.Collection;
 
-public class UnionFind
-{
-	private Node[] parents;
+public class UnionFind {
+	private City[] parents;
 	private int[] ranks;
 
-	public UnionFind(Collection<Node> nodes, Node startNode, Node endNode, int size)
-	{
-		parents = new Node[size];
+	public UnionFind(Collection<City> nodes, City startNode, City endNode, int size) {
+		parents = new City[size];
 		ranks = new int[size];
-		for (Node node : nodes)
+		for (City node : nodes) {
 			parents[node.id] = node;
+		}
 		parents[startNode.id] = startNode;
 		parents[endNode.id] = endNode;
 	}
@@ -22,7 +20,7 @@ public class UnionFind
 	 * This constructor allows us to reuse an old UnionFind that will never be used again in
 	 * order to save on allocating memory.
 	 */
-	public UnionFind(Node[] nodes, Node[] parents, int[] ranks)
+	public UnionFind(City[] nodes, City[] parents, int[] ranks)
 	{
 		this.parents = parents;
 		this.ranks = ranks;
@@ -36,7 +34,7 @@ public class UnionFind
 	/**
 	 * Returns the root of the tree that this node is a part of.
 	 */
-	public Node find(Node n)
+	public City find(City n)
 	{
 		if (parents[n.id] == n)
 			return n;
@@ -50,7 +48,7 @@ public class UnionFind
 	/**
 	 * Merges the trees with the given roots;
 	 */
-	public void union(Node root1, Node root2)
+	public void union(City root1, City root2)
 	{
 		if (ranks[root1.id] < ranks[root2.id])
 			parents[root1.id] = root2;
@@ -60,18 +58,6 @@ public class UnionFind
 		{
 			parents[root2.id] = root1;
 			ranks[root1.id]++;
-		}
-	}
-
-	public class UFNode
-	{
-		public Node node;
-		public UFNode parent;
-
-		public UFNode(Node node, UFNode parent)
-		{
-			this.node = node;
-			this.parent = parent;
 		}
 	}
 }

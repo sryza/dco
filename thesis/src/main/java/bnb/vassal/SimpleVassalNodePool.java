@@ -44,6 +44,6 @@ public class SimpleVassalNodePool implements VassalNodePool {
 
 	@Override
 	public synchronized void postEvaluated(BnbNode node) {
-		nodeList.add(node);
+		nodeList.addLast(node);
 	}	
 }

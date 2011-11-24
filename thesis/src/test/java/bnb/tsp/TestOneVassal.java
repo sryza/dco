@@ -3,7 +3,6 @@ package bnb.tsp;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -36,11 +35,11 @@ public class TestOneVassal {
 		
 		lord.registerVassal(vassalProxy, 1);
 		
-		final int numCities = 4;
+		final int numCities = 7;
 		
 		City[] cities = ProblemGen.genCities(numCities);
 		TspProblem problem = new TspProblem(cities);
-		List<City> remainingCities = new LinkedList<City>();
+		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
 		
 		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, problem);

@@ -44,7 +44,7 @@ public class LordMain {
 		
 		TspProblem problem = new TspProblem(cities);
 
-		List<City> remainingCities = new LinkedList<City>();
+		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
 		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, problem);
 

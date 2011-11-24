@@ -23,3 +23,9 @@ consider nodes sending data directly to other nodes (instead of through the mast
 we still have to break the symmetry of going around in the opposite direction
 
 should updateMinCosts for all the nodes asynchronously
+
+Optimizations we can do:
+use the edges instead of Math.sqrt for calculating distances
+all sorts of stuff with msts and held and karp vals
+use fibonacci heaps
+don't include crossing edges in the minimum spanning tree
