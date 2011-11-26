@@ -22,7 +22,7 @@ public class LDSNodePool implements VassalNodePool {
 	}
 
 	@Override
-	public void postEvaluated(BnbNode node) {
+	public void post(BnbNode node) {
 		// TODO Auto-generated method stub
 		
 	}

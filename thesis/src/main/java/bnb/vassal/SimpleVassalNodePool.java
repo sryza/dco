@@ -20,7 +20,7 @@ public class SimpleVassalNodePool implements VassalNodePool {
 	@Override
 	public synchronized List<BnbNode> stealNodes() {
 		if (nodeList.isEmpty()) {
-			return null;
+			return new LinkedList<BnbNode>();
 		}
 		return Arrays.asList(nodeList.removeFirst());
 	}
@@ -43,7 +43,7 @@ public class SimpleVassalNodePool implements VassalNodePool {
 	}
 
 	@Override
-	public synchronized void postEvaluated(BnbNode node) {
+	public synchronized void post(BnbNode node) {
 		nodeList.addLast(node);
 	}	
 }

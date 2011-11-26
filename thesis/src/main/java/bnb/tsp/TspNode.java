@@ -305,6 +305,17 @@ public class TspNode extends BnbNode {
 				numChosen++;
 			}
 			
+			//TODO: explored children
+			//TODO: this can be an arraylist of the size we expect
+			int numExploredChildren = dis.readInt();
+			if (numExploredChildren != -1) {
+				exploredChildren = new LinkedList<City>();
+				for (int i = 0; i < numExploredChildren; i++) {
+					int id = dis.readInt();
+					exploredChildren.add(problemCities[id]);
+				}
+			}
+			
 			startCity = problemCities[0];
 			remainingCities = new LinkedList<City>();
 			remainingVector = new boolean[problem.getNumCities()];
@@ -314,7 +325,7 @@ public class TspNode extends BnbNode {
 			//to the list for buildSinglePathStructures
 			city = prevCities.remove(prevCities.size()-1);
 			
-			//TODO: explored children
+			
 		} catch (IOException ex) {
 			LOG.error("IOException reading from byte array, this should never happen", ex);
 		}
@@ -343,15 +354,16 @@ public class TspNode extends BnbNode {
 			for (City city : stack) {
 				dos.writeInt(city.id);
 			}
-			//TODO: explored children
-			for (int i = 0; i < numChosen; i++) {
+			//num explored children
+			if (exploredChildren != null) {
+				dos.writeInt(exploredChildren.size());
+				//explored children
+				for (City child : exploredChildren) {
+					dos.writeInt(child.id);
+				}
+			} else {
+				dos.writeInt(-1);
 			}
-//			//num explored children
-//			dos.writeInt(exploredChildren.size());
-//			//explored children
-//			for (City child : exploredChildren) {
-//				dos.writeInt(child.id);
-//			}
 			
 			return baos.toByteArray();
 		} catch (IOException ex) {

@@ -31,33 +31,41 @@ public class VassalProxy {
 	
 	public int getVassalId() throws IOException {
 		if (idCache == -1) {
-			try {
-				if (!socket.isOpen()) {
-					socket.open();
+			synchronized(this) {
+				try {
+					if (!socket.isOpen()) {
+						socket.open();
+					}
+					idCache = vassalClient.getVassalId();
+				} catch (TException ex) {
+					throw new IOException("send exception", ex);
 				}
-				idCache = vassalClient.getVassalId();
-			} catch (TException ex) {
-				throw new IOException("send exception", ex);
 			}
 		}
 		return idCache;
 	}
 	
+	public int getVassalIdCache() {
+		return idCache;
+	}
+	
 	public int getNumSlots() throws IOException {
 		if (numSlotsCache == -1) {
-			try {
-				if (!socket.isOpen()) {
-					socket.open();
+			synchronized(this) {
+				try {
+					if (!socket.isOpen()) {
+						socket.open();
+					}
+					numSlotsCache = vassalClient.getNumSlots();
+				} catch (TException ex) {
+					throw new IOException("send exception", ex);
 				}
-				numSlotsCache = vassalClient.getNumSlots();
-			} catch (TException ex) {
-				throw new IOException("send exception", ex);
 			}
 		}
 		return numSlotsCache;
 	}
 	
-	public void updateBestSolCost(double bestCost, int jobid)
+	public synchronized void updateBestSolCost(double bestCost, int jobid)
 		throws IOException {
 		try {
 			if (!socket.isOpen()) {
@@ -69,7 +77,7 @@ public class VassalProxy {
 		}
 	}
 
-	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid, int nthreads)
+	public synchronized void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid, int nthreads)
 		throws IOException {
 		try {
 			if (!socket.isOpen()) {
@@ -86,7 +94,7 @@ public class VassalProxy {
 		}
 	}
 
-	public List<BnbNode> stealWork(LordJobManager jobManager) throws IOException {
+	public synchronized List<BnbNode> stealWork(LordJobManager jobManager) throws IOException {
 		try {
 			if (!socket.isOpen()) {
 				socket.open();

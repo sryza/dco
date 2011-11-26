@@ -78,7 +78,7 @@ public class VassalRunner implements VassalPublic {
 			if (!node.isEvaluated()) {
 				node.evaluate(bestCost);
 			}
-			nodePool.postEvaluated(node);
+			nodePool.post(node);
 		}
 		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordInfo, vassalId, jobid);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);

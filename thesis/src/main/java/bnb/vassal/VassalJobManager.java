@@ -121,9 +121,9 @@ public class VassalJobManager implements Runnable {
 				done();
 				return true;
 			} else {
-				LOG.debug("received work");
 				for (BnbNode node : work) {
-					nodePool.postEvaluated(node);
+					LOG.debug("received work: " + node);
+					nodePool.post(node);
 				}
 				taskRunner.setWorking();
 				return true;

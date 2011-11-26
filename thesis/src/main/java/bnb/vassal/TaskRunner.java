@@ -36,7 +36,7 @@ public class TaskRunner implements Runnable {
 					}
 				}
 				if (!node.isLeaf()) {
-					jobManager.getNodePool().postEvaluated(node);
+					jobManager.getNodePool().post(node);
 				} else {
 					//if we're not posting the node to do work with, let its parent
 					//know that we're done doing computation on it

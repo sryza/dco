@@ -24,8 +24,14 @@ we still have to break the symmetry of going around in the opposite direction
 
 should updateMinCosts for all the nodes asynchronously
 
+Better design:
+move the synchronizations on the communications to the proxy class methods
+
 Optimizations we can do:
 use the edges instead of Math.sqrt for calculating distances
 all sorts of stuff with msts and held and karp vals
 use fibonacci heaps
 don't include crossing edges in the minimum spanning tree
+right now every method of the node pool is synchronized. we shouldn't need to do this.
+remove synchronizations from the proxy class methods
+measure how spaced apart requests for more work happen (so we can know whether to have a lag after a request to wait for similar ones)

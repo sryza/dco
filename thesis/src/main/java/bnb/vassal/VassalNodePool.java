@@ -20,5 +20,5 @@ public interface VassalNodePool {
 	/**
 	 * Posts an evaluated node to the pool.
 	 */
-	public void postEvaluated(BnbNode node);
+	public void post(BnbNode node);
 }
