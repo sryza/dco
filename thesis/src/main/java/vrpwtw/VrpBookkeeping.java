@@ -1,7 +1,9 @@
 package vrpwtw;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * We want to calculate the feasibility/cost of insertion for each customer at
@@ -25,6 +27,8 @@ public class VrpBookkeeping {
 	// could be a TreeMap<Integer (cost), List<RouteNode>>
 	private Set<RouteNode>[] insertionPoints;
 	private VrpProblem problem;
+	
+	private Stack<List<RouteNode>> removedCustsStack;
 	
 	/**
 	 * 
@@ -88,10 +92,9 @@ public class VrpBookkeeping {
 					}
 					
 					//calculate insertion cost
-					int oldCost = routeNode.next.minDepartTime - routeNode.minDepartTime;
-					int nextMinDepartTime = Math.max(minDepartTime + distFromCust, 
-							routeNode.next.customer.getWindowStart()) + routeNode.next.customer.getServiceTime();
-					int insertionCost = nextMinDepartTime - routeNode.minDepartTime - oldCost;
+
+					int insertionCost = distToCust + distFromCust -
+						routeNode.customer.dist(routeNode.next.customer);
 					
 					//skip if insertion cost makes the objective function too high
 					if (toursCost + insertionCost >= bestCost) {
@@ -116,7 +119,19 @@ public class VrpBookkeeping {
 	 * 		the node to insert the customer after
 	 */
 	public void insert(Customer cust, RouteNode node) {
+		RouteNode newNode = new RouteNode(cust, node.next, node);
+		node.next.prev = newNode;
+		node.next = newNode;
 		
+		List<RouteNode> prunedInsertions = new LinkedList<RouteNode>();
+		
+		//update minDepartTimes
+		//at each insertion point, see whether this eliminates any feasible insertions
+		do {
+			
+		} while();
+		
+		//if any customers have no insertion points, return false
 	}
 	
 	/**
