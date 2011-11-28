@@ -28,6 +28,10 @@ Better design:
 move the synchronizations on the communications to the proxy class methods
 
 Optimizations we can do:
+if we find that having multiple threads accessing the same queue causes too much contention and cache inlocality, we can have a separate queue for each thread, and when the queue runs out, then the TaskRunner can ask for a split from one of the other threads
+^that is probably the better thing to do
+
+
 use the edges instead of Math.sqrt for calculating distances
 all sorts of stuff with msts and held and karp vals
 use fibonacci heaps
