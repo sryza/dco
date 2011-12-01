@@ -32,13 +32,14 @@ public class HeldAndKarp {
 			double minCost, List<City> remainingNodesList, int numCities, int curTourCost)
 	{
 		List<Edge> usableEdges = new ArrayList<Edge>(edges.size());
-		
 		//compute edges we can still use
 		for (Edge edge : edges)
 		{
-			if (edge.node1 == startNode || edge.node2 == startNode || edge.node1 == endNode || edge.node2 == endNode)
-				if ((edge.node1 == startNode && edge.node2 == endNode) || (edge.node1 == endNode && edge.node2 == startNode))
+			if (edge.node1 == startNode || edge.node2 == startNode || edge.node1 == endNode || edge.node2 == endNode) {
+				if ((edge.node1 == startNode && edge.node2 == endNode) || (edge.node1 == endNode && edge.node2 == startNode)) {
 					continue;
+				}
+			}
 			//ignore all edges that touch interior nodes in the path-so-far
 			if (edge.node1 != startNode && edge.node1 != endNode && !remainingVector[edge.node1.id])
 				continue;
@@ -52,25 +53,45 @@ public class HeldAndKarp {
 		
 		//choose one tree node
 		//min two edges for every node
-		//TODO: edges can't go both to startNode and endNode?
+		//edges can't go both to startNode and endNode, because that would create a cycle in the MST
 		Edge[][] bestEdges = new Edge[numCities][2]; //TODO: shouldn't allocate this every time
 		Iterator<Edge> iter = usableEdges.iterator();
 		while (iter.hasNext()) {
 			Edge e = iter.next();
+			boolean touchesStartOrEnd = e.node1 == startNode || e.node1 == endNode || e.node2 == startNode ||
+				e.node2 == endNode;
 			//node 1
-			if (bestEdges[e.node1.id][0] == null || e.dist < bestEdges[e.node1.id][0].dist) {
-				bestEdges[e.node1.id][1] = bestEdges[e.node1.id][0];
+			Edge bestEdge = bestEdges[e.node1.id][0];
+			Edge secondBestEdge = bestEdges[e.node1.id][1];
+			boolean bestEdgeTouchesStartOrEnd = bestEdge != null && (bestEdge.node1 == startNode || 
+					bestEdge.node1 == endNode || bestEdge.node2 == startNode ||
+					bestEdge.node2 == endNode);
+			if (bestEdge == null || e.dist < bestEdge.dist) {
+				if (!touchesStartOrEnd || !bestEdgeTouchesStartOrEnd) {
+					bestEdges[e.node1.id][1] = bestEdges[e.node1.id][0];
+				}
 				bestEdges[e.node1.id][0] = e;
-			} else if ((bestEdges[e.node1.id][1] == null || e.dist < bestEdges[e.node1.id][1].dist)) {
-				bestEdges[e.node1.id][1] = e;
+			} else if (secondBestEdge == null || e.dist < secondBestEdge.dist) {
+				if (!touchesStartOrEnd || !bestEdgeTouchesStartOrEnd) {
+					bestEdges[e.node1.id][1] = e;
+				}
 			}
 			
 			//node 2
-			if (bestEdges[e.node2.id][0] == null || e.dist < bestEdges[e.node2.id][0].dist) {
-				bestEdges[e.node2.id][1] = bestEdges[e.node2.id][0];
+			bestEdge = bestEdges[e.node2.id][0];
+			secondBestEdge = bestEdges[e.node2.id][1];
+			bestEdgeTouchesStartOrEnd = bestEdge != null && (bestEdge.node1 == startNode || 
+					bestEdge.node1 == endNode || bestEdge.node2 == startNode ||
+					bestEdge.node2 == endNode);
+			if (bestEdge == null || e.dist < bestEdge.dist) {
+				if (!touchesStartOrEnd || !bestEdgeTouchesStartOrEnd) {
+					bestEdges[e.node2.id][1] = bestEdges[e.node2.id][0];
+				}
 				bestEdges[e.node2.id][0] = e;
-			} else if (bestEdges[e.node2.id][1] == null || e.dist < bestEdges[e.node2.id][1].dist) {
-				bestEdges[e.node2.id][1] = e;
+			} else if (secondBestEdge == null || e.dist < secondBestEdge.dist) {
+				if (!touchesStartOrEnd || !bestEdgeTouchesStartOrEnd) {
+					bestEdges[e.node2.id][1] = e;
+				}
 			}
 		}
 		
@@ -188,6 +209,7 @@ public class HeldAndKarp {
 		//so put them together
 		//TODO: connect whichever edges the oneTreeNode connects
 		unionFind.union(oneTreeTarget1, oneTreeTarget2);
+		unionFind.union(startNode, endNode);
 		/*for (Edge edge : requiredEdges)
 		{
 			Node root1 = unionFind.find(edge.node1), root2 = unionFind.find(edge.node2);
@@ -196,8 +218,12 @@ public class HeldAndKarp {
 			unionFind.union(root1, root2);
 			totalCost += edge.dist;
 		}*/
-		//second -1 accounts for union of startNode and endNode
-		while (numEdges < remainingNodes.size()+2-1-1 && edgesQueue.size() > 0)
+		//have to connect all remainingNodes, which should take remainingNodes.size()-1
+		//we add two to this for startNode and endNode
+		//we subtract two from this for the edges we've added for the oneTreeNode
+		//we subtract one from this for the virtual edge we have connecting startNode and endNode
+		//which represents the path so far
+		while (numEdges < remainingNodes.size()-1+2-2-1 && edgesQueue.size() > 0)
 		{
 //			System.out.println ("in while loop");
 			Edge e = edgesQueue.remove();
