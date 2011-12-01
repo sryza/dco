@@ -4,7 +4,6 @@ public class Edge implements Comparable<Edge> {
 	public City node1;
 	public City node2;
 	public int dist;
-	public int extra;
 
 	public Edge(City node1, City node2) {
 		this.node1 = node1;
@@ -13,7 +12,7 @@ public class Edge implements Comparable<Edge> {
 	}
 	
 	public int cost() {
-		return dist + extra;
+		return dist;
 	}
 	
 	@Override

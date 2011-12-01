@@ -1,16 +1,16 @@
 package bnb.tsp;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public class HeldAndKarp {
 	
-	private static final int MAX_ITERATIONS = 50;
+	private static final int MAX_ITERATIONS = 5;
+	private static final int MAX_CHANGES = 5;
+	private static final double LIMIT = .5;
 	
 	/**
 	 * 
@@ -50,118 +50,135 @@ public class HeldAndKarp {
 			usableEdges.add(edge);
 		}
 		
-		int lowerBound = Integer.MIN_VALUE;
-		
-		for (int i = 0; i < remainingNodesList.size(); i++)
-		{
-			City oneTreeNode = remainingNodesList.remove(0); //so it won't be considered in the spanning tree
-			LinkedList<Edge> removedEdges = new LinkedList<Edge>();
-			Iterator<Edge> iter = usableEdges.iterator();
+		//choose one tree node
+		//min two edges for every node
+		//TODO: edges can't go both to startNode and endNode?
+		Edge[][] bestEdges = new Edge[numCities][2]; //TODO: shouldn't allocate this every time
+		Iterator<Edge> iter = usableEdges.iterator();
+		while (iter.hasNext()) {
+			Edge e = iter.next();
+			//node 1
+			if (bestEdges[e.node1.id][0] == null || e.dist < bestEdges[e.node1.id][0].dist) {
+				bestEdges[e.node1.id][1] = bestEdges[e.node1.id][0];
+				bestEdges[e.node1.id][0] = e;
+			} else if ((bestEdges[e.node1.id][1] == null || e.dist < bestEdges[e.node1.id][1].dist)) {
+				bestEdges[e.node1.id][1] = e;
+			}
 			
-			//find the two edges of least distance coming out of the one-tree node
-			//remove all edges coming out of the one-tree node
-			//TODO: this could be more efficient because we only need to consider edges
-			//that touch the one-tree node
-			Edge bestEdge = null, secondBestEdge = null;
-			while (iter.hasNext()) {
-				Edge e = iter.next();
-				if (e.node1 == oneTreeNode || e.node2 == oneTreeNode) {
-					iter.remove();
-					removedEdges.add(e);
-					if (bestEdge == null || e.dist < bestEdge.dist) {
-						secondBestEdge = bestEdge;
-						bestEdge = e;
-					} else if (secondBestEdge == null || e.dist < secondBestEdge.dist) {
-						secondBestEdge = e;
+			//node 2
+			if (bestEdges[e.node2.id][0] == null || e.dist < bestEdges[e.node2.id][0].dist) {
+				bestEdges[e.node2.id][1] = bestEdges[e.node2.id][0];
+				bestEdges[e.node2.id][0] = e;
+			} else if (bestEdges[e.node2.id][1] == null || e.dist < bestEdges[e.node2.id][1].dist) {
+				bestEdges[e.node2.id][1] = e;
+			}
+		}
+		
+		City oneTreeNode = null;
+		City oneTreeNodeTarget1 = null;
+		City oneTreeNodeTarget2 = null;
+		int maxSummedMinCost = Integer.MIN_VALUE;
+		for (City city : remainingNodesList) {
+			if (bestEdges[city.id][1] != null) { //TODO: is this ever allowed to happen
+				int summedMinCost = bestEdges[city.id][0].dist + bestEdges[city.id][1].dist;
+				if (summedMinCost > maxSummedMinCost) {
+					oneTreeNode = city;
+					oneTreeNodeTarget1 = (bestEdges[city.id][0].node1 == oneTreeNode) ? bestEdges[city.id][0].node2
+							: bestEdges[city.id][0].node1;
+					oneTreeNodeTarget2 = (bestEdges[city.id][1].node1 == oneTreeNode) ? bestEdges[city.id][1].node2
+							: bestEdges[city.id][1].node1;
+					maxSummedMinCost = summedMinCost;
+				}
+			}
+		}
+		
+		//new held & karp starts here
+		int bestBound = Integer.MIN_VALUE;
+		int[] nodeWeights = new int[numCities]; // TODO: get this from somewhere else
+		int[] nodeEdges = new int[numCities]; // TODO: don't need to initialize this every time
+		int weightsSum = 0;
+		HeldKarpEdgeComparator edgeComparator = new HeldKarpEdgeComparator(nodeWeights);
+		double stepScale = 2.0;
+		double stepChange = .5;
+		for (int c = 0; c < MAX_CHANGES; c++) {
+			for (int j = 0; j < MAX_ITERATIONS; j++) {
+				//calculate one-tree bound
+				PriorityQueue<Edge> edgesHeap = new PriorityQueue<Edge>(usableEdges.size(), edgeComparator);
+				edgesHeap.addAll(usableEdges);
+				int mstCost = mstCost(startNode, endNode, oneTreeNode, oneTreeNodeTarget1, oneTreeNodeTarget2,
+						remainingNodesList, edgesHeap, nodeWeights, nodeEdges);
+				int cost = 2 * weightsSum + curTourCost + mstCost + maxSummedMinCost;
+				//include weights from one-tree edges
+				cost -= nodeWeights[oneTreeNodeTarget1.id];
+				cost -= nodeWeights[oneTreeNodeTarget2.id];
+				
+				if (cost > bestBound) {
+					bestBound = cost;
+					if (bestBound >= minCost) {
+						return bestBound;
 					}
 				}
-			}
-			
-			int[] nodeEdges = new int[numCities];
-			PriorityQueue<Edge> edgesHeap = new PriorityQueue<Edge>(usableEdges);
-			int mstCost = mstCost(startNode, endNode, remainingNodesList, edgesHeap, nodeEdges);
-			int cost = curTourCost + bestEdge.dist + secondBestEdge.dist + mstCost;
-			
-			if (cost > lowerBound) {
-				lowerBound = cost;
-				if (lowerBound > minCost) {
-					remainingNodesList.add(oneTreeNode);
-					return lowerBound;
+
+				//TODO: if we've reached a tour, stop
+				//if the tour improves our objective function, we should return it
+				//and not explore the rest of the subtree
+				//for now, just print out when this happens
+				
+				//compute step size
+				int sumSquareDiffs = 0;
+				int numOptimalNumEdges = 0;
+				for (City node : remainingNodesList) {
+					if (node == oneTreeNode) {
+						continue;
+					}
+					int optimalNumEdges = (node == bestEdges[oneTreeNode.id][0].node1 || 
+							node == bestEdges[oneTreeNode.id][0].node2 || 
+							node == bestEdges[oneTreeNode.id][1].node1 || 
+							node == bestEdges[oneTreeNode.id][1].node2) ? 1 : 2;
+					if (nodeEdges[node.id] == optimalNumEdges) {
+						numOptimalNumEdges++;
+					}
+					sumSquareDiffs += (optimalNumEdges-nodeEdges[node.id]) * (optimalNumEdges-nodeEdges[node.id]);
 				}
+				sumSquareDiffs += (1 - nodeEdges[startNode.id]) * (1 - nodeEdges[startNode.id]);
+				sumSquareDiffs += (1 - nodeEdges[endNode.id]) * (1 - nodeEdges[endNode.id]);
+				double stepSize = stepScale * (minCost - cost) / (sumSquareDiffs);
+				
+				if (stepSize < LIMIT) {
+					return bestBound;
+				}
+				
+				//update weights
+				weightsSum = 0;
+				for (City city : remainingNodesList) {
+					if (city != oneTreeNode) {
+						nodeWeights[city.id] += stepSize * (2 - nodeEdges[city.id]);
+						weightsSum += nodeWeights[city.id];
+					}
+				}
+//				nodeWeights[startNode.id] += stepSize * (1 - nodeEdges[startNode.id]);
+//				weightsSum += nodeWeights[startNode.id];
+//				nodeWeights[endNode.id] += stepSize * (1 - nodeEdges[endNode.id]);
+//				weightsSum += nodeWeights[endNode.id];
 			}
-			
-//			//held and karp!
-//			int[] nodeCosts = new int[numCities];
-//			int[] nodeEdges = new int[numCities];
-//			final double limit = .5;
-//			double stepSize = Double.MAX_VALUE, stepScale = 2.0, stepChange = .75;
-//			
-//			for (int j = 0; j < MAX_ITERATIONS; j++)
-//			{
-//				for (Edge edge : usableEdges)
-//					edge.extra = -nodeCosts[edge.node1.id] - nodeCosts[edge.node2.id];
-//				Arrays.fill(nodeEdges, 0);
-//
-//				PriorityQueue<Edge> edgesHeap = new PriorityQueue<Edge>(usableEdges);
-//				int cost = curTourCost + mstCost(startNode, endNode, remainingNodesList, edgesHeap, nodeEdges)
-//					+ bestEdge.dist + secondBestEdge.dist;
-////				System.out.println ("before cost: "+ cost);
-//				for (City node : remainingNodesList)
-//					cost += 2 * nodeCosts[node.id];
-//				cost += nodeCosts[startNode.id];
-//				cost += nodeCosts[endNode.id];
-////				System.out.println ("after cost: " + cost);
-//				if (cost > minCost)
-//				{
-//					remainingNodesList.add(oneTreeNode);
-//					return cost;
-//				}
-//
-//				if (cost > lowerBound) {
-//					lowerBound = cost;
-//				}
-//				
-//				//calculate step size
-//				int sumSquareDiffs = 0;
-//				for (City node : remainingNodesList) {
-////					if (nodeEdges[node.id] < 1)
-////						System.out.println ("this is wrong");
-//					int optimalNumEdges = (node == bestEdge.node1 || node == bestEdge.node2 || node == secondBestEdge.node1 || node == secondBestEdge.node2) ? 1 : 2;
-//					sumSquareDiffs += (optimalNumEdges-nodeEdges[node.id]) * (optimalNumEdges-nodeEdges[node.id]);
-//				}
-//				sumSquareDiffs += (1-nodeEdges[startNode.id]) * (1-nodeEdges[startNode.id]);
-//				sumSquareDiffs += (1-nodeEdges[endNode.id]) * (1-nodeEdges[endNode.id]);
-//					
-//				stepSize = (stepScale * (minCost - cost)) / sumSquareDiffs;
-//				if (stepSize < limit) {
-////					System.out.println ("j: " + j);
-//					break;
-//				}
-//				
-//				for (City node : remainingNodesList)
-//				{
-//					int optimalNumEdges = (node == bestEdge.node1 || node == bestEdge.node2 || node == bestEdge.node1 || node == bestEdge.node2) ? 1 : 2;
-//					nodeCosts[node.id] += (int)(stepSize * (optimalNumEdges - nodeEdges[node.id]));
-//				}
-//				startNode.cost += (int)(stepSize * (1 - nodeEdges[startNode.id]));
-//				endNode.cost += (int)(stepSize * (1 - nodeEdges[endNode.id]));
-//				
-//				stepScale *= stepChange;
-//			}
-			
-			//add stuff back in
-			remainingNodesList.add(oneTreeNode);
-			usableEdges.addAll(removedEdges);
+			stepScale = stepScale * stepChange;
 		}
-		return lowerBound;
+
+		return bestBound;
 	}
 	
 	/**
 	 * Finds the cost of the minimum spanning tree through startNode, endNode,
 	 * and all the nodes in remainingNodes.
+	 * 
+	 * @param oneTreeNode
+	 * 		all edges touching this node will be ignored
+	 * @param nodeEdges
+	 * 		the number of incoming edges for each node
 	 */
-	public static int mstCost(City startNode, City endNode, Collection<City> remainingNodes, 
-			PriorityQueue<Edge> edgesQueue, int[] nodeEdges)
+	public static int mstCost(City startNode, City endNode, City oneTreeNode, City oneTreeTarget1, 
+			City oneTreeTarget2, Collection<City> remainingNodes, PriorityQueue<Edge> edgesQueue, 
+			int[] nodeWeights, int[] nodeEdges)
 	{
 		int totalCost = 0;
 		int numEdges = 0;
@@ -169,7 +186,8 @@ public class HeldAndKarp {
 		UnionFind unionFind = new UnionFind(remainingNodes, startNode, endNode, nodeEdges.length);
 		//startNode and endNode are already connected by the rest of the path,
 		//so put them together
-		unionFind.union(startNode, endNode);
+		//TODO: connect whichever edges the oneTreeNode connects
+		unionFind.union(oneTreeTarget1, oneTreeTarget2);
 		/*for (Edge edge : requiredEdges)
 		{
 			Node root1 = unionFind.find(edge.node1), root2 = unionFind.find(edge.node2);
@@ -183,12 +201,15 @@ public class HeldAndKarp {
 		{
 //			System.out.println ("in while loop");
 			Edge e = edgesQueue.remove();
+			if (e.node1 == oneTreeNode || e.node2 == oneTreeNode) {
+				continue;
+			}
 			City root1 = unionFind.find(e.node1);
 			City root2 = unionFind.find(e.node2);
 //			System.out.println ("finished finds");
 			if (root1 != root2)
 			{
-				totalCost += e.cost();
+				totalCost += e.cost() - nodeWeights[e.node1.id] - nodeWeights[e.node2.id];
 				nodeEdges[e.node1.id]++;
 				nodeEdges[e.node2.id]++;
 				unionFind.union(root1, root2);

@@ -211,7 +211,7 @@ public class TspNode extends BnbNode {
 //			}
 //		}
 		
-		if (numChosen > 1) {
+		if (numChosen > 1 && numChosen < problem.getNumCities()) {
 			int heldKarpBound = HeldAndKarp.bound(startCity, city, remainingVector, problem.getEdges(), minCost, 
 					remainingCities, problem.getNumCities(), tourCost-city.dist(startCity));
 			if (heldKarpBound >= minCost) {

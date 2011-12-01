@@ -7,8 +7,6 @@ public class City {
 	public int id;
 	public ThreadLocal<Integer> threadLocalMark = new ThreadLocal<Integer>();
 	
-	public int cost; //for held & karp bounds
-	
 	public City(int x, int y, int id) {
 		this.x = x;
 		this.y = y;
