@@ -22,6 +22,7 @@ public class HeldAndKarp {
 	 * @param edges
 	 * @param minCost
 	 * @param remainingNodesList
+	 * 		must have at least 2 entries
 	 * @param numCities
 	 * 		the total number of nodes we're trying to solve for
 	 * @param curTourCost
@@ -208,7 +209,7 @@ public class HeldAndKarp {
 		//startNode and endNode are already connected by the rest of the path,
 		//so put them together
 		//TODO: connect whichever edges the oneTreeNode connects
-		unionFind.union(oneTreeTarget1, oneTreeTarget2);
+//		unionFind.union(oneTreeTarget1, oneTreeTarget2);
 		unionFind.union(startNode, endNode);
 		/*for (Edge edge : requiredEdges)
 		{
@@ -219,11 +220,11 @@ public class HeldAndKarp {
 			totalCost += edge.dist;
 		}*/
 		//have to connect all remainingNodes, which should take remainingNodes.size()-1
+		//we subtract one because we're ignoring the oneTreeNode
 		//we add two to this for startNode and endNode
-		//we subtract two from this for the edges we've added for the oneTreeNode
 		//we subtract one from this for the virtual edge we have connecting startNode and endNode
 		//which represents the path so far
-		while (numEdges < remainingNodes.size()-1+2-2-1 && edgesQueue.size() > 0)
+		while (numEdges < remainingNodes.size()-1-1+2-1 && edgesQueue.size() > 0)
 		{
 //			System.out.println ("in while loop");
 			Edge e = edgesQueue.remove();

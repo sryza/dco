@@ -210,16 +210,12 @@ public class TspNode extends BnbNode {
 //				}
 //			}
 //		}
-		
-		if (numChosen == 6 && city.id == 3 && getParent() != null && ((TspNode)getParent()).getCity().id == 1) {
-			System.out.println("yo");
-		}
-		
-		if (numChosen > 1 && numChosen < problem.getNumCities()) {
+				
+		if (numChosen > 1 && numChosen < problem.getNumCities()-1) {
 			int heldKarpBound = HeldAndKarp.bound(startCity, city, remainingVector, problem.getEdges(), minCost, 
 					remainingCities, problem.getNumCities(), tourCost-city.dist(startCity));
 			if (heldKarpBound >= minCost) {
-				System.out.println("held & karp bounding: " + this);
+//				System.out.println("held & karp bounding: " + this);
 				return false;
 			}
 		}
