@@ -28,6 +28,7 @@ public class HeldAndKarp {
 	 * @param curTourCost
 	 * 		the cost of the current tour (not including edge from start to finish)
 	 * @return
+	 * 		a lower bound on the current solution
 	 */
 	public static int bound(City startNode, City endNode, boolean[] remainingVector, Collection<Edge> edges, 
 			double minCost, List<City> remainingNodesList, int numCities, int curTourCost)
@@ -163,8 +164,19 @@ public class HeldAndKarp {
 					sumSquareDiffs += (optimalNumEdges-nodeEdges[node.id]) * (optimalNumEdges-nodeEdges[node.id]);
 				}
 				sumSquareDiffs += (1 - nodeEdges[startNode.id]) * (1 - nodeEdges[startNode.id]);
+				if (nodeEdges[startNode.id] == 1) {
+					numOptimalNumEdges++;
+				}
 				sumSquareDiffs += (1 - nodeEdges[endNode.id]) * (1 - nodeEdges[endNode.id]);
+				if (nodeEdges[endNode.id] == 1) {
+					numOptimalNumEdges++;
+				}
 				double stepSize = stepScale * (minCost - cost) / (sumSquareDiffs);
+				
+				if (numOptimalNumEdges == remainingNodesList.size()+2-1) { //-1 for oneTreeNode, +2 for start/end
+					System.out.println("found tour at remainingNodesList.size()=" + remainingNodesList.size());
+					System.out.println(cost);
+				}
 				
 				if (stepSize < LIMIT) {
 					return bestBound;
