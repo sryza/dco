@@ -19,7 +19,8 @@ public class SimpleVassalNodePool implements VassalNodePool {
 	
 	@Override
 	public synchronized List<BnbNode> stealNodes() {
-		if (nodeList.isEmpty()) {
+		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
+				(nodeList.getFirst().isEvaluated() && !nodeList.getFirst().hasNextChild())) {
 			return new LinkedList<BnbNode>();
 		}
 		return Arrays.asList(nodeList.removeFirst());

@@ -111,7 +111,7 @@ public class LordJobManager {
 				if (vassalProxy != source) {
 					try {
 						vassalProxy.updateBestSolCost(minCost, jobid);
-						LOG.debug("Successfully sent best cost " + minCost + " to " + source.getVassalId());
+						LOG.debug("Successfully sent best cost " + minCost + " to " + vassalProxy.getVassalId());
 					} catch (IOException ex) {
 						LOG.warn("Failed to send cost " + minCost + " to vassalProxy", ex);
 					}

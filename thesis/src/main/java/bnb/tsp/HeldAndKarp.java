@@ -1,12 +1,20 @@
 package bnb.tsp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 public class HeldAndKarp {
+	
+	private static final Logger LOG = Logger.getLogger(HeldAndKarp.class);
 	
 	private static final int MAX_ITERATIONS = 5;
 	private static final int MAX_CHANGES = 5;
@@ -27,11 +35,14 @@ public class HeldAndKarp {
 	 * 		the total number of nodes we're trying to solve for
 	 * @param curTourCost
 	 * 		the cost of the current tour (not including edge from start to finish)
+	 * @param tour
+	 * 		an empty list to be filled with an optimal tour, if one is found
 	 * @return
 	 * 		a lower bound on the current solution
 	 */
 	public static int bound(City startNode, City endNode, boolean[] remainingVector, Collection<Edge> edges, 
-			double minCost, List<City> remainingNodesList, int numCities, int curTourCost)
+			double minCost, List<City> remainingNodesList, int numCities, int curTourCost, int[] nodeWeights,
+			List<City> tour)
 	{
 		List<Edge> usableEdges = new ArrayList<Edge>(edges.size());
 		//compute edges we can still use
@@ -114,22 +125,30 @@ public class HeldAndKarp {
 				}
 			}
 		}
+
+		nodeWeights[oneTreeNode.id] = 0;
 		
 		//new held & karp starts here
 		int bestBound = Integer.MIN_VALUE;
-		int[] nodeWeights = new int[numCities]; // TODO: get this from somewhere else
 		int[] nodeEdges = new int[numCities]; // TODO: don't need to initialize this every time
 		int weightsSum = 0;
+		for (City city : remainingNodesList) {
+			weightsSum += nodeWeights[city.id];
+		}
 		HeldKarpEdgeComparator edgeComparator = new HeldKarpEdgeComparator(nodeWeights);
 		double stepScale = 2.0;
 		double stepChange = .5;
 		for (int c = 0; c < MAX_CHANGES; c++) {
 			for (int j = 0; j < MAX_ITERATIONS; j++) {
+				Arrays.fill(nodeEdges, 0);
 				//calculate one-tree bound
 				PriorityQueue<Edge> edgesHeap = new PriorityQueue<Edge>(usableEdges.size(), edgeComparator);
 				edgesHeap.addAll(usableEdges);
+				List<Edge> chosenEdges = new LinkedList<Edge>();//TODO: could use an arraylist
+				chosenEdges.add(bestEdges[oneTreeNode.id][0]);
+				chosenEdges.add(bestEdges[oneTreeNode.id][1]);
 				int mstCost = mstCost(startNode, endNode, oneTreeNode, oneTreeNodeTarget1, oneTreeNodeTarget2,
-						remainingNodesList, edgesHeap, nodeWeights, nodeEdges);
+						remainingNodesList, edgesHeap, nodeWeights, nodeEdges, chosenEdges);
 				int cost = 2 * weightsSum + curTourCost + mstCost + maxSummedMinCost;
 				//include weights from one-tree edges
 				cost -= nodeWeights[oneTreeNodeTarget1.id];
@@ -176,6 +195,53 @@ public class HeldAndKarp {
 				if (numOptimalNumEdges == remainingNodesList.size()+2-1) { //-1 for oneTreeNode, +2 for start/end
 					System.out.println("found tour at remainingNodesList.size()=" + remainingNodesList.size());
 					System.out.println(cost);
+//					for (int i = 0; i < nodeWeights.length; i++) {
+//						System.out.print(nodeWeights[i] + " ");
+//					}
+					int mstEdgesCost = 0;
+					List<City>[] chosenEdgesArr = new List[numCities];
+					for (Edge e : chosenEdges) {
+						if (chosenEdgesArr[e.node1.id] == null) {
+							chosenEdgesArr[e.node1.id] = new ArrayList<City>(2);
+						}
+						chosenEdgesArr[e.node1.id].add(e.node2);
+						if (chosenEdgesArr[e.node1.id].size() > 2) {
+							LOG.warn("too many connecting cities for tour: " + chosenEdgesArr[e.node1.id]);
+						}
+						if (chosenEdgesArr[e.node2.id] == null) {
+							chosenEdgesArr[e.node2.id] = new ArrayList<City>(2);
+						}
+						chosenEdgesArr[e.node2.id].add(e.node1);
+						if (chosenEdgesArr[e.node2.id].size() > 2) {
+							LOG.warn("too many connecting cities for tour: " + chosenEdgesArr[e.node2.id]);
+						}
+						mstEdgesCost += e.dist;
+					}
+
+//					System.out.println(Arrays.asList(chosenEdgesArr));
+
+					//construct tour
+					City city = endNode;
+					int tourCost = 0;
+					City prevCity = null;
+					while (city != startNode) {
+						if (city != endNode) {
+							tour.add(city);
+						}
+						City nextCity = chosenEdgesArr[city.id].get(0);
+						if (nextCity == prevCity) {
+							nextCity = chosenEdgesArr[city.id].get(1);
+						}
+						prevCity = city;
+						city = nextCity;
+						tourCost += prevCity.dist(city);
+					}
+					System.out.println(tour.size() + "\t" + remainingNodesList.size());
+					System.out.println(tour);
+					System.out.println(tourCost + curTourCost);
+					System.out.println(tourCost + "\t" + curTourCost);
+					System.out.println(mstEdgesCost+curTourCost);
+					return cost;
 				}
 				
 				if (stepSize < LIMIT) {
@@ -209,10 +275,12 @@ public class HeldAndKarp {
 	 * 		all edges touching this node will be ignored
 	 * @param nodeEdges
 	 * 		the number of incoming edges for each node
+	 * @param chosenEdges
+	 * 		a list of edges to be filled with the edges that are chosen as part of the MST
 	 */
 	public static int mstCost(City startNode, City endNode, City oneTreeNode, City oneTreeTarget1, 
 			City oneTreeTarget2, Collection<City> remainingNodes, PriorityQueue<Edge> edgesQueue, 
-			int[] nodeWeights, int[] nodeEdges)
+			int[] nodeWeights, int[] nodeEdges, List<Edge> chosenEdges)
 	{
 		int totalCost = 0;
 		int numEdges = 0;
@@ -248,6 +316,7 @@ public class HeldAndKarp {
 //			System.out.println ("finished finds");
 			if (root1 != root2)
 			{
+				chosenEdges.add(e);
 				totalCost += e.cost() - nodeWeights[e.node1.id] - nodeWeights[e.node2.id];
 				nodeEdges[e.node1.id]++;
 				nodeEdges[e.node2.id]++;

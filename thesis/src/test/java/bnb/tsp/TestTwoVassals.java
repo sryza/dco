@@ -17,7 +17,7 @@ public class TestTwoVassals {
 	
 	public static void main(String[] args) throws IOException {
 		final int numCores = 2;//Runtime.getRuntime().availableProcessors() * 4;
-		final int numVassals = 1;
+		final int numVassals = 3;
 		LOG.info("numCores: " + numCores);
 
 		LordRunner lord = new LordRunner(Ports.DEFAULT_LORD_PORT);
@@ -40,15 +40,15 @@ public class TestTwoVassals {
 			lord.registerVassal(vassalProxies[i], i);
 		}
 		
-		final int numCities = 8;
+		final int numCities = 51;
 		
 		City[] cities = ProblemGen.genCities(numCities);
 		TspProblem problem = new TspProblem(cities);
 		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
 
-		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, problem);
+		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, null, -1, problem);
 
-		lord.runJob(root, problem, /*Double.MAX_VALUE*/300, Arrays.asList(vassalProxies), 0);
+		lord.runJob(root, problem, /*Double.MAX_VALUE*/450, Arrays.asList(vassalProxies), 0);
 	}
 }

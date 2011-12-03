@@ -33,16 +33,21 @@ public class TaskRunner implements Runnable {
 						LOG.info("new best cost: " + node.getCost());
 						LOG.info("new best solution: " + node.getSolution());
 						jobManager.betterLocalSolution(node.getSolution(), node.getCost());
-					}
-				}
-				if (!node.isLeaf()) {
-					jobManager.getNodePool().post(node);
-				} else {
-					//if we're not posting the node to do work with, let its parent
-					//know that we're done doing computation on it
-					node.whenAllChildrenDone();
-					if (node.getParent() != null) {
+						//TODO: mark as done
+						
+						node.whenAllChildrenDone();
 						node.getParent().childDone();
+					}
+				} else {
+					if (!node.isLeaf()) {
+						jobManager.getNodePool().post(node);
+					} else {
+						//if we're not posting the node to do work with, let its parent
+						//know that we're done doing computation on it
+						node.whenAllChildrenDone();
+						if (node.getParent() != null) {
+							node.getParent().childDone();
+						}
 					}
 				}
 			}

@@ -46,7 +46,7 @@ public class LordMain {
 
 		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
-		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, problem);
+		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, null, -1, problem);
 
 		lord.runJob(root, problem, Double.MAX_VALUE, vassalHosts.size(), 0);
 	}

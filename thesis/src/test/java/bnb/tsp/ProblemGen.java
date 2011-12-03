@@ -7,8 +7,8 @@ import java.io.IOException;
 
 public class ProblemGen {
 	
-	private static final File PROB_FILE = new File("../eil22.txt");
-	private static final int MAX_CITIES = 22;
+	private static final File PROB_FILE = new File("../tsptests/eil51.258");
+	private static final int MAX_CITIES = 51;
 	
 	public static City[] genCities(int numCities) throws IOException {
 		if (numCities > MAX_CITIES) {

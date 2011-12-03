@@ -24,8 +24,8 @@ public class TspNode extends BnbNode {
 	private boolean isEvaluated;
 	
 	private boolean bounded;
-	private int parentTourCost = -1;
-	private int tourCost = -1;
+	private int parentTourCost;
+	private volatile int tourCost = -1;
 	
 	private int numChosen;
 	private City city;
@@ -45,22 +45,25 @@ public class TspNode extends BnbNode {
 	//if parent is null, and this isn't the root, this shouldn't be null
 	private ArrayList<City> prevCities;
 	
+	//for held & karp
+	private int[] heldKarpNodeWeights;
+	private List<City> heldKarpOptimalTour;
+	
 	public TspNode() {
 		super(null);
 	}
 	
 	public TspNode(City startCity, City city, int numChosen, TspNode parent, LinkedList<City> remCities, 
-			boolean[] remVector, TspProblem problem) {
+			boolean[] remVector, int[] heldKarpNodeWeights, int parentTourCost, TspProblem problem) {
 		super(parent);
 		this.startCity = startCity;
 		this.city = city;
 		this.remainingCities = remCities;
 		this.remainingVector = remVector;
+		this.heldKarpNodeWeights = heldKarpNodeWeights;
+		this.parentTourCost = parentTourCost;
 		
 		this.numChosen = numChosen;
-		if (parent != null) {
-			parentTourCost = parent.getTourCost();
-		}
 		this.problem = problem;
 	}
 	
@@ -68,8 +71,8 @@ public class TspNode extends BnbNode {
 	 * Builds remainingVector for you
 	 */
 	public TspNode(City startCity, City city, int numChosen, TspNode parent, LinkedList<City> remCities, 
-			TspProblem problem) {
-		this(startCity, city, numChosen, parent, remCities, null, problem);
+			int[] heldKarpNodeWeights, int parentTourCost, TspProblem problem) {
+		this(startCity, city, numChosen, parent, remCities, null, heldKarpNodeWeights, parentTourCost, problem);
 		if (remCities != null) {
 			remainingVector = new boolean[problem.getNumCities()];
 			for (City remCity : remCities) {
@@ -93,13 +96,8 @@ public class TspNode extends BnbNode {
 		if (!isEvaluated) {
 			throw new IllegalStateException("Tsp node not yet evaluated.");
 		}
-		return !bounded && numChosen == problem.getNumCities();
-	}
-	
-	public int getTourCost() {
-		return tourCost;
-	}
-	
+		return !bounded && (numChosen == problem.getNumCities() || heldKarpOptimalTour != null);
+	}	
 	
 //	private List<City> buildRemainingCities(Iterator<City> iter) {
 //		//build a new remainingCities
@@ -167,14 +165,31 @@ public class TspNode extends BnbNode {
 			tourCost = parentTourCost - prevCity.dist(startCity) + 
 				prevCity.dist(city) + city.dist(startCity);
 		}
+		//calculate actual tour cost for comparison
+		//TODO: remove this
+//		Iterator<City> tourCostIter = new ParentCityIterator(this);
+//		int tourCostSum = 0;
+//		City prev = null;
+//		while (tourCostIter.hasNext()) {
+//			City next = tourCostIter.next();
+//			if (prev != null) {
+//				tourCostSum += next.dist(prev);
+//			}
+//			prev = next;
+//		}
+//		tourCostSum += city.dist(startCity);
+//		if (tourCostSum != tourCost) {
+//			System.out.println("tour cost discrepancy: " + tourCostSum + "\t" + tourCost);
+//		}
+		
 		
 		if (tourCost >= minCost) {
 			return false;
 		}
 		
-		if (numChosen <= 3)
+		if (numChosen <= 3) {
 			return true; // otherwise do opt stuff
-			
+		}
 		
 		//if 2 or 3 opt give us better solutions, discard this one
 		ParentCityIterator iter = new ParentCityIterator(this);
@@ -211,12 +226,26 @@ public class TspNode extends BnbNode {
 //			}
 //		}
 				
-		if (numChosen > 1 && numChosen < problem.getNumCities()-1) {
+		if (numChosen > 1 && numChosen < problem.getNumCities()-1) {			
+			int[] nodeWeights = new int[problem.getNumCities()];
+			if (heldKarpNodeWeights != null) {
+				System.arraycopy(heldKarpNodeWeights, 0, nodeWeights, 0, problem.getNumCities());
+			}
+			//start and end node shouldn't have any weights
+			nodeWeights[city.id] = 0;
+			nodeWeights[startCity.id] = 0;
+			List<City> optimalTour = new ArrayList<City>(remainingCities.size());
 			int heldKarpBound = HeldAndKarp.bound(startCity, city, remainingVector, problem.getEdges(), minCost, 
-					remainingCities, problem.getNumCities(), tourCost-city.dist(startCity));
+					remainingCities, problem.getNumCities(), tourCost-city.dist(startCity), nodeWeights, 
+					optimalTour);
+			heldKarpNodeWeights = nodeWeights;
 			if (heldKarpBound >= minCost) {
 //				System.out.println("held & karp bounding: " + this);
 				return false;
+			}
+			if (optimalTour.size() > 0) {
+				heldKarpOptimalTour = optimalTour;
+				tourCost = heldKarpBound;
 			}
 		}
 		
@@ -234,6 +263,10 @@ public class TspNode extends BnbNode {
 		if (!hasNextChild()) {
 			throw new NoSuchElementException("Node has no next child.");
 		}
+		if (heldKarpOptimalTour != null) {
+			LOG.error("should not be looking for children when already found held/karp optimal tour");
+		}
+		
 		LinkedList<City> remCities = remainingCities;
 		boolean[] remVec = remainingVector;
 		int count = activeChildCount.getAndIncrement();
@@ -246,7 +279,11 @@ public class TspNode extends BnbNode {
 		City city = remCities.remove(0);
 		exploredChildren.add(city);
 		remVec[city.id] = false;
-		TspNode child = new TspNode(startCity, city, numChosen+1, this, remCities, remVec, problem);
+		TspNode child = new TspNode(startCity, city, numChosen+1, this, remCities, remVec, 
+//				null,
+				heldKarpNodeWeights, 
+				tourCost,
+				problem);
 		return child;
 	}
 	
@@ -294,6 +331,8 @@ public class TspNode extends BnbNode {
 			
 			isEvaluated = dis.readBoolean();
 			int numCities = dis.readInt();
+			parentTourCost = dis.readInt();
+			tourCost = dis.readInt();
 			//TODO: how do we reconstruct this in the most efficient way?
 			prevCities = new ArrayList<City>(numCities);
 			for (int i = 0; i < numCities; i++) {
@@ -345,6 +384,8 @@ public class TspNode extends BnbNode {
 			
 			//num nodes in path
 			dos.writeInt(numChosen);
+			dos.writeInt(parentTourCost); //TODO: kind of redundant
+			dos.writeInt(tourCost);
 
 			//nodes in path
 			Stack<City> stack = new Stack<City>();
@@ -380,7 +421,11 @@ public class TspNode extends BnbNode {
 	
 	@Override
 	public Solution getSolution() {
-		return new TspSolution(new ParentCityIterator(this), problem.getNumCities());
+		if (heldKarpOptimalTour == null) {
+			return new TspSolution(new ParentCityIterator(this), problem.getNumCities());
+		} else {
+			return new TspSolution(new ParentCityIterator(this), heldKarpOptimalTour, problem.getNumCities());
+		}
 	}
 	
 	@Override
