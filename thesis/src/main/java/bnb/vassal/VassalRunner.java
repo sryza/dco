@@ -55,12 +55,13 @@ public class VassalRunner implements VassalPublic {
 					server.serve();
 				}
 			};
+			LOG.info("starting vassal server");
 			serverThread.start();
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
 	}
-		
+	
 	public int numSlots() {
 		return numSlots;
 	}
