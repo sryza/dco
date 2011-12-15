@@ -29,6 +29,7 @@ public class LordMain {
 		File citiesFile = new File(args[1]);
 		int numCities = Integer.parseInt(args[2]);
 		List<String> vassalHosts = readLines(vassalFile);
+		LOG.info("vassal hosts: " + vassalHosts);
 		
 		final LordRunner lord = new LordRunner(lordPort);
 		
@@ -56,7 +57,9 @@ public class LordMain {
 		List<String> lines = new ArrayList<String>();
 		String line;
 		while ((line = br.readLine()) != null) {
-			lines.add(line);
+			if (!line.matches("\\s*")) {
+				lines.add(line);
+			}
 		}
 		return lines;
 	}

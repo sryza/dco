@@ -10,6 +10,8 @@ import bnb.rpc.Ports;
 
 public class VassalMain {
 	
+	private static final Logger LOG = Logger.getLogger(VassalMain.class);
+	
 	private static final String DEFAULT_LORD_HOST = "localhost";
 	private static final int DEFAULT_NUM_SLOTS = 1;
 	private static final int DEFAULT_LORD_PORT = Ports.DEFAULT_LORD_PORT;
@@ -28,7 +30,9 @@ public class VassalMain {
 		Logger.getRootLogger().addAppender(fileAppender);
 		
 		LordProxy lordProxy = new LordProxy(lordHost, lordPort);
+		LOG.info("created lord proxy");
 		VassalRunner vassal = new VassalRunner(lordProxy, numSlots, id, vassalPort);
+		LOG.info("about to start vassal runner");
 		vassal.start();
 	}
 }
