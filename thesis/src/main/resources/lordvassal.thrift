@@ -14,6 +14,6 @@ service ThriftVassal {
 }
 
 service ThriftLord {
-	void sendBestSolCost(1:double bestCost, 2:i32 jobid, 3:i32 vassalid),
+	void sendBestSolCost(1:double bestCost, 2:i32 jobid, 3:i32 vassalid, 4:ThriftData solution),
 	list<ThriftData> askForWork(1:i32 jobid, 2:i32 vassalid, 3:double bestCost)
 }

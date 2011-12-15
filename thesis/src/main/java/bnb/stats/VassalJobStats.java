@@ -1,10 +1,10 @@
-package bnb.vassal;
+package bnb.stats;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VassalStats {
+public class VassalJobStats {
 	private ThreadLocal<Long> askForWorkStart;
 	private ThreadLocal<Long> nextNodeStart;
 	
@@ -12,7 +12,7 @@ public class VassalStats {
 	private ThreadLocalList<Long> askForWorkLats;
 	private ThreadLocalList<Long> nextNodeLats;
 	
-	public VassalStats() {
+	public VassalJobStats() {
 		askForWorkLats = new ThreadLocalList<Long>();
 		askForWorkStart = new ThreadLocal<Long>();
 		nextNodeLats = new ThreadLocalList<Long>();
@@ -82,34 +82,8 @@ public class VassalStats {
 		
 		sb.append("max: " + max + "\n");
 		sb.append("min: " + min + "\n");
+		sb.append("sum: " + sum + "\n");
 		sb.append("avg: " + avg + "\n");
 		sb.append("var: " + var + "\n");
-	}
-	
-	/**
-	 * Aggregates separate statistics for each thread with the option to combine them
-	 * later.
-	 */
-	private class ThreadLocalList<T> {
-		private List<List<T>> listOfLists = new LinkedList<List<T>>();
-		private ThreadLocal<List<T>> list = new ThreadLocal<List<T>>();
-		
-		public void add(T t) {
-			if (list.get() == null) {
-				list.set(new LinkedList<T>());
-				synchronized(listOfLists) {
-					listOfLists.add(list.get());
-				}
-			}
-			list.get().add(t);
-		}
-		
-		public List<T> getAll() {
-			List<T> all = new ArrayList<T>();
-			for (List<T> list : listOfLists) {
-				all.addAll(list);
-			}
-			return all;
-		}
 	}
 }

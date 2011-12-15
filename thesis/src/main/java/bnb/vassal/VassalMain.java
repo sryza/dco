@@ -1,5 +1,6 @@
 package bnb.vassal;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Appender;
@@ -26,7 +27,9 @@ public class VassalMain {
 		
 		Appender appender = (Appender)Logger.getRootLogger().getAllAppenders().nextElement();
 		Logger.getRootLogger().removeAllAppenders();
-		FileAppender fileAppender = new FileAppender(appender.getLayout(), "logs/vassal" + id + ".log");
+		String logFilePath = "logs/vassal" + id + ".log";
+		new File(logFilePath).delete();
+		FileAppender fileAppender = new FileAppender(appender.getLayout(), logFilePath);
 		Logger.getRootLogger().addAppender(fileAppender);
 		
 		LordProxy lordProxy = new LordProxy(lordHost, lordPort);

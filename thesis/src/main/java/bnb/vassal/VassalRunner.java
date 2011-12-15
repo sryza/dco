@@ -18,6 +18,7 @@ import bnb.BnbNode;
 import bnb.rpc.ThriftVassal;
 import bnb.rpc.VassalPublic;
 import bnb.rpc.VassalThriftWrapper;
+import bnb.stats.VassalJobStats;
 
 public class VassalRunner implements VassalPublic {
 	
@@ -74,6 +75,10 @@ public class VassalRunner implements VassalPublic {
 	@Override
 	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid, int numThreads) 
 		throws IOException {
+		if (numThreads < 1) {
+				LOG.error("Illegal number of threads: " + numThreads);
+		}
+		
 		VassalNodePool nodePool = new SimpleVassalNodePool();
 		for (BnbNode node : nodes) {
 			//TODO: should this be happening here?
@@ -86,7 +91,7 @@ public class VassalRunner implements VassalPublic {
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 		
-		VassalStats stats = new VassalStats();
+		VassalJobStats stats = new VassalJobStats();
 		CyclicBarrier completeBarrier = new CyclicBarrier(numThreads);
 
 		jobMap.put(jobid, jobManager);
@@ -96,13 +101,12 @@ public class VassalRunner implements VassalPublic {
 	}
 	
 	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
-			VassalJobManager jobManager, VassalStats stats, CyclicBarrier completeBarrier) {
+			VassalJobManager jobManager, VassalJobStats stats, CyclicBarrier completeBarrier) {
 		TaskRunner runner = new TaskRunner(jobManager, stats, completeBarrier);
 		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
 		taskThread.setName("Vassal " + vassalId + " TaskRunner");
 		taskThread.start();
-		numSlots--;
 	}
 
 	@Override

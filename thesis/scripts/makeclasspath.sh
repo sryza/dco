@@ -1,0 +1,2 @@
+cd /home/sryza/thesis/dco/thesis/
+JAVA_CLASSPATH=bin/:jars/libthrift-0.7.0.jar:jars/supportjars/commons-codec-1.3.jar:jars/supportjars/commons-logging-1.1.1.jar:jars/supportjars/httpcore-4.0.1.jar:jars/supportjars/log4j-1.2.14.jar:jars/supportjars/slf4j-api-1.5.8.jar:jars/supportjars/commons-lang-2.5.jar:jars/supportjars/httpclient-4.0.1.jar:jars/supportjars/servlet-api-2.5.jar:jars/supportjars/slf4j-log4j12-1.5.8.jar

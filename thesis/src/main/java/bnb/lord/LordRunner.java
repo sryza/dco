@@ -19,6 +19,7 @@ import bnb.BnbNode;
 import bnb.rpc.LordPublic;
 import bnb.rpc.ThriftLord;
 import bnb.rpc.LordThriftWrapper;
+import bnb.stats.LordJobStats;
 
 public class LordRunner implements LordPublic {
 	
@@ -92,6 +93,9 @@ public class LordRunner implements LordPublic {
 			int minNodesToSave) {
 		int jobid = nextJobid++;
 		
+		LordJobStats stats = new LordJobStats();
+		stats.aboutToStart();
+		
 		for (VassalProxy vassal : vassalServers) {
 			try {
 				if (!vassalMap.containsKey(vassal.getVassalId())) {
@@ -109,7 +113,7 @@ public class LordRunner implements LordPublic {
 				vassalServers.size() + minNodesToSave);
 		LOG.info("extra start nodes: " + (startNodes.size() - vassalServers.size()));
 		
-		LordJobManager jobManager = new LordJobManager(jobid, startNodes, spec, vassalServers);
+		LordJobManager jobManager = new LordJobManager(jobid, startNodes, spec, vassalServers, stats);
 		jobMap.put(jobid, jobManager);
 		for (VassalProxy vassal : vassalServers) {
 			List<BnbNode> nodePool = new LinkedList<BnbNode>();
@@ -117,11 +121,14 @@ public class LordRunner implements LordPublic {
 			nodePool.add(node);
 			
 			try {
+				LOG.info("About to start job " + jobid + " on vassal " + vassal.getVassalIdCache());
 				vassal.startJobTasks(nodePool, spec, bestCost, jobid, vassal.getNumSlots());
 			} catch (IOException ex) {
-				LOG.error("Failed to start job tasks on vassal", ex);
+				LOG.error("Failed to start job tasks on vassal " + vassal.getVassalIdCache(), ex);
 			}
 		}
+		
+		stats.finishedSendingInitialWork();
 	}
 
 	@Override

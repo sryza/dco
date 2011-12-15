@@ -5,19 +5,20 @@ import java.util.concurrent.CyclicBarrier;
 import org.apache.log4j.Logger;
 
 import bnb.BnbNode;
+import bnb.stats.VassalJobStats;
 
 public class TaskRunner implements Runnable {
 	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
 	
 	private final VassalJobManager jobManager;
-	private final VassalStats stats;
+	private final VassalJobStats stats;
 	private final CyclicBarrier completeBarrier;
 	
 	private int numEvaluated;
 	
 	private volatile boolean working = true;
 	
-	public TaskRunner(VassalJobManager jobManager, VassalStats stats, CyclicBarrier barrier) {
+	public TaskRunner(VassalJobManager jobManager, VassalJobStats stats, CyclicBarrier barrier) {
 		this.jobManager = jobManager;
 		this.stats = stats;
 		this.completeBarrier = barrier;

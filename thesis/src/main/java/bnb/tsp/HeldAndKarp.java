@@ -3,12 +3,10 @@ package bnb.tsp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -193,8 +191,8 @@ public class HeldAndKarp {
 				double stepSize = stepScale * (minCost - cost) / (sumSquareDiffs);
 				
 				if (numOptimalNumEdges == remainingNodesList.size()+2-1) { //-1 for oneTreeNode, +2 for start/end
-					System.out.println("found tour at remainingNodesList.size()=" + remainingNodesList.size());
-					System.out.println(cost);
+					LOG.info("Held & Karp found tour at remainingNodesList.size()=" + remainingNodesList.size());
+//					System.out.println(cost);
 //					for (int i = 0; i < nodeWeights.length; i++) {
 //						System.out.print(nodeWeights[i] + " ");
 //					}
@@ -236,11 +234,11 @@ public class HeldAndKarp {
 						city = nextCity;
 						tourCost += prevCity.dist(city);
 					}
-					System.out.println(tour.size() + "\t" + remainingNodesList.size());
-					System.out.println(tour);
-					System.out.println(tourCost + curTourCost);
-					System.out.println(tourCost + "\t" + curTourCost);
-					System.out.println(mstEdgesCost+curTourCost);
+//					System.out.println(tour.size() + "\t" + remainingNodesList.size());
+//					System.out.println(tour);
+//					System.out.println(tourCost + curTourCost);
+//					System.out.println(tourCost + "\t" + curTourCost);
+//					System.out.println(mstEdgesCost+curTourCost);
 					return cost;
 				}
 				

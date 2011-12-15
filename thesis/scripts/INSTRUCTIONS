@@ -1,0 +1,32 @@
+To get it working, first you've got to get vassals running, then a lord.
+
+To Run Vassals
+--------------
+Make a file with the vassals you want included.  Traditionally this is vassalhosts.txt, which is two directories up.
+First argument is vassal hosts file.  Second argument is lord host.  Third is number of processors to use.
+./runvassals.sh ../../vassalhosts.txt draper(for example) 2
+
+To Run Lord
+-----------
+Runs on localhost.  The three arguments are the three arguments that the java program takes: vassal file, cities file, and the number of cities.
+./runlord.sh ../../vassalhosts.txt ../../tsptests/eil51.258 20
+
+To Kill Vassals
+---------------
+./killall.sh ../../vassalhosts.txt
+
+
+Where Are The Logs?
+-------------------
+Each vassal gets its own logs.  They're in $HOME/logs/vassal[#].log
+
+
+
+To See What's Clogging A Port
+-----------------------------
+ssh cslab2b netstat -tnlp | grep 4389
+
+
+To See Whether Vassals Are Running
+----------------------------------
+
