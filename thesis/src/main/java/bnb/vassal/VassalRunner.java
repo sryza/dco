@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CyclicBarrier;
 
 import org.apache.log4j.Logger;
 import org.apache.thrift.TProcessor;
@@ -84,16 +85,19 @@ public class VassalRunner implements VassalPublic {
 		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordInfo, vassalId, jobid);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
+		
+		VassalStats stats = new VassalStats();
+		CyclicBarrier completeBarrier = new CyclicBarrier(numThreads);
 
 		jobMap.put(jobid, jobManager);
 		for (int i = 0; i < numThreads; i++) {
-			startTaskRunner(lordInfo, nodePool, jobManager);
+			startTaskRunner(lordInfo, nodePool, jobManager, stats, completeBarrier);
 		}
 	}
 	
 	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
-			VassalJobManager jobManager) {
-		TaskRunner runner = new TaskRunner(jobManager);
+			VassalJobManager jobManager, VassalStats stats, CyclicBarrier completeBarrier) {
+		TaskRunner runner = new TaskRunner(jobManager, stats, completeBarrier);
 		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
 		taskThread.setName("Vassal " + vassalId + " TaskRunner");
