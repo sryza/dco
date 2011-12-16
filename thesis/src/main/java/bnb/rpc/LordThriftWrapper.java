@@ -23,7 +23,7 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 	}
 
 	@Override
-	public void sendBestSolCost(double bestCost, int jobid, int vassalid)
+	public void sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution)
 			throws TException {
 		try {
 			lord.sendBestSolCost(bestCost, jobid, vassalid);
@@ -34,7 +34,8 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 	}
 
 	@Override
-	public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) throws TException {
+	public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) 
+			throws TException {
 		try {
 			List<BnbNode> nodes = lord.askForWork(jobid, vassalid, bestCost);
 			List<ThriftData> nodesData = new ArrayList<ThriftData>(nodes.size());
@@ -42,6 +43,17 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 				nodesData.add(RpcUtil.toThriftData(node));
 			}
 			return nodesData;
+		} catch (IOException ex) {
+			LOG.error("IOException where we shouldn't really have one", ex);
+			throw new TException(ex);
+		}
+	}
+
+	@Override
+	public void registerVassal(String hostname, int port, int vassalid)
+			throws TException {
+		try {
+			lord.registerVassal(hostname, port, id);
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);
 			throw new TException(ex);

@@ -24,17 +24,21 @@ public class ThriftLord {
 
   public interface Iface {
 
-    public void sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException;
+    public void sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution) throws org.apache.thrift.TException;
 
     public List<ThriftData> askForWork(int jobid, int vassalid, double bestCost) throws org.apache.thrift.TException;
+
+    public void registerVassal(String hostname, int port, int vassalid) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void sendBestSolCost(double bestCost, int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
+    public void sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException;
 
     public void askForWork(int jobid, int vassalid, double bestCost, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.askForWork_call> resultHandler) throws org.apache.thrift.TException;
+
+    public void registerVassal(String hostname, int port, int vassalid, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.registerVassal_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -58,18 +62,19 @@ public class ThriftLord {
       super(iprot, oprot);
     }
 
-    public void sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException
+    public void sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution) throws org.apache.thrift.TException
     {
-      send_sendBestSolCost(bestCost, jobid, vassalid);
+      send_sendBestSolCost(bestCost, jobid, vassalid, solution);
       recv_sendBestSolCost();
     }
 
-    public void send_sendBestSolCost(double bestCost, int jobid, int vassalid) throws org.apache.thrift.TException
+    public void send_sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution) throws org.apache.thrift.TException
     {
       sendBestSolCost_args args = new sendBestSolCost_args();
       args.setBestCost(bestCost);
       args.setJobid(jobid);
       args.setVassalid(vassalid);
+      args.setSolution(solution);
       sendBase("sendBestSolCost", args);
     }
 
@@ -105,6 +110,28 @@ public class ThriftLord {
       throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "askForWork failed: unknown result");
     }
 
+    public void registerVassal(String hostname, int port, int vassalid) throws org.apache.thrift.TException
+    {
+      send_registerVassal(hostname, port, vassalid);
+      recv_registerVassal();
+    }
+
+    public void send_registerVassal(String hostname, int port, int vassalid) throws org.apache.thrift.TException
+    {
+      registerVassal_args args = new registerVassal_args();
+      args.setHostname(hostname);
+      args.setPort(port);
+      args.setVassalid(vassalid);
+      sendBase("registerVassal", args);
+    }
+
+    public void recv_registerVassal() throws org.apache.thrift.TException
+    {
+      registerVassal_result result = new registerVassal_result();
+      receiveBase(result, "registerVassal");
+      return;
+    }
+
   }
   public static class AsyncClient extends org.apache.thrift.async.TAsyncClient implements AsyncIface {
     public static class Factory implements org.apache.thrift.async.TAsyncClientFactory<AsyncClient> {
@@ -123,9 +150,9 @@ public class ThriftLord {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void sendBestSolCost(double bestCost, int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException {
+    public void sendBestSolCost(double bestCost, int jobid, int vassalid, ThriftData solution, org.apache.thrift.async.AsyncMethodCallback<sendBestSolCost_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      sendBestSolCost_call method_call = new sendBestSolCost_call(bestCost, jobid, vassalid, resultHandler, this, ___protocolFactory, ___transport);
+      sendBestSolCost_call method_call = new sendBestSolCost_call(bestCost, jobid, vassalid, solution, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -134,11 +161,13 @@ public class ThriftLord {
       private double bestCost;
       private int jobid;
       private int vassalid;
-      public sendBestSolCost_call(double bestCost, int jobid, int vassalid, org.apache.thrift.async.AsyncMethodCallback<sendBestSolCost_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      private ThriftData solution;
+      public sendBestSolCost_call(double bestCost, int jobid, int vassalid, ThriftData solution, org.apache.thrift.async.AsyncMethodCallback<sendBestSolCost_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.bestCost = bestCost;
         this.jobid = jobid;
         this.vassalid = vassalid;
+        this.solution = solution;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
@@ -147,6 +176,7 @@ public class ThriftLord {
         args.setBestCost(bestCost);
         args.setJobid(jobid);
         args.setVassalid(vassalid);
+        args.setSolution(solution);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -199,6 +229,44 @@ public class ThriftLord {
       }
     }
 
+    public void registerVassal(String hostname, int port, int vassalid, org.apache.thrift.async.AsyncMethodCallback<registerVassal_call> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      registerVassal_call method_call = new registerVassal_call(hostname, port, vassalid, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class registerVassal_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private String hostname;
+      private int port;
+      private int vassalid;
+      public registerVassal_call(String hostname, int port, int vassalid, org.apache.thrift.async.AsyncMethodCallback<registerVassal_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.hostname = hostname;
+        this.port = port;
+        this.vassalid = vassalid;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("registerVassal", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        registerVassal_args args = new registerVassal_args();
+        args.setHostname(hostname);
+        args.setPort(port);
+        args.setVassalid(vassalid);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public void getResult() throws org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        (new Client(prot)).recv_registerVassal();
+      }
+    }
+
   }
 
   public static class Processor<I extends Iface> extends org.apache.thrift.TBaseProcessor implements org.apache.thrift.TProcessor {
@@ -214,6 +282,7 @@ public class ThriftLord {
     private static <I extends Iface> Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> getProcessMap(Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
       processMap.put("sendBestSolCost", new sendBestSolCost());
       processMap.put("askForWork", new askForWork());
+      processMap.put("registerVassal", new registerVassal());
       return processMap;
     }
 
@@ -228,7 +297,7 @@ public class ThriftLord {
 
       protected sendBestSolCost_result getResult(I iface, sendBestSolCost_args args) throws org.apache.thrift.TException {
         sendBestSolCost_result result = new sendBestSolCost_result();
-        iface.sendBestSolCost(args.bestCost, args.jobid, args.vassalid);
+        iface.sendBestSolCost(args.bestCost, args.jobid, args.vassalid, args.solution);
         return result;
       }
     }
@@ -249,6 +318,22 @@ public class ThriftLord {
       }
     }
 
+    private static class registerVassal<I extends Iface> extends org.apache.thrift.ProcessFunction<I, registerVassal_args> {
+      public registerVassal() {
+        super("registerVassal");
+      }
+
+      protected registerVassal_args getEmptyArgsInstance() {
+        return new registerVassal_args();
+      }
+
+      protected registerVassal_result getResult(I iface, registerVassal_args args) throws org.apache.thrift.TException {
+        registerVassal_result result = new registerVassal_result();
+        iface.registerVassal(args.hostname, args.port, args.vassalid);
+        return result;
+      }
+    }
+
   }
 
   public static class sendBestSolCost_args implements org.apache.thrift.TBase<sendBestSolCost_args, sendBestSolCost_args._Fields>, java.io.Serializable, Cloneable   {
@@ -257,16 +342,19 @@ public class ThriftLord {
     private static final org.apache.thrift.protocol.TField BEST_COST_FIELD_DESC = new org.apache.thrift.protocol.TField("bestCost", org.apache.thrift.protocol.TType.DOUBLE, (short)1);
     private static final org.apache.thrift.protocol.TField JOBID_FIELD_DESC = new org.apache.thrift.protocol.TField("jobid", org.apache.thrift.protocol.TType.I32, (short)2);
     private static final org.apache.thrift.protocol.TField VASSALID_FIELD_DESC = new org.apache.thrift.protocol.TField("vassalid", org.apache.thrift.protocol.TType.I32, (short)3);
+    private static final org.apache.thrift.protocol.TField SOLUTION_FIELD_DESC = new org.apache.thrift.protocol.TField("solution", org.apache.thrift.protocol.TType.STRUCT, (short)4);
 
     public double bestCost; // required
     public int jobid; // required
     public int vassalid; // required
+    public ThriftData solution; // required
 
     /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
     public enum _Fields implements org.apache.thrift.TFieldIdEnum {
       BEST_COST((short)1, "bestCost"),
       JOBID((short)2, "jobid"),
-      VASSALID((short)3, "vassalid");
+      VASSALID((short)3, "vassalid"),
+      SOLUTION((short)4, "solution");
 
       private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -287,6 +375,8 @@ public class ThriftLord {
             return JOBID;
           case 3: // VASSALID
             return VASSALID;
+          case 4: // SOLUTION
+            return SOLUTION;
           default:
             return null;
         }
@@ -341,6 +431,8 @@ public class ThriftLord {
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       tmpMap.put(_Fields.VASSALID, new org.apache.thrift.meta_data.FieldMetaData("vassalid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.SOLUTION, new org.apache.thrift.meta_data.FieldMetaData("solution", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, ThriftData.class)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(sendBestSolCost_args.class, metaDataMap);
     }
@@ -351,7 +443,8 @@ public class ThriftLord {
     public sendBestSolCost_args(
       double bestCost,
       int jobid,
-      int vassalid)
+      int vassalid,
+      ThriftData solution)
     {
       this();
       this.bestCost = bestCost;
@@ -360,6 +453,7 @@ public class ThriftLord {
       setJobidIsSet(true);
       this.vassalid = vassalid;
       setVassalidIsSet(true);
+      this.solution = solution;
     }
 
     /**
@@ -371,6 +465,9 @@ public class ThriftLord {
       this.bestCost = other.bestCost;
       this.jobid = other.jobid;
       this.vassalid = other.vassalid;
+      if (other.isSetSolution()) {
+        this.solution = new ThriftData(other.solution);
+      }
     }
 
     public sendBestSolCost_args deepCopy() {
@@ -385,6 +482,7 @@ public class ThriftLord {
       this.jobid = 0;
       setVassalidIsSet(false);
       this.vassalid = 0;
+      this.solution = null;
     }
 
     public double getBestCost() {
@@ -456,6 +554,30 @@ public class ThriftLord {
       __isset_bit_vector.set(__VASSALID_ISSET_ID, value);
     }
 
+    public ThriftData getSolution() {
+      return this.solution;
+    }
+
+    public sendBestSolCost_args setSolution(ThriftData solution) {
+      this.solution = solution;
+      return this;
+    }
+
+    public void unsetSolution() {
+      this.solution = null;
+    }
+
+    /** Returns true if field solution is set (has been assigned a value) and false otherwise */
+    public boolean isSetSolution() {
+      return this.solution != null;
+    }
+
+    public void setSolutionIsSet(boolean value) {
+      if (!value) {
+        this.solution = null;
+      }
+    }
+
     public void setFieldValue(_Fields field, Object value) {
       switch (field) {
       case BEST_COST:
@@ -482,6 +604,14 @@ public class ThriftLord {
         }
         break;
 
+      case SOLUTION:
+        if (value == null) {
+          unsetSolution();
+        } else {
+          setSolution((ThriftData)value);
+        }
+        break;
+
       }
     }
 
@@ -495,6 +625,9 @@ public class ThriftLord {
 
       case VASSALID:
         return Integer.valueOf(getVassalid());
+
+      case SOLUTION:
+        return getSolution();
 
       }
       throw new IllegalStateException();
@@ -513,6 +646,8 @@ public class ThriftLord {
         return isSetJobid();
       case VASSALID:
         return isSetVassalid();
+      case SOLUTION:
+        return isSetSolution();
       }
       throw new IllegalStateException();
     }
@@ -554,6 +689,15 @@ public class ThriftLord {
         if (!(this_present_vassalid && that_present_vassalid))
           return false;
         if (this.vassalid != that.vassalid)
+          return false;
+      }
+
+      boolean this_present_solution = true && this.isSetSolution();
+      boolean that_present_solution = true && that.isSetSolution();
+      if (this_present_solution || that_present_solution) {
+        if (!(this_present_solution && that_present_solution))
+          return false;
+        if (!this.solution.equals(that.solution))
           return false;
       }
 
@@ -603,6 +747,16 @@ public class ThriftLord {
           return lastComparison;
         }
       }
+      lastComparison = Boolean.valueOf(isSetSolution()).compareTo(typedOther.isSetSolution());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSolution()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.solution, typedOther.solution);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
       return 0;
     }
 
@@ -644,6 +798,14 @@ public class ThriftLord {
               org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
             }
             break;
+          case 4: // SOLUTION
+            if (field.type == org.apache.thrift.protocol.TType.STRUCT) {
+              this.solution = new ThriftData();
+              this.solution.read(iprot);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
           default:
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
         }
@@ -668,6 +830,11 @@ public class ThriftLord {
       oprot.writeFieldBegin(VASSALID_FIELD_DESC);
       oprot.writeI32(this.vassalid);
       oprot.writeFieldEnd();
+      if (this.solution != null) {
+        oprot.writeFieldBegin(SOLUTION_FIELD_DESC);
+        this.solution.write(oprot);
+        oprot.writeFieldEnd();
+      }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
@@ -687,6 +854,14 @@ public class ThriftLord {
       if (!first) sb.append(", ");
       sb.append("vassalid:");
       sb.append(this.vassalid);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("solution:");
+      if (this.solution == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.solution);
+      }
       first = false;
       sb.append(")");
       return sb.toString();
@@ -1690,6 +1865,677 @@ public class ThriftLord {
         sb.append(this.success);
       }
       first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+  }
+
+  public static class registerVassal_args implements org.apache.thrift.TBase<registerVassal_args, registerVassal_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("registerVassal_args");
+
+    private static final org.apache.thrift.protocol.TField HOSTNAME_FIELD_DESC = new org.apache.thrift.protocol.TField("hostname", org.apache.thrift.protocol.TType.STRING, (short)1);
+    private static final org.apache.thrift.protocol.TField PORT_FIELD_DESC = new org.apache.thrift.protocol.TField("port", org.apache.thrift.protocol.TType.I32, (short)2);
+    private static final org.apache.thrift.protocol.TField VASSALID_FIELD_DESC = new org.apache.thrift.protocol.TField("vassalid", org.apache.thrift.protocol.TType.I32, (short)3);
+
+    public String hostname; // required
+    public int port; // required
+    public int vassalid; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      HOSTNAME((short)1, "hostname"),
+      PORT((short)2, "port"),
+      VASSALID((short)3, "vassalid");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // HOSTNAME
+            return HOSTNAME;
+          case 2: // PORT
+            return PORT;
+          case 3: // VASSALID
+            return VASSALID;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    private static final int __PORT_ISSET_ID = 0;
+    private static final int __VASSALID_ISSET_ID = 1;
+    private BitSet __isset_bit_vector = new BitSet(2);
+
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.HOSTNAME, new org.apache.thrift.meta_data.FieldMetaData("hostname", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.PORT, new org.apache.thrift.meta_data.FieldMetaData("port", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      tmpMap.put(_Fields.VASSALID, new org.apache.thrift.meta_data.FieldMetaData("vassalid", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(registerVassal_args.class, metaDataMap);
+    }
+
+    public registerVassal_args() {
+    }
+
+    public registerVassal_args(
+      String hostname,
+      int port,
+      int vassalid)
+    {
+      this();
+      this.hostname = hostname;
+      this.port = port;
+      setPortIsSet(true);
+      this.vassalid = vassalid;
+      setVassalidIsSet(true);
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public registerVassal_args(registerVassal_args other) {
+      __isset_bit_vector.clear();
+      __isset_bit_vector.or(other.__isset_bit_vector);
+      if (other.isSetHostname()) {
+        this.hostname = other.hostname;
+      }
+      this.port = other.port;
+      this.vassalid = other.vassalid;
+    }
+
+    public registerVassal_args deepCopy() {
+      return new registerVassal_args(this);
+    }
+
+    @Override
+    public void clear() {
+      this.hostname = null;
+      setPortIsSet(false);
+      this.port = 0;
+      setVassalidIsSet(false);
+      this.vassalid = 0;
+    }
+
+    public String getHostname() {
+      return this.hostname;
+    }
+
+    public registerVassal_args setHostname(String hostname) {
+      this.hostname = hostname;
+      return this;
+    }
+
+    public void unsetHostname() {
+      this.hostname = null;
+    }
+
+    /** Returns true if field hostname is set (has been assigned a value) and false otherwise */
+    public boolean isSetHostname() {
+      return this.hostname != null;
+    }
+
+    public void setHostnameIsSet(boolean value) {
+      if (!value) {
+        this.hostname = null;
+      }
+    }
+
+    public int getPort() {
+      return this.port;
+    }
+
+    public registerVassal_args setPort(int port) {
+      this.port = port;
+      setPortIsSet(true);
+      return this;
+    }
+
+    public void unsetPort() {
+      __isset_bit_vector.clear(__PORT_ISSET_ID);
+    }
+
+    /** Returns true if field port is set (has been assigned a value) and false otherwise */
+    public boolean isSetPort() {
+      return __isset_bit_vector.get(__PORT_ISSET_ID);
+    }
+
+    public void setPortIsSet(boolean value) {
+      __isset_bit_vector.set(__PORT_ISSET_ID, value);
+    }
+
+    public int getVassalid() {
+      return this.vassalid;
+    }
+
+    public registerVassal_args setVassalid(int vassalid) {
+      this.vassalid = vassalid;
+      setVassalidIsSet(true);
+      return this;
+    }
+
+    public void unsetVassalid() {
+      __isset_bit_vector.clear(__VASSALID_ISSET_ID);
+    }
+
+    /** Returns true if field vassalid is set (has been assigned a value) and false otherwise */
+    public boolean isSetVassalid() {
+      return __isset_bit_vector.get(__VASSALID_ISSET_ID);
+    }
+
+    public void setVassalidIsSet(boolean value) {
+      __isset_bit_vector.set(__VASSALID_ISSET_ID, value);
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case HOSTNAME:
+        if (value == null) {
+          unsetHostname();
+        } else {
+          setHostname((String)value);
+        }
+        break;
+
+      case PORT:
+        if (value == null) {
+          unsetPort();
+        } else {
+          setPort((Integer)value);
+        }
+        break;
+
+      case VASSALID:
+        if (value == null) {
+          unsetVassalid();
+        } else {
+          setVassalid((Integer)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case HOSTNAME:
+        return getHostname();
+
+      case PORT:
+        return Integer.valueOf(getPort());
+
+      case VASSALID:
+        return Integer.valueOf(getVassalid());
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case HOSTNAME:
+        return isSetHostname();
+      case PORT:
+        return isSetPort();
+      case VASSALID:
+        return isSetVassalid();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof registerVassal_args)
+        return this.equals((registerVassal_args)that);
+      return false;
+    }
+
+    public boolean equals(registerVassal_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_hostname = true && this.isSetHostname();
+      boolean that_present_hostname = true && that.isSetHostname();
+      if (this_present_hostname || that_present_hostname) {
+        if (!(this_present_hostname && that_present_hostname))
+          return false;
+        if (!this.hostname.equals(that.hostname))
+          return false;
+      }
+
+      boolean this_present_port = true;
+      boolean that_present_port = true;
+      if (this_present_port || that_present_port) {
+        if (!(this_present_port && that_present_port))
+          return false;
+        if (this.port != that.port)
+          return false;
+      }
+
+      boolean this_present_vassalid = true;
+      boolean that_present_vassalid = true;
+      if (this_present_vassalid || that_present_vassalid) {
+        if (!(this_present_vassalid && that_present_vassalid))
+          return false;
+        if (this.vassalid != that.vassalid)
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(registerVassal_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      registerVassal_args typedOther = (registerVassal_args)other;
+
+      lastComparison = Boolean.valueOf(isSetHostname()).compareTo(typedOther.isSetHostname());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetHostname()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.hostname, typedOther.hostname);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetPort()).compareTo(typedOther.isSetPort());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetPort()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.port, typedOther.port);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetVassalid()).compareTo(typedOther.isSetVassalid());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetVassalid()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.vassalid, typedOther.vassalid);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      org.apache.thrift.protocol.TField field;
+      iprot.readStructBegin();
+      while (true)
+      {
+        field = iprot.readFieldBegin();
+        if (field.type == org.apache.thrift.protocol.TType.STOP) { 
+          break;
+        }
+        switch (field.id) {
+          case 1: // HOSTNAME
+            if (field.type == org.apache.thrift.protocol.TType.STRING) {
+              this.hostname = iprot.readString();
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
+          case 2: // PORT
+            if (field.type == org.apache.thrift.protocol.TType.I32) {
+              this.port = iprot.readI32();
+              setPortIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
+          case 3: // VASSALID
+            if (field.type == org.apache.thrift.protocol.TType.I32) {
+              this.vassalid = iprot.readI32();
+              setVassalidIsSet(true);
+            } else { 
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+            }
+            break;
+          default:
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+        }
+        iprot.readFieldEnd();
+      }
+      iprot.readStructEnd();
+
+      // check for required fields of primitive type, which can't be checked in the validate method
+      validate();
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      validate();
+
+      oprot.writeStructBegin(STRUCT_DESC);
+      if (this.hostname != null) {
+        oprot.writeFieldBegin(HOSTNAME_FIELD_DESC);
+        oprot.writeString(this.hostname);
+        oprot.writeFieldEnd();
+      }
+      oprot.writeFieldBegin(PORT_FIELD_DESC);
+      oprot.writeI32(this.port);
+      oprot.writeFieldEnd();
+      oprot.writeFieldBegin(VASSALID_FIELD_DESC);
+      oprot.writeI32(this.vassalid);
+      oprot.writeFieldEnd();
+      oprot.writeFieldStop();
+      oprot.writeStructEnd();
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("registerVassal_args(");
+      boolean first = true;
+
+      sb.append("hostname:");
+      if (this.hostname == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.hostname);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("port:");
+      sb.append(this.port);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("vassalid:");
+      sb.append(this.vassalid);
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bit_vector = new BitSet(1);
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+  }
+
+  public static class registerVassal_result implements org.apache.thrift.TBase<registerVassal_result, registerVassal_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("registerVassal_result");
+
+
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+;
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(registerVassal_result.class, metaDataMap);
+    }
+
+    public registerVassal_result() {
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public registerVassal_result(registerVassal_result other) {
+    }
+
+    public registerVassal_result deepCopy() {
+      return new registerVassal_result(this);
+    }
+
+    @Override
+    public void clear() {
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof registerVassal_result)
+        return this.equals((registerVassal_result)that);
+      return false;
+    }
+
+    public boolean equals(registerVassal_result that) {
+      if (that == null)
+        return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(registerVassal_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      registerVassal_result typedOther = (registerVassal_result)other;
+
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      org.apache.thrift.protocol.TField field;
+      iprot.readStructBegin();
+      while (true)
+      {
+        field = iprot.readFieldBegin();
+        if (field.type == org.apache.thrift.protocol.TType.STOP) { 
+          break;
+        }
+        switch (field.id) {
+          default:
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+        }
+        iprot.readFieldEnd();
+      }
+      iprot.readStructEnd();
+
+      // check for required fields of primitive type, which can't be checked in the validate method
+      validate();
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      oprot.writeStructBegin(STRUCT_DESC);
+
+      oprot.writeFieldStop();
+      oprot.writeStructEnd();
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("registerVassal_result(");
+      boolean first = true;
+
       sb.append(")");
       return sb.toString();
     }
