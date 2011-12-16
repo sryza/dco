@@ -1,6 +1,7 @@
 package bnb.vassal;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,11 @@ public class VassalRunner implements VassalPublic {
 	
 	public void start() {
 		startServer(port);
+		
+		//let lord know we're here
+//		java.net.InetAddress addr = java.net.InetAddress.getLocalHost();
+//	    String hostname = addr.getHostName();
+//	    System.out.println("Hostname of system = " + hostname);
 	}
 	
 	private void startServer(int port) {
@@ -62,6 +68,10 @@ public class VassalRunner implements VassalPublic {
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
+	}
+	
+	public void stop() {
+		server.stop();
 	}
 	
 	public int numSlots() {
@@ -95,18 +105,26 @@ public class VassalRunner implements VassalPublic {
 		CyclicBarrier completeBarrier = new CyclicBarrier(numThreads);
 
 		jobMap.put(jobid, jobManager);
+		List<Thread> taskThreads = new ArrayList<Thread>();
 		for (int i = 0; i < numThreads; i++) {
-			startTaskRunner(lordInfo, nodePool, jobManager, stats, completeBarrier);
+			Thread t = startTaskRunner(lordInfo, nodePool, jobManager, stats, completeBarrier);
+			taskThreads.add(t);
 		}
+		
+		new TermThread(taskThreads).start();
 	}
 	
-	public void startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
+	/**
+	 * Returns the thread that the task is running on.
+	 */
+	public Thread startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
 			VassalJobManager jobManager, VassalJobStats stats, CyclicBarrier completeBarrier) {
 		TaskRunner runner = new TaskRunner(jobManager, stats, completeBarrier);
 		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
 		taskThread.setName("Vassal " + vassalId + " TaskRunner");
 		taskThread.start();
+		return taskThread;
 	}
 
 	@Override
@@ -124,5 +142,30 @@ public class VassalRunner implements VassalPublic {
 		LOG.info("Work being stolen from job " + jobid);
 		VassalJobManager jobManager = jobMap.get(jobid);
 		return jobManager.stealWork();
+	}
+	
+	/**
+	 * For terminating this vassal when a job is done.
+	 */
+	private class TermThread extends Thread {
+		
+		private final List<Thread> threads;
+		
+		public TermThread(List<Thread> threads) {
+			this.threads = threads;
+		}
+		
+		public void run() {
+			for (Thread thread : threads) {
+				try {
+					thread.join();	
+				} catch (InterruptedException ex) {
+					LOG.error("Interrupted while waiting to terminate", ex);
+				}
+			}
+			LOG.info("job completed, stopping Thrift server");
+			VassalRunner.this.stop();
+			LOG.info("Thrift server successfully stopped");
+		}
 	}
 }

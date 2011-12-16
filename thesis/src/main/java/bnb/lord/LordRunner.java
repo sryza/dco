@@ -32,6 +32,8 @@ public class LordRunner implements LordPublic {
 	
 	private TServer server;
 	
+	private Object waitToRunCondVar = new Object();
+	
 	public LordRunner(int port) {
 		jobMap = new HashMap<Integer, LordJobManager>();
 		vassalMap = new HashMap<Integer, VassalProxy>();
@@ -41,12 +43,7 @@ public class LordRunner implements LordPublic {
 	public void start() {
 		startServer(port);
 	}
-	
-	public void registerVassal(String host, int port, int id) {
-		VassalProxy proxy = new VassalProxy(host, port);
-		vassalMap.put(id, proxy);
-	}
-	
+		
 	public void registerVassal(VassalProxy proxy, int id) {
 		if (vassalMap.containsKey(id)) {
 			LOG.warn("vassal already registered with id " + id);
@@ -78,6 +75,23 @@ public class LordRunner implements LordPublic {
 		} catch (TTransportException ex) {
 			LOG.error("Trouble making server socket", ex);
 		}
+	}
+	
+	/**
+	 * Runs a job when a required number of vassals have checked in to the lord.
+	 * @numVassals
+	 * 		the number of unique vassals to wait for to run the job
+	 */
+	public void runJobWhenEnoughVassals(BnbNode root, Problem spec, double bestCost, int numVassals) {
+		synchronized(waitToRunCondVar) {
+			while (vassalMap.size() < numVassals) {
+				try {
+					waitToRunCondVar.wait();
+				} catch (InterruptedException ex) {	}
+			}
+		}
+		
+		runJob(root, spec, bestCost, numVassals, 0);
 	}
 	
 	public void runJob(BnbNode root, Problem spec, double bestCost, int numVassals, int minNodesToSave) {		
@@ -157,5 +171,13 @@ public class LordRunner implements LordPublic {
 			jobManager.updateMinCost(bestCost, vassal);
 		}
 		return jobManager.askForWork(vassalid);
+	}
+	
+	public void registerVassal(String hostname, int port, int id) {
+		VassalProxy proxy = new VassalProxy(hostname, port);
+		vassalMap.put(id, proxy);
+		synchronized(waitToRunCondVar) {
+			waitToRunCondVar.notify();
+		}
 	}
 }
