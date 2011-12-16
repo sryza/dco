@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.log4j.Logger;
+
 /**
  * We want to calculate the feasibility/cost of insertion for each customer at
  * each insertion point.
@@ -22,6 +24,9 @@ import java.util.Stack;
  * TODO: HOW DO WE BEST CONSIDER VEHICLE CAPACITIES
  */
 public class VrpBookkeeping {
+	
+	private static final Logger LOG = Logger.getLogger(VrpBookkeeping.class);
+	
 	// array index is customer id
 	// should order by cost of insertion
 	// could be a TreeMap<Integer (cost), List<RouteNode>>
@@ -71,7 +76,7 @@ public class VrpBookkeeping {
 				//for each node in the route
 				RouteNode routeNode = routeStart;
 				do {
-					//consider inserting cust after routeNode
+					//here consider inserting cust after routeNode
 					
 					//calculate dists
 					int distToCust = routeNode.customer.dist(cust);
@@ -92,7 +97,6 @@ public class VrpBookkeeping {
 					}
 					
 					//calculate insertion cost
-
 					int insertionCost = distToCust + distFromCust -
 						routeNode.customer.dist(routeNode.next.customer);
 					
@@ -101,7 +105,7 @@ public class VrpBookkeeping {
 						continue;
 					}
 					
-					//TODO: add it
+					//TODO: add it to list of possible insertions
 					
 				} while ((routeNode = routeNode.next) != routeStart);
 			}
@@ -119,19 +123,63 @@ public class VrpBookkeeping {
 	 * 		the node to insert the customer after
 	 */
 	public void insert(Customer cust, RouteNode node) {
+		//perform insertion
 		RouteNode newNode = new RouteNode(cust, node.next, node);
 		node.next.prev = newNode;
 		node.next = newNode;
 		
 		List<RouteNode> prunedInsertions = new LinkedList<RouteNode>();
 		
-		//update minDepartTimes
+		//go forwards to update minDepartTimes
 		//at each insertion point, see whether this eliminates any feasible insertions
+		RouteNode curNode = newNode;
 		do {
+			//check time constraints
+			int minArriveTime = curNode.prev.minDepartTime + curNode.prev.customer.dist(curNode.customer);
+			if (minArriveTime >= cust.getWindowEnd()) {
+				LOG.error("invalid insertion when we expected it to be valid, something's wrong");
+				continue;
+			}
+			//calculate cust's new minDepartTime
+			int minDepartTime = Math.max(minArriveTime, curNode.customer.getWindowStart()) + 
+				curNode.customer.getServiceTime();
+			//if minDepartTime isn't changed, no need to keep going
+			if (curNode != newNode && minDepartTime == curNode.minDepartTime) {
+				break;
+			}
 			
-		} while();
+			curNode.minDepartTime = minDepartTime;
+			//TODO: remove insertions here
+		} while ((curNode = curNode.next) != routeStart); //TODO: any edge conditions here?
+		
+		//TODO: are we handling insertion at the end?
+		
+		//update maxDepartTimes
+		curNode = newNode;
+		do {
+			int maxDepartTime = Math.min(curNode.customer.getWindowEnd() + 
+					curNode.customer.getServiceTime(),
+					curNode.next.maxDepartTime - curNode.next.customer.getServiceTime() -
+					curNode.customer.dist(curNode.next.customer));
+			//if maxDepartTime isn't changed, no need to keep going
+			if (curNode != newNode && maxDepartTime == curNode.maxDepartTime) {
+				break;
+			}
+			curNode.maxDepartTime = maxDepartTime;
+			
+			//TODO: prune 
+		} while ((curNode = curNode.prev) != );
 		
 		//if any customers have no insertion points, return false
+	}
+	
+	/**
+	 * We can represent an insertion with a (disconnected RouteNode).
+	 * insertedNode was inserted into a tour. what possible insertions does it remove?
+	 * return them
+	 */
+	private List<RouteNode> pruneInsertions(RouteNode insertedNode) {
+		
 	}
 	
 	/**
