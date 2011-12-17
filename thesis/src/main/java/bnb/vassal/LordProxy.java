@@ -31,7 +31,7 @@ public class LordProxy {
 			if (!socket.isOpen()) {
 				socket.open();
 			}
-			lordClient.sendBestSolCost(cost, jobid, vassalid);
+			lordClient.sendBestSolCost(cost, jobid, vassalid, null);
 		} catch (TException ex) {
 			throw new IOException("send exception", ex);
 		}
@@ -69,6 +69,17 @@ public class LordProxy {
 			throw new IOException("invalid class", e);
 		} catch (SecurityException e) {
 			throw new IOException("invalid class", e);
+		}
+	}
+	
+	public void registerVassal(String hostname, int port, int id) throws IOException {
+		try {
+			if (!socket.isOpen()) {
+				socket.open();
+			}
+			lordClient.registerVassal(hostname, port, id);
+		} catch (TException ex) {
+			throw new IOException("send exception", ex);
 		}
 	}
 }

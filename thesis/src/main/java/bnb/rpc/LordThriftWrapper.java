@@ -53,7 +53,7 @@ public class LordThriftWrapper implements ThriftLord.Iface {
 	public void registerVassal(String hostname, int port, int vassalid)
 			throws TException {
 		try {
-			lord.registerVassal(hostname, port, id);
+			lord.registerVassal(hostname, port, vassalid);
 		} catch (IOException ex) {
 			LOG.error("IOException where we shouldn't really have one", ex);
 			throw new TException(ex);

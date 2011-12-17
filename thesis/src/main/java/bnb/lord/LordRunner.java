@@ -173,6 +173,7 @@ public class LordRunner implements LordPublic {
 		return jobManager.askForWork(vassalid);
 	}
 	
+	@Override
 	public void registerVassal(String hostname, int port, int id) {
 		VassalProxy proxy = new VassalProxy(hostname, port);
 		vassalMap.put(id, proxy);

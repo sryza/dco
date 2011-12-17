@@ -25,18 +25,29 @@ public class LordMain {
 	
 	public static void main(String[] args) throws IOException {
 		int lordPort = DEFAULT_LORD_PORT;
-		File vassalFile = new File(args[0]);
+		// if first arg is a number, it's the number of vassals to wait for connections from
+		// otherwise, it's a file specifying a list of vassals
+		int numVassalsToWaitFor = -1;
+		File vassalFile = null;
+		if (args[0].matches("\\d+")) {
+			numVassalsToWaitFor = Integer.parseInt(args[0]);
+		} else {
+			vassalFile = new File(args[0]);
+		}
+
 		File citiesFile = new File(args[1]);
 		int numCities = Integer.parseInt(args[2]);
-		List<String> vassalHosts = readLines(vassalFile);
-		LOG.info("vassal hosts: " + vassalHosts);
 		
 		final LordRunner lord = new LordRunner(lordPort);
-		
-		VassalProxy[] vassalProxies = new VassalProxy[vassalHosts.size()];
-		for (int i = 0; i < vassalHosts.size(); i++) {
-			vassalProxies[i] = new VassalProxy(vassalHosts.get(i), Ports.DEFAULT_VASSAL_PORT);
-			lord.registerVassal(vassalProxies[i]);
+		List<String> vassalHosts = null;
+		if (vassalFile != null) {
+			vassalHosts = readLines(vassalFile);
+			LOG.info("vassal hosts: " + vassalHosts);
+			VassalProxy[] vassalProxies = new VassalProxy[vassalHosts.size()];
+			for (int i = 0; i < vassalHosts.size(); i++) {
+				vassalProxies[i] = new VassalProxy(vassalHosts.get(i), Ports.DEFAULT_VASSAL_PORT);
+				lord.registerVassal(vassalProxies[i]);
+			}
 		}
 		
 		lord.start();
@@ -48,8 +59,12 @@ public class LordMain {
 		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
 		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, null, -1, problem);
-
-		lord.runJob(root, problem, Double.MAX_VALUE, vassalHosts.size(), 0);
+		
+		if (vassalFile != null) {
+			lord.runJob(root, problem, Double.MAX_VALUE, vassalHosts.size(), 0);
+		} else {
+			lord.runJobWhenEnoughVassals(root, problem, Double.MAX_VALUE, numVassalsToWaitFor);
+		}
 	}
 	
 	private static List<String> readLines(File f) throws IOException {

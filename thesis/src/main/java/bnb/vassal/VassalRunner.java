@@ -1,6 +1,8 @@
 package bnb.vassal;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +29,7 @@ public class VassalRunner implements VassalPublic {
 	
 	private int numSlots;
 	private final Map<Integer, VassalJobManager> jobMap;
-	private final LordProxy lordInfo;
+	private final LordProxy lordProxy;
 	private final int vassalId;
 	private TServer server;
 	private final int port;
@@ -35,7 +37,7 @@ public class VassalRunner implements VassalPublic {
 	public VassalRunner(LordProxy lordProxy, int numSlots, int vassalId, int port) {
 		this.numSlots = numSlots;
 		jobMap = new HashMap<Integer, VassalJobManager>();
-		this.lordInfo = lordProxy;
+		this.lordProxy = lordProxy;
 		this.vassalId = vassalId;
 		this.port = port;
 	}
@@ -44,9 +46,16 @@ public class VassalRunner implements VassalPublic {
 		startServer(port);
 		
 		//let lord know we're here
-//		java.net.InetAddress addr = java.net.InetAddress.getLocalHost();
-//	    String hostname = addr.getHostName();
-//	    System.out.println("Hostname of system = " + hostname);
+		try {
+			InetAddress addr = InetAddress.getLocalHost();
+		    String hostname = addr.getHostName();
+		    LOG.info("My hostname is " + hostname);
+		    lordProxy.registerVassal(hostname, port, vassalId);
+		} catch (UnknownHostException ex) {
+			LOG.error("Failed to retrieve hostname, not going to register with lord", ex);
+		} catch (IOException ex) {
+			LOG.error("Failed to register with lord", ex);
+		}
 	}
 	
 	private void startServer(int port) {
@@ -97,7 +106,7 @@ public class VassalRunner implements VassalPublic {
 			}
 			nodePool.post(node);
 		}
-		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordInfo, vassalId, jobid);
+		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordProxy, vassalId, jobid);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 		
@@ -107,7 +116,7 @@ public class VassalRunner implements VassalPublic {
 		jobMap.put(jobid, jobManager);
 		List<Thread> taskThreads = new ArrayList<Thread>();
 		for (int i = 0; i < numThreads; i++) {
-			Thread t = startTaskRunner(lordInfo, nodePool, jobManager, stats, completeBarrier);
+			Thread t = startTaskRunner(lordProxy, nodePool, jobManager, stats, completeBarrier);
 			taskThreads.add(t);
 		}
 		
