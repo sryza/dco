@@ -18,7 +18,7 @@ public class SimpleTest {
 		for (int i = 0; i < vassals.length; i++) {
 			int port = 1455 + i;
 			int id = i;
-			vassals[i] = new VassalRunner(makeLordProxy(), 1, id, port);
+//			vassals[i] = new VassalRunner(makeLordProxy(), 1, id, port);
 			vassals[i].start();
 		}
 	}

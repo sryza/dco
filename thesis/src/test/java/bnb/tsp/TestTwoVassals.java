@@ -28,7 +28,7 @@ public class TestTwoVassals {
 		for (int i = 0; i < vassals.length; i++) {
 			LordProxy lordProxy = new LordProxy("localhost", Ports.DEFAULT_LORD_PORT);
 			LOG.info("instantiated lord proxy");
-			vassals[i] = new VassalRunner(lordProxy, numCores, i, Ports.DEFAULT_VASSAL_PORT+i);
+			vassals[i] = new VassalRunner(lordProxy, numCores, i, Ports.DEFAULT_VASSAL_PORT+i, null);
 			vassals[i].start();
 			LOG.info("started vassal " + i);
 		}

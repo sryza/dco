@@ -26,7 +26,7 @@ public class TestOneVassal {
 		LordProxy lordProxy = new LordProxy("localhost", Ports.DEFAULT_LORD_PORT); 
 		LOG.info("instantiated lord proxy");
 
-		VassalRunner vassal = new VassalRunner(lordProxy, numCores, 1, Ports.DEFAULT_VASSAL_PORT);
+		VassalRunner vassal = null;//new VassalRunner(lordProxy, numCores, 1, Ports.DEFAULT_VASSAL_PORT);
 		vassal.start();
 		LOG.info("started vassal");
 		
@@ -42,8 +42,8 @@ public class TestOneVassal {
 		LinkedList<City> remainingCities = new LinkedList<City>();
 		remainingCities.addAll(Arrays.asList(cities).subList(1, cities.length));
 		
-		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, -1, problem);
+//		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, -1, problem);
 
-		lord.runJob(root, problem, /*Double.MAX_VALUE*/300, Arrays.asList(vassalProxy), 1);
+//		lord.runJob(root, problem, /*Double.MAX_VALUE*/300, Arrays.asList(vassalProxy), 1);
 	}	
 }

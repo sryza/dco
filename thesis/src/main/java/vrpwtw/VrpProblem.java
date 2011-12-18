@@ -7,7 +7,7 @@ package vrpwtw;
 public class VrpProblem {
 	//by route id
 	private Route[] routes;
-	private final int capacity;
+	private int capacity;
 	
 	public int getNumRoutes() {
 		return routes.length;

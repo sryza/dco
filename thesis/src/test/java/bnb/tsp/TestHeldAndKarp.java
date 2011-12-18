@@ -34,7 +34,7 @@ public class TestHeldAndKarp {
 		remainingNodes.addAll(Arrays.asList(cities).subList(2, cities.length));
 		int[] nodeEdges = new int[cities.length];
 		
-		int cost = HeldAndKarp.mstCost(cities[0], cities[1], remainingNodes, edgesQueue, nodeEdges);
-		Assert.assertEquals(3, cost);
+//		int cost = HeldAndKarp.mstCost(cities[0], cities[1], remainingNodes, edgesQueue, nodeEdges);
+//		Assert.assertEquals(3, cost);
 	}
 }

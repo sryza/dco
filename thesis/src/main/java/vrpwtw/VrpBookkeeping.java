@@ -123,7 +123,7 @@ public class VrpBookkeeping {
 	 * @param node
 	 * 		the node to insert the customer after
 	 */
-	public void insert(Customer cust, RouteNode node) {
+	public void insert(Customer cust, RouteNode node, RouteNode routeStart) {
 		//perform insertion
 		RouteNode newNode = new RouteNode(cust, node.next, node);
 		node.next.prev = newNode;
@@ -169,7 +169,7 @@ public class VrpBookkeeping {
 			curNode.maxDepartTime = maxDepartTime;
 			
 			//TODO: prune 
-		} while ((curNode = curNode.prev) != );
+		} while ((curNode = curNode.prev) != null);//TODO: this is wrong, just did this to get it to compile
 		
 		//if any customers have no insertion points, return false
 	}

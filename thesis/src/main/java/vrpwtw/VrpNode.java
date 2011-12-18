@@ -88,9 +88,8 @@ public class VrpNode extends BnbNode {
 					//capacity constraints, then return a child with it
 				}
 			}
+			return null;
 		}
-		
-		return null;
 	}
 
 	@Override
