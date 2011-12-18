@@ -1,7 +1,9 @@
 package vrpwtw;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -22,15 +24,14 @@ import org.apache.log4j.Logger;
  * then check for feasibility/cost both before and after the inserted city.
  *
  * TODO: HOW DO WE BEST CONSIDER VEHICLE CAPACITIES
+ * 
+ * TODO: make sure we're consistent with all the bounds
  */
 public class VrpBookkeeping {
 	
 	private static final Logger LOG = Logger.getLogger(VrpBookkeeping.class);
 	
-	// array index is customer id
-	// should order by cost of insertion
-	// could be a TreeMap<Integer (cost), List<RouteNode>>
-	private Set<RouteNode>[] insertionPoints;
+	private Map<RouteNode, List<Customer>> insertionsByNode;
 	private VrpProblem problem;
 	
 	private Stack<List<RouteNode>> removedCustsStack;
@@ -174,12 +175,82 @@ public class VrpBookkeeping {
 	}
 	
 	/**
-	 * We can represent an insertion with a (disconnected RouteNode).
+	 * We can represent an insertion with a disconnected RouteNode.
 	 * insertedNode was inserted into a tour. what possible insertions does it remove?
-	 * return them
+	 * return them.
+	 * 
+	 * We need to split the insertion list at that point into two different insertion lists.
+	 * @param cost
+	 * 		the new cost of the tour after inserting insertedNode
+	 * @param bestCost
+	 * 		the current bestCost which we must not exceed
+	 * 
+	 *TODO: consider the edge cases
 	 */
-	private List<RouteNode> pruneInsertions(RouteNode insertedNode) {
+	private void pruneInsertions(RouteNode insertedNode, int cost, int bestCost, 
+			List<Customer> pruned, List<Customer> afterOk, List<Customer> beforeOk) {
+		//for each customer at the given insertion point
 		
+		//TODO: consider capacity
+		
+		List<Customer> insertions = null;
+		for (Customer cust : insertions) {
+			boolean beforeFeasible = insertionFeasible(insertedNode.prev, insertedNode, cust, bestCost-cost);
+			boolean afterFeasible = insertionFeasible(insertedNode, insertedNode.next, cust, bestCost-cost);
+			if (beforeFeasible) {
+				beforeOk.add(cust);
+			}
+			if (afterFeasible) {
+				afterOk.add(cust);
+			}
+			if (!beforeFeasible && !afterFeasible) {
+				pruned.add(cust);
+			}
+		}
+	}
+	
+	/**
+	 * Determines the feasibility of inserting cust between prev and next.
+	 * @param
+	 * 		if inserting would increase the objective function by costSlack or more, return false
+	 */
+	private boolean insertionFeasible(RouteNode prev, RouteNode next, Customer cust, int costSlack) {
+		int costOfInsertion = prev.customer.dist(cust) + cust.dist(next.customer) - 
+			prev.customer.dist(next.customer);
+		if (costOfInsertion >= costSlack) {
+			return false;
+		}
+		
+		int minArriveTime = prev.minDepartTime + prev.customer.dist(cust); //for cust
+		if (minArriveTime >= cust.getWindowEnd()) {
+			return false;
+		}
+		int minDepartTime = minDepartTime(minArriveTime, cust);
+		if (minDepartTime + cust.dist(next.customer) >= next.customer.getWindowStart()) {
+			return false;
+		}
+		
+		int maxDepartTime = maxDepartTime(cust, next.customer, next.maxDepartTime); //for cust
+		if (maxDepartTime - cust.getServiceTime() < cust.getWindowStart()) {
+			return false;
+		}
+		int prevMaxDepartTime = maxDepartTime(prev.customer, cust, maxDepartTime);
+		if (prevMaxDepartTime - prev.customer.getServiceTime() < prev.customer.getWindowStart()) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private int minDepartTime(int minArriveTime, Customer cust) {
+		return Math.max(cust.getWindowStart(), minArriveTime) + cust.getServiceTime();
+	}
+	
+	private int maxDepartTime(Customer cust, Customer next, int nextMaxDepartTime) {
+		return Math.min(cust.getWindowEnd() + 
+				cust.getServiceTime(),
+				nextMaxDepartTime - next.getServiceTime() -
+				cust.dist(next));
 	}
 	
 	/**
