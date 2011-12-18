@@ -21,6 +21,8 @@ import bnb.BnbNode;
 public class TspNode extends BnbNode {
 	private static final Logger LOG = Logger.getLogger(TspNode.class);
 	
+	private static final int DONT_STEAL_NUM_CITIES = 6;
+	
 	private boolean isEvaluated;
 	
 	private boolean bounded;
@@ -426,6 +428,11 @@ public class TspNode extends BnbNode {
 		} else {
 			return new TspSolution(new ParentCityIterator(this), heldKarpOptimalTour, problem.getNumCities());
 		}
+	}
+	
+	@Override
+	public boolean dontSteal() {
+		return (problem.getNumCities() - numChosen) < DONT_STEAL_NUM_CITIES;
 	}
 	
 	@Override

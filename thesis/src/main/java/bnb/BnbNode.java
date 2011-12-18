@@ -68,4 +68,10 @@ public abstract class BnbNode implements Byteable {
 	public abstract Solution getSolution();
 	
 	public abstract void initFromBytes(byte[] bytes, Problem problem);
+	
+	/**
+	 * Returns false when the node shouldn't be stolen (probably because it's too small
+	 * to be worth it).
+	 */
+	public abstract boolean dontSteal();
 }

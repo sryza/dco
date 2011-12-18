@@ -128,4 +128,10 @@ public class VrpNode extends BnbNode {
 		
 	}
 
+	@Override
+	public boolean dontSteal() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
