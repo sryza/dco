@@ -38,6 +38,11 @@ public class LordMain {
 		File citiesFile = new File(args[1]);
 		int numCities = Integer.parseInt(args[2]);
 		
+		int upperBound = Integer.MAX_VALUE;
+		if (args.length > 3) {
+			upperBound = Integer.parseInt(args[3]);
+		}
+		
 		final LordRunner lord = new LordRunner(lordPort);
 		List<String> vassalHosts = null;
 		if (vassalFile != null) {
@@ -61,9 +66,9 @@ public class LordMain {
 		TspNode root = new TspNode(cities[0], cities[0], 1, null, remainingCities, null, -1, problem);
 		
 		if (vassalFile != null) {
-			lord.runJob(root, problem, Double.MAX_VALUE, vassalHosts.size(), 0);
+			lord.runJob(root, problem, upperBound, vassalHosts.size(), 0);
 		} else {
-			lord.runJobWhenEnoughVassals(root, problem, Double.MAX_VALUE, numVassalsToWaitFor);
+			lord.runJobWhenEnoughVassals(root, problem, upperBound, numVassalsToWaitFor);
 		}
 	}
 	

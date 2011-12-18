@@ -27,6 +27,10 @@ To See What's Clogging A Port
 ssh cslab2b netstat -tnlp | grep 4389
 
 
-To See Whether Vassals Are Running
-----------------------------------
+To Run A Bunch of Vassals and Lords On The Grid
+-----------------------------------------------
+second argument is number of vassals
+./runlord.sh 3 ../../tsptests/eil51.258 15
+in a separate shell:
+qsub -pe smp 2 -q '*@@ang' -t 1-3 gridvassal.sh hoover 2
 

@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public class VassalJobStats {
+	
+	private static final Logger LOG = Logger.getLogger(VassalJobStats.class);
+	
 	private ThreadLocal<Long> askForWorkStart;
 	private ThreadLocal<Long> nextNodeStart;
 	
@@ -43,7 +48,7 @@ public class VassalJobStats {
 	 * only executes once.
 	 */
 	public void report() {
-		System.out.println(makeReport());
+		LOG.info(makeReport());
 	}
 	
 	public String makeReport() {

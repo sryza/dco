@@ -175,6 +175,7 @@ public class VassalRunner implements VassalPublic {
 			LOG.info("job completed, stopping Thrift server");
 			VassalRunner.this.stop();
 			LOG.info("Thrift server successfully stopped");
+			System.exit(0);
 		}
 	}
 }

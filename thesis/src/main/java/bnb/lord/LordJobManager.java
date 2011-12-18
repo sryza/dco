@@ -135,7 +135,7 @@ public class LordJobManager {
 	//TODO: need this synchronization?
 	public synchronized void updateMinCost(double cost, VassalProxy source) {
 		if (cost < minCost) {
-			LOG.info("lord received better min cost: " + cost);
+			LOG.info("lord received better min cost from vassal " + source.getVassalIdCache() + ": " + cost);
 			this.minCost = Math.min(cost, minCost);
 			for (VassalProxy vassalProxy : vassalProxies) {
 				if (vassalProxy != source) {
