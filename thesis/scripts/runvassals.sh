@@ -10,7 +10,7 @@ vassalId=0
 while read line
 	do
 		echo "starting vassal on $line";
-		ssh $line java -classpath $JAVA_CLASSPATH bnb.vassal.VassalMain $2 $vassalId $3 &
+		ssh $line java -classpath $JAVA_CLASSPATH bnb.tsp.run.VassalMain $2 $vassalId $3 &
 		vassalId=$((vassalId+1))
 	done < $1
 

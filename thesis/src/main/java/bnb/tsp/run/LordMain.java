@@ -1,4 +1,4 @@
-package bnb.lord;
+package bnb.tsp.run;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,9 +11,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import bnb.lord.LordRunner;
+import bnb.lord.VassalProxy;
 import bnb.rpc.Ports;
 import bnb.tsp.City;
-import bnb.tsp.ProblemGen;
 import bnb.tsp.TspNode;
 import bnb.tsp.TspProblem;
 

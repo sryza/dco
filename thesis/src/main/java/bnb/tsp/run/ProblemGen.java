@@ -1,9 +1,11 @@
-package bnb.tsp;
+package bnb.tsp.run;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import bnb.tsp.City;
 
 public class ProblemGen {
 	

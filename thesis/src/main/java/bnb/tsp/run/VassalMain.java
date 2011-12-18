@@ -1,4 +1,4 @@
-package bnb.vassal;
+package bnb.tsp.run;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,6 +9,8 @@ import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 
 import bnb.rpc.Ports;
+import bnb.vassal.LordProxy;
+import bnb.vassal.VassalRunner;
 
 public class VassalMain {
 	

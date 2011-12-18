@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import bnb.lord.LordRunner;
 import bnb.lord.VassalProxy;
 import bnb.rpc.Ports;
+import bnb.tsp.run.ProblemGen;
 import bnb.vassal.LordProxy;
 import bnb.vassal.VassalRunner;
 
