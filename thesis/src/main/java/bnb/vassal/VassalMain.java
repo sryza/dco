@@ -1,6 +1,7 @@
 package bnb.vassal;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.log4j.Appender;
@@ -32,9 +33,19 @@ public class VassalMain {
 		FileAppender fileAppender = new FileAppender(appender.getLayout(), logFilePath);
 		Logger.getRootLogger().addAppender(fileAppender);
 		
+		//create output file for stats
+		String statsFilePath = "logs/stats/" + id;
+		File statsFile = null;
+		int i = 0;
+		do {
+			statsFile = new File(statsFilePath + "_" + i + ".stats");
+			i++;
+		} while (statsFile.exists());
+		FileOutputStream sfos = new FileOutputStream(statsFile);
+		
 		LordProxy lordProxy = new LordProxy(lordHost, lordPort);
 		LOG.info("created lord proxy");
-		VassalRunner vassal = new VassalRunner(lordProxy, numSlots, id, vassalPort);
+		VassalRunner vassal = new VassalRunner(lordProxy, numSlots, id, vassalPort, sfos);
 		LOG.info("about to start vassal runner");
 		vassal.start();
 	}

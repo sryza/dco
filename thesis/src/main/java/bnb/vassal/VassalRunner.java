@@ -1,13 +1,15 @@
 package bnb.vassal;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CyclicBarrier;
 
 import org.apache.log4j.Logger;
 import org.apache.thrift.TProcessor;
@@ -34,12 +36,15 @@ public class VassalRunner implements VassalPublic {
 	private TServer server;
 	private final int port;
 	
-	public VassalRunner(LordProxy lordProxy, int numSlots, int vassalId, int port) {
+	private final OutputStream statsOs;
+	
+	public VassalRunner(LordProxy lordProxy, int numSlots, int vassalId, int port, OutputStream statsOs) {
 		this.numSlots = numSlots;
 		jobMap = new HashMap<Integer, VassalJobManager>();
 		this.lordProxy = lordProxy;
 		this.vassalId = vassalId;
 		this.port = port;
+		this.statsOs = statsOs;
 	}
 	
 	public void start() {
@@ -111,24 +116,23 @@ public class VassalRunner implements VassalPublic {
 		jobManagerThread.start();
 		
 		VassalJobStats stats = new VassalJobStats();
-		CyclicBarrier completeBarrier = new CyclicBarrier(numThreads);
 
 		jobMap.put(jobid, jobManager);
 		List<Thread> taskThreads = new ArrayList<Thread>();
 		for (int i = 0; i < numThreads; i++) {
-			Thread t = startTaskRunner(lordProxy, nodePool, jobManager, stats, completeBarrier);
+			Thread t = startTaskRunner(lordProxy, nodePool, jobManager, stats);
 			taskThreads.add(t);
 		}
 		
-		new TermThread(taskThreads).start();
+		new TermThread(taskThreads, stats).start();
 	}
 	
 	/**
 	 * Returns the thread that the task is running on.
 	 */
 	public Thread startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
-			VassalJobManager jobManager, VassalJobStats stats, CyclicBarrier completeBarrier) {
-		TaskRunner runner = new TaskRunner(jobManager, stats, completeBarrier);
+			VassalJobManager jobManager, VassalJobStats stats) {
+		TaskRunner runner = new TaskRunner(jobManager, stats);
 		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
 		taskThread.setName("Vassal " + vassalId + " TaskRunner");
@@ -159,9 +163,11 @@ public class VassalRunner implements VassalPublic {
 	private class TermThread extends Thread {
 		
 		private final List<Thread> threads;
+		private final VassalJobStats stats;
 		
-		public TermThread(List<Thread> threads) {
+		public TermThread(List<Thread> threads, VassalJobStats stats) {
 			this.threads = threads;
+			this.stats = stats;
 		}
 		
 		public void run() {
@@ -172,9 +178,20 @@ public class VassalRunner implements VassalPublic {
 					LOG.error("Interrupted while waiting to terminate", ex);
 				}
 			}
+			
+			if (statsOs != null) {
+				try {
+					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(statsOs));
+					bw.write(stats.makeReport());
+				} catch (IOException ex) {
+					LOG.error("Error writing stats to output stream", ex);
+				}
+			}
+			
 			LOG.info("job completed, stopping Thrift server");
 			VassalRunner.this.stop();
 			LOG.info("Thrift server successfully stopped");
+			
 			System.exit(0);
 		}
 	}

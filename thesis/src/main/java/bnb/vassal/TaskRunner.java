@@ -1,7 +1,5 @@
 package bnb.vassal;
 
-import java.util.concurrent.CyclicBarrier;
-
 import org.apache.log4j.Logger;
 
 import bnb.BnbNode;
@@ -12,16 +10,14 @@ public class TaskRunner implements Runnable {
 	
 	private final VassalJobManager jobManager;
 	private final VassalJobStats stats;
-	private final CyclicBarrier completeBarrier;
 	
 	private int numEvaluated;
 	
 	private volatile boolean working = true;
 	
-	public TaskRunner(VassalJobManager jobManager, VassalJobStats stats, CyclicBarrier barrier) {
+	public TaskRunner(VassalJobManager jobManager, VassalJobStats stats) {
 		this.jobManager = jobManager;
 		this.stats = stats;
-		this.completeBarrier = barrier;
 	}
 	
 	public void run() {
@@ -63,15 +59,7 @@ public class TaskRunner implements Runnable {
 					}
 				}
 			}
-		}
-		try {
-			if (completeBarrier.await() == 0) {
-				stats.report();
-			}
-		} catch (Exception ex) {
-			LOG.warn("complete barrier problem, could not report stats", ex);
-		}
-		
+		}		
 //		LOG.info("numEvaluated: " + numEvaluated);
 	}
 	

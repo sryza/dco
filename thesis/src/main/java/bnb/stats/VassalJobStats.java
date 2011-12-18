@@ -42,18 +42,12 @@ public class VassalJobStats {
 	public void reportAskForWorkEnd() {
 		askForWorkLats.add(System.currentTimeMillis()-askForWorkStart.get());
 	}
-	
-	/**
-	 * If this method is called multiple times (from different threads) it
-	 * only executes once.
-	 */
-	public void report() {
-		LOG.info(makeReport());
-	}
-	
+		
 	public String makeReport() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Ask for work latencies: \n");
+		sb.append(askForWorkLats.getAll());
+		sb.append("Ask for work latencies stats: \n");
 		makeReportOnList(askForWorkLats.getAll(), sb);
 		sb.append("Next node latencies: \n");
 		makeReportOnList(nextNodeLats.getAll(), sb);
