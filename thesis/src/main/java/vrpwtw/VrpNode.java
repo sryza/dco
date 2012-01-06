@@ -16,7 +16,13 @@ public class VrpNode extends BnbNode {
 	
 	private int[] routeFilledAmounts; //organized by route id
 	
-	public VrpNode(BnbNode parent) {
+	private VrpBookkeeping bookkeeping;
+	
+	private InsertionListsNode insertion; 
+	
+	private InsertionListsNode nextChildInsertion;
+	
+	public VrpNode(BnbNode parent, Customer custToInsert, RouteNode insertionPoint) {
 		super(parent);
 		// TODO Auto-generated constructor stub
 	}
@@ -25,12 +31,6 @@ public class VrpNode extends BnbNode {
 	public byte[] toBytes() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void whenAllChildrenDone() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class VrpNode extends BnbNode {
 	@Override
 	public void evaluate(double bound) {
 		// TODO Auto-generated method stub
-		
+		bookkeeping.insert(insertion, routeStart);
 		
 	}
 
@@ -55,6 +55,27 @@ public class VrpNode extends BnbNode {
 
 	@Override
 	public BnbNode nextChild() {
+		//here we don't actually make any changes to the data structures, we leave
+		//that to the evaluate method. that way, we don't have to undo anything before forking.
+			//not exactly true, because stuff will be modified down the line
+		
+		//TODO: make it so that propagation can make us insert (and be able to uninsert) multiple children
+		// for a single node
+		
+		//find customer whose cheapest insertion point is maximum
+		if (nextChildInsertion == null) {
+			InsertionList custList = bookkeeping.getMaxCheapestInsertionCustomer();
+			nextChildInsertion = custList.getHead();
+		} else {
+			nextChildInsertion = nextChildInsertion.nextInCustList;
+		}
+		
+		
+		//TODO: what if there are none?
+		
+		new VrpNode(nextChildInsertion);
+		
+		
 		// TODO: select depot whose best insertion degrades the objective function the most
 		// does this mean that we have to try inserting every node in every place?
 		
@@ -69,27 +90,15 @@ public class VrpNode extends BnbNode {
 		// path after an inserted node ahead of the times we're allowed to visit them at
 
 		//this should be set by the heuristic somehow, now we apply our CP to it
-
-		while (true) { //TODO: need a better child condition
-			Customer child = null;
-			
-			for (int i = 0; i < problem.getNumRoutes(); i++) {
-				//skip the route if we can't fit inside of it
-				Route route = problem.getRouteById(i);
-				if (routeFilledAmounts[i] + child.getDemand() > route.getCapacity()) {
-					continue;
-				}
-				
-				List<Customer> depots = route.getDepots();
-				ListIterator<Customer> iter = depots.listIterator();
-				while (iter.hasNext()) {
-					Customer next = iter.next();
-					//if we can place the depot after this depot by the time and
-					//capacity constraints, then return a child with it
-				}
-			}
-			return null;
-		}
+	}
+	
+	@Override
+	public void whenAllChildrenDone() {
+		//TODO: uninsert the inserted customer(s?)
+		bookkeeping.uninsert(insertion);
+		
+		//TODO: insert the insertion back into the customer's insertion list
+		insertion.addToLists(custList, pointList);
 	}
 
 	@Override

@@ -61,7 +61,16 @@ public class Customer {
 		return windowEnd;
 	}
 	
+	public int getId() {
+		return id;
+	}
+	
 	public int dist(Customer other) {
 		return (int)Math.sqrt(x*x + y*y);
+	}
+	
+	public boolean equals(Object other) {
+		Customer cust = (Customer)other;
+		return id == cust.id;
 	}
 }

@@ -1,6 +1,8 @@
 package vrpwtw;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +31,23 @@ import org.apache.log4j.Logger;
  */
 public class VrpBookkeeping {
 	
+	/**
+	 * TODO: First node in route should probably always be depot
+	 */
+	
 	private static final Logger LOG = Logger.getLogger(VrpBookkeeping.class);
 	
-	private Map<RouteNode, List<Customer>> insertionsByNode;
+	//RouteNode is the node after which the node would be inserted
+	//lists in this structure are ordered by cost of insertion
+//	private Map<RouteNode, List<Customer>> insertionsByNode;
+	private Map<RouteNode, InsertionList> insertionsByPoint;
+	private Map<Customer, InsertionList> insertionsByCust;
 	private VrpProblem problem;
 	
-	private Stack<List<RouteNode>> removedCustsStack;
+	//for every customer we need to keep a list of insertion points, sorted by cost
+	//when we insert something, we need to modify the insertion points in the customer lists
+	//when we 
+	
 	
 	/**
 	 * 
@@ -50,6 +63,17 @@ public class VrpBookkeeping {
 	public void precomputeInsertionPoints(List<RouteNode> startNodes, int[] routeFullnesses, 
 			List<Customer> custs, int toursCost, int bestCost) {
 		
+		//compute minDepartTime for each customer
+		for (RouteNode routeStart : startNodes) {
+			routeStart.minDepartTime = routeStart.customer.getWindowStart() + routeStart.customer.getServiceTime();
+			RouteNode routeNode = routeStart.next;
+			while (routeNode != routeStart) {
+				int minArriveTime = routeNode.prev.minDepartTime + routeNode.prev.customer.dist(routeNode.customer);
+				routeNode.minDepartTime = minDepartTime(minArriveTime, routeNode.customer);
+				routeNode = routeNode.next;
+			}
+		}
+		
 		//compute maxDepartTime for each customer
 		for (RouteNode routeStart : startNodes) {
 			RouteNode routeNode = routeStart.prev;
@@ -63,7 +87,7 @@ public class VrpBookkeeping {
 				routeNode.maxDepartTime = maxDepartTime;
 			}
 		}
-		
+			
 		for (Customer cust : custs) {
 			//for each route
 			int routeId = -1;
@@ -106,15 +130,23 @@ public class VrpBookkeeping {
 						continue;
 					}
 					
-					//TODO: add it to list of possible insertions
-					
+					//add it to list of possible insertions
+					InsertionList byCustList = insertionsByCust.get(cust);
+					InsertionList byPointList = insertionsByPoint.get(routeNode);
+					InsertionListsNode insertion = new InsertionListsNode(cust, routeNode);
+					byCustList.add(insertion);
+					byPointList.add(insertion);
 				} while ((routeNode = routeNode.next) != routeStart);
 			}
-
 		}
+		
+		//TODO: now sort the lists in the way they should be sorted
+		//TODO: this can be done in parallel if it helps
 	}
 	
-	
+	public InsertionList getMaxCheapestInsertionCustomer() {
+		
+	}
 	
 	/**
 	 * Returns the RouteNode containing the inserted customer.
@@ -123,13 +155,49 @@ public class VrpBookkeeping {
 	 * @param node
 	 * 		the node to insert the customer after
 	 */
-	public void insert(Customer cust, RouteNode node, RouteNode routeStart) {
+	public void insert(InsertionListsNode insertion, RouteNode routeStart) {
+		RouteNode node = insertion.insertionPoint;
+		Customer cust = insertion.customer;
+		
+		//update possible insertions data structure
+		InsertionList custList = insertionsByCust.remove(cust);
+		InsertionList pointList = insertionsByPoint.remove(node);
+		//TODO: gotta save custList
+		
 		//perform insertion
 		RouteNode newNode = new RouteNode(cust, node.next, node);
 		node.next.prev = newNode;
 		node.next = newNode;
+		//calc minDepartTime and maxDepartTime for new node
+		int newNodeMinArriveTime = node.minDepartTime + node.customer.dist(cust);
+		newNode.minDepartTime = minDepartTime(newNodeMinArriveTime, cust);
+		newNode.maxDepartTime = maxDepartTime(cust, newNode.next.customer, newNode.next.maxDepartTime);
+		List<InsertionListsNode> prunedInsertions = new LinkedList<InsertionListsNode>();
 		
-		List<RouteNode> prunedInsertions = new LinkedList<RouteNode>();
+		//remove insertions at the point and place them into new lists if feasible
+		InsertionList before = new InsertionList(InsertionList.POINT);
+		//are we sure we want to use node and not a new one?  could conflict with updating minDepartTimes
+		//TODO: use a new node
+		insertionsByPoint.put(node, before);
+		InsertionList after = new InsertionList(InsertionList.POINT);
+		insertionsByPoint.put(newNode, after);
+		Iterator<InsertionListsNode> pointListIter = pointList.iterator();
+		while (pointListIter.hasNext()) {
+			InsertionListsNode curInsertion = pointListIter.next();
+			//remember to insert into both point list and cust list
+			boolean canInsertAfter = insertionFeasibleForward(curInsertion.customer, newNode, newNode.next);
+			if (canInsertAfter) {
+				InsertionListsNode afterInsertion = new InsertionListsNode(curInsertion.customer, newNode);
+				after.add(afterInsertion);
+			}
+			boolean canInsertBefore = insertionFeasibleBackward(curInsertion.customer, node, newNode);
+			if (canInsertBefore) {
+				before.add(curInsertion);
+			}
+			if (!canInsertBefore && !canInsertAfter) {
+				prunedInsertions.add(curInsertion);
+			}
+		}
 		
 		//go forwards to update minDepartTimes
 		//at each insertion point, see whether this eliminates any feasible insertions
@@ -142,26 +210,33 @@ public class VrpBookkeeping {
 				continue;
 			}
 			//calculate cust's new minDepartTime
-			int minDepartTime = Math.max(minArriveTime, curNode.customer.getWindowStart()) + 
-				curNode.customer.getServiceTime();
+			int minDepartTime = minDepartTime(minArriveTime, curNode.customer);
 			//if minDepartTime isn't changed, no need to keep going
 			if (curNode != newNode && minDepartTime == curNode.minDepartTime) {
 				break;
 			}
 			
 			curNode.minDepartTime = minDepartTime;
-			//TODO: remove insertions here
+			//prune/modify insertable data structure
+			InsertionList previouslyInsertable = insertionsByPoint.get(curNode); // TODO: what if curNode is newNode?  it won't have an entry
+			Iterator<InsertionListsNode> iter = previouslyInsertable.iterator();
+			while (iter.hasNext()) {
+				InsertionListsNode curInsertion = iter.next();
+				Customer insertCust = curInsertion.customer;
+				//if no longer insertable, prune it
+				if (!insertionFeasibleForward(insertCust, curNode, curNode.next)) {
+					iter.remove();
+					prunedInsertions.add(curInsertion);
+				}
+			}
 		} while ((curNode = curNode.next) != routeStart); //TODO: any edge conditions here?
 		
 		//TODO: are we handling insertion at the end?
 		
 		//update maxDepartTimes
 		curNode = newNode;
-		do {
-			int maxDepartTime = Math.min(curNode.customer.getWindowEnd() + 
-					curNode.customer.getServiceTime(),
-					curNode.next.maxDepartTime - curNode.next.customer.getServiceTime() -
-					curNode.customer.dist(curNode.next.customer));
+		while ((curNode = curNode.prev) != null){//TODO: this is wrong, just did this to get it to compile {
+			int maxDepartTime = maxDepartTime(curNode.customer, curNode.next.customer, curNode.next.maxDepartTime);
 			//if maxDepartTime isn't changed, no need to keep going
 			if (curNode != newNode && maxDepartTime == curNode.maxDepartTime) {
 				break;
@@ -169,17 +244,31 @@ public class VrpBookkeeping {
 			curNode.maxDepartTime = maxDepartTime;
 			
 			//TODO: prune 
-		} while ((curNode = curNode.prev) != null);//TODO: this is wrong, just did this to get it to compile
+			//prune/modify insertable data structure
+			InsertionList previouslyInsertable = insertionsByPoint.get(curNode); // TODO: what if curNode is newNode?  it won't have an entry
+			Iterator<InsertionListsNode> iter = previouslyInsertable.iterator();
+			while (iter.hasNext()) {
+				InsertionListsNode curInsertion = iter.next();
+				Customer insertCust = curInsertion.customer;
+				//if no longer insertable
+				if (!insertionFeasibleBackward(insertCust, curNode, curNode.next)) {
+					iter.remove();
+					prunedInsertions.add(curInsertion);
+				}
+		}
 		
 		//if any customers have no insertion points, return false
 	}
 	
 	/**
-	 * We can represent an insertion with a disconnected RouteNode.
-	 * insertedNode was inserted into a tour. what possible insertions does it remove?
-	 * return them.
+	 * Given an insertion point into a tour and a customer to insert into it (both specified by
+	 * a route node), looks at what was previously insertable there and figures out what
+	 * is still feasible to insert on either side of the new node.
 	 * 
 	 * We need to split the insertion list at that point into two different insertion lists.
+	 * @param insertions
+	 * 		customers that are able to be inserted at the insertion point before 
+	 * 		insertedNode.customer is inserted
 	 * @param cost
 	 * 		the new cost of the tour after inserting insertedNode
 	 * @param bestCost
@@ -187,13 +276,12 @@ public class VrpBookkeeping {
 	 * 
 	 *TODO: consider the edge cases
 	 */
-	private void pruneInsertions(RouteNode insertedNode, int cost, int bestCost, 
+	private void pruneInsertions(RouteNode insertedNode, int cost, int bestCost, List<Customer> insertions,
 			List<Customer> pruned, List<Customer> afterOk, List<Customer> beforeOk) {
 		//for each customer at the given insertion point
 		
 		//TODO: consider capacity
 		
-		List<Customer> insertions = null;
 		for (Customer cust : insertions) {
 			boolean beforeFeasible = insertionFeasible(insertedNode.prev, insertedNode, cust, bestCost-cost);
 			boolean afterFeasible = insertionFeasible(insertedNode, insertedNode.next, cust, bestCost-cost);
@@ -207,6 +295,28 @@ public class VrpBookkeeping {
 				pruned.add(cust);
 			}
 		}
+	}
+	
+	/**
+	 * Tests whether it's feasible to insert Customer insertCust between node1 and node2
+	 * 
+	 * The thinking behind this method is that when a node is inserted, feasibility for other nodes is only needed to
+	 * be tested in the direction of the other nodes from the node.
+	 * 
+	 * @param node1
+	 * @return
+	 */
+	private boolean insertionFeasibleForward(Customer insertCust, RouteNode node1, RouteNode node2) {
+		int insertCustMinArriveTime = node1.minDepartTime + node1.customer.dist(insertCust);
+		if (insertCustMinArriveTime >= insertCust.getWindowEnd()) {
+			return false;
+		}
+		int insertCustMinDepartTime = minDepartTime(insertCustMinArriveTime, node2.customer);
+		int nextMinArriveTime = insertCustMinDepartTime + insertCust.dist(node2.customer);
+		if (nextMinArriveTime >= node2.customer.getWindowEnd()) {
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -226,7 +336,7 @@ public class VrpBookkeeping {
 			return false;
 		}
 		int minDepartTime = minDepartTime(minArriveTime, cust);
-		if (minDepartTime + cust.dist(next.customer) >= next.customer.getWindowStart()) {
+		if (minDepartTime + cust.dist(next.customer) >= next.customer.getWindowEnd()) {
 			return false;
 		}
 		
@@ -241,7 +351,7 @@ public class VrpBookkeeping {
 		
 		return true;
 	}
-	
+		
 	private int minDepartTime(int minArriveTime, Customer cust) {
 		return Math.max(cust.getWindowStart(), minArriveTime) + cust.getServiceTime();
 	}
@@ -255,10 +365,25 @@ public class VrpBookkeeping {
 	
 	/**
 	 * Undoes an insertion, i.e. removes the node from the route
-	 * .
+	 * @param custList
+	 * 		list of points that insertion's customer could be inserted at
 	 * @param node
 	 */
-	public void uninsert(RouteNode node) {
+	public void uninsert(InsertionListsNode insertion, InsertionList custList, InsertionList pointList, 
+			List<InsertionListsNode> prunedInsertions) {
+		//update insertion data structures
+		Customer cust = insertion.customer;
+		insertionsByCust.put(cust, custList);
+		pointList.addBack(insertion);
+		
+		
+	}
+	
+	public boolean equals(VrpBookkeeping other) {
+		
+	}
+	
+	public VrpBookkeeping copy() {
 		
 	}
 }
