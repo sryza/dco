@@ -43,7 +43,7 @@ public class VrpNode extends BnbNode {
 	@Override
 	public void evaluate(double bound) {
 		// TODO Auto-generated method stub
-		bookkeeping.insert(insertion, routeStart);
+//		bookkeeping.insert(insertion, routeStart);
 		
 	}
 
@@ -73,7 +73,7 @@ public class VrpNode extends BnbNode {
 		
 		//TODO: what if there are none?
 		
-		new VrpNode(nextChildInsertion);
+//		new VrpNode(nextChildInsertion);
 		
 		
 		// TODO: select depot whose best insertion degrades the objective function the most
@@ -90,15 +90,17 @@ public class VrpNode extends BnbNode {
 		// path after an inserted node ahead of the times we're allowed to visit them at
 
 		//this should be set by the heuristic somehow, now we apply our CP to it
+		
+		return null;
 	}
 	
 	@Override
 	public void whenAllChildrenDone() {
 		//TODO: uninsert the inserted customer(s?)
-		bookkeeping.uninsert(insertion);
+//		bookkeeping.uninsert(insertion);
 		
 		//TODO: insert the insertion back into the customer's insertion list
-		insertion.addToLists(custList, pointList);
+//		insertion.addToLists(custList, pointList);
 	}
 
 	@Override

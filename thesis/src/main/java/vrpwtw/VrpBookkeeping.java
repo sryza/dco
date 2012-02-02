@@ -145,7 +145,7 @@ public class VrpBookkeeping {
 	}
 	
 	public InsertionList getMaxCheapestInsertionCustomer() {
-		
+		return null;
 	}
 	
 	/**
@@ -255,6 +255,7 @@ public class VrpBookkeeping {
 					iter.remove();
 					prunedInsertions.add(curInsertion);
 				}
+			}
 		}
 		
 		//if any customers have no insertion points, return false
@@ -351,7 +352,12 @@ public class VrpBookkeeping {
 		
 		return true;
 	}
-		
+	
+	private boolean insertionFeasibleBackward(Customer insertCust, RouteNode node1, RouteNode node2) {
+		return false;
+	}
+
+	
 	private int minDepartTime(int minArriveTime, Customer cust) {
 		return Math.max(cust.getWindowStart(), minArriveTime) + cust.getServiceTime();
 	}
@@ -380,10 +386,10 @@ public class VrpBookkeeping {
 	}
 	
 	public boolean equals(VrpBookkeeping other) {
-		
+		return false;
 	}
 	
 	public VrpBookkeeping copy() {
-		
+		return null;
 	}
 }
