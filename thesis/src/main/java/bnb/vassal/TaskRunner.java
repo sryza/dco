@@ -22,11 +22,13 @@ public class TaskRunner implements Runnable {
 	
 	public void run() {
 		LOG.info("running task");
+		stats.reportWorking();
 		while (true) {
 			stats.reportNextNodeStart();
 			BnbNode node = jobManager.getNodePool().nextNode();
 			stats.reportNextNodeEnd();
 			if (node == null) {
+				stats.reportNotWorking();
 				stats.reportAskForWorkStart();
 				boolean workStolen = stealWork();
 				stats.reportAskForWorkEnd();
@@ -59,7 +61,8 @@ public class TaskRunner implements Runnable {
 					}
 				}
 			}
-		}		
+		}
+		stats.reportDone();
 //		LOG.info("numEvaluated: " + numEvaluated);
 	}
 	
@@ -72,6 +75,7 @@ public class TaskRunner implements Runnable {
 	}
 	
 	public void setWorking() {
+		stats.reportWorking();
 		working  = true;
 	}
 	

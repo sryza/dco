@@ -1,7 +1,7 @@
 package bnb.stats;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -16,6 +16,11 @@ public class VassalJobStats {
 	//TODO: probably can just be a regular list
 	private ThreadLocalList<Long> askForWorkLats;
 	private ThreadLocalList<Long> nextNodeLats;
+	
+	private ThreadLocalList<Long> stopWorkTimes;
+	private ThreadLocalList<Long> startWorkTimes;
+	
+	private ThreadLocal<Long> doneTime;
 	
 	public VassalJobStats() {
 		askForWorkLats = new ThreadLocalList<Long>();
@@ -36,25 +41,85 @@ public class VassalJobStats {
 		askForWorkStart.set(System.currentTimeMillis());
 	}
 	
+	public void reportWorking() {
+		startWorkTimes.add(System.currentTimeMillis());
+	}
+	
+	public void reportNotWorking() {
+		stopWorkTimes.add(System.currentTimeMillis());
+	}
+	
+	public void reportDone() {
+		long time = System.currentTimeMillis();
+		stopWorkTimes.add(time);
+		doneTime.set(time);
+	}
+	
 	/**
 	 * TODO: maybe report depth of node stolen
 	 */
 	public void reportAskForWorkEnd() {
 		askForWorkLats.add(System.currentTimeMillis()-askForWorkStart.get());
 	}
-		
+	
+	/**
+	 * In a JSON format.
+	 */
 	public String makeReport() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Ask for work latencies: \n");
+		sb.append("{\"askForWork_latencies\":");
 		sb.append(askForWorkLats.getAll());
-		sb.append("Ask for work latencies stats: \n");
+		
+		sb.append(",\n");
+		
+		sb.append("\"askForWork_latencies_stats\":");
 		makeReportOnList(askForWorkLats.getAll(), sb);
-		sb.append("Next node latencies: \n");
-		makeReportOnList(nextNodeLats.getAll(), sb);
+		
+		sb.append(",\n");
 
+		sb.append("\"nextNode_latencies_stats\": ");
+		makeReportOnList(nextNodeLats.getAll(), sb);
+		
+		sb.append("\"time_spent\": ");
+		List<List<Long>> workStartLists = startWorkTimes.getLists();
+		List<List<Long>> workStopLists = stopWorkTimes.getLists();
+		if (workStartLists.size() != workStopLists.size()) {
+			sb.append("-1");
+		} else {
+			List<Long> totalWorkingTimes = new ArrayList<Long>();
+			List<Long> totalTimes = new ArrayList<Long>();
+			loop:
+			for (int i = 0; i < workStartLists.size(); i++) {
+				long totalWorkingTime = 0;
+				
+				List<Long> startTimesList = workStartLists.get(i);
+				List<Long> stopTimesList = workStopLists.get(i);
+				Iterator<Long> startTimesIter = startTimesList.iterator();
+				Iterator<Long> stopTimesIter = stopTimesList.iterator();
+				while (startTimesIter.hasNext()) {
+					if (!stopTimesIter.hasNext()) {
+						sb.append("-1");
+						break loop;
+					}
+					long startTime = startTimesIter.next();
+					long stopTime = stopTimesIter.next();
+					if (stopTime < startTime) {
+						sb.append("-1");
+						break loop;
+					}
+					
+					totalWorkingTime += startTime - stopTime;
+				}
+				totalWorkingTimes.add(totalWorkingTime);
+				totalTimes.add(stopTimesList.get(stopTimesList.size()-1) - startTimesList.get(0));
+			}
+			sb.append("[" + totalWorkingTimes + ", " + totalTimes + "]");
+		}
+		
+		sb.append("}");
 		return sb.toString();
 	}
-	
+		
 	/**
 	 * Calculates statistics on a list of numbers and appends them in
 	 * human readable form to the given StringBuilder.
@@ -79,10 +144,18 @@ public class VassalJobStats {
 		}
 		double var = sumSquareDist / list.size();
 		
-		sb.append("max: " + max + "\n");
-		sb.append("min: " + min + "\n");
-		sb.append("sum: " + sum + "\n");
-		sb.append("avg: " + avg + "\n");
-		sb.append("var: " + var + "\n");
+		sb.append("{");
+		sb.append("\"count\": " + list.size());
+		sb.append(", ");
+		sb.append("\"max\": " + max);
+		sb.append(", ");
+		sb.append("\"min\": " + min + "\n");
+		sb.append(", ");
+		sb.append("\"sum\": " + sum + "\n");
+		sb.append(", ");
+		sb.append("\"avg\": " + avg + "\n");
+		sb.append(", ");
+		sb.append("\"var\": " + var + "\n");
+		sb.append("}");
 	}
 }

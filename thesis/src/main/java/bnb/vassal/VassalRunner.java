@@ -152,7 +152,7 @@ public class VassalRunner implements VassalPublic {
 
 	@Override
 	public List<BnbNode> stealWork(int jobid) throws IOException {
-		LOG.info("Work being stolen from job " + jobid);
+		LOG.info("About to try to steal work for job " + jobid);
 		VassalJobManager jobManager = jobMap.get(jobid);
 		return jobManager.stealWork();
 	}
@@ -183,6 +183,7 @@ public class VassalRunner implements VassalPublic {
 				try {
 					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(statsOs));
 					bw.write(stats.makeReport());
+					bw.close();
 				} catch (IOException ex) {
 					LOG.error("Error writing stats to output stream", ex);
 				}

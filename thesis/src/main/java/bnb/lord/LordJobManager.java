@@ -49,6 +49,12 @@ public class LordJobManager {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param vassalId
+	 * 		The id of the vassal that's asking for work.
+	 * @return
+	 */
 	public List<BnbNode> askForWork(int vassalId) {
 		hasWorkMap.remove(vassalId);
 		
@@ -88,13 +94,14 @@ public class LordJobManager {
 				return new LinkedList<BnbNode>();
 			}
 			
-			LOG.info("contacting proxy " + proxy.getVassalIdCache() + " for work");
+//			LOG.info("considering contacting vassal " + proxy.getVassalIdCache() + " for work on behalf of vassal " + vassalId);
 			nextVassalQueue.add(proxy);
 			if (hasWorkMap.containsKey(proxy.getVassalIdCache())) {
 				try {
 					List<BnbNode> stolenWork = proxy.stealWork(this);
 					if (stolenWork.size() > 0) {
 						//TODO: synchronize this?
+						LOG.info("stole work from " + proxy.getVassalIdCache() + " for " + vassalId + ". first node's depth is " + stolenWork.get(0).getDepth()); 
 						hasWorkMap.put(vassalId, true); //TODO: defer this until after we've sent our response?
 						return stolenWork;
 					} else {

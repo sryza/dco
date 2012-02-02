@@ -431,6 +431,11 @@ public class TspNode extends BnbNode {
 	}
 	
 	@Override
+	public int getDepth() {
+		return numChosen;
+	}
+	
+	@Override
 	public boolean dontSteal() {
 		return (problem.getNumCities() - numChosen) < DONT_STEAL_NUM_CITIES;
 	}

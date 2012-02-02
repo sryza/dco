@@ -74,4 +74,11 @@ public abstract class BnbNode implements Byteable {
 	 * to be worth it).
 	 */
 	public abstract boolean dontSteal();
+	
+	/**
+	 * For logging purposes.
+	 */
+	public int getDepth() {
+		return -1;
+	}
 }
