@@ -12,7 +12,7 @@ is there a reason for askForWork to be an async call?
 it's very important to compare remote and local operations (like getting a node to work on) and see by what difference they take longer.
 this will help discover how important transport optimizations are.  we'll also need to separate different parts of the transport time, possibly using an eclipse profiler.
 hopefully we'll come to the conclusion that we don't need transport optimizations. at worst, we'll learn how to do it.
-
+http://stackoverflow.com/questions/2362409/java-thread-profiling-determine-thread-waits-for-specific-locks-and-duration-o
 
 best first search:
 do DFS on a node.  at any point we have a best lower bound (less than our best solution cost).  when we get to a node that's 10% greater than that, we post back to the master node and ask for the node with the smallest lower bound.
