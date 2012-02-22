@@ -32,8 +32,8 @@ ssh cslab2b netstat -tnlp | grep 4389
 To Run A Bunch of Vassals and Lords On The Grid
 -----------------------------------------------
 second argument is number of vassals
-./runlord.sh 3 ../../tsptests/eil51.258 15
-a fourth argument can be given as an inital bound
+./runlord.sh 3 ../../tsptests/eil51.258 40 500
+the fourth argument is an inital bound
 
 in a separate shell:
 qsub -pe smp 2 -q '*@@ang' -t 1-3 gridvassal.sh hoover 2 [test id]

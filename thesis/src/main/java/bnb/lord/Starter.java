@@ -29,7 +29,7 @@ public class Starter {
 			node.evaluate(bestCost);
 			//TODO: shouldn't care about recreating remaining children for tsp?
 			while (node.hasNextChild()) {
-				BnbNode child = node.nextChild();
+				BnbNode child = node.nextChild(false);
 				nodes.addLast(child);
 			}
 		}

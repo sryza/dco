@@ -1,7 +1,5 @@
 package bnb.stats;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -17,16 +15,18 @@ public class VassalJobStats {
 	private ThreadLocalList<Long> askForWorkLats;
 	private ThreadLocalList<Long> nextNodeLats;
 	
-	private ThreadLocalList<Long> stopWorkTimes;
-	private ThreadLocalList<Long> startWorkTimes;
+	private ThreadLocalList<Long> toggleWorkingTimes;
 	
-	private ThreadLocal<Long> doneTime;
+	private int numEvaluated;
+	
+	private long doneTime;
 	
 	public VassalJobStats() {
 		askForWorkLats = new ThreadLocalList<Long>();
 		askForWorkStart = new ThreadLocal<Long>();
 		nextNodeLats = new ThreadLocalList<Long>();
 		nextNodeStart = new ThreadLocal<Long>();
+		toggleWorkingTimes = new ThreadLocalList<Long>();
 	}
 	
 	public void reportNextNodeStart() {
@@ -42,17 +42,19 @@ public class VassalJobStats {
 	}
 	
 	public void reportWorking() {
-		startWorkTimes.add(System.currentTimeMillis());
+		toggleWorkingTimes.add(System.currentTimeMillis());
 	}
 	
 	public void reportNotWorking() {
-		stopWorkTimes.add(System.currentTimeMillis());
+		toggleWorkingTimes.add(System.currentTimeMillis());
 	}
 	
 	public void reportDone() {
-		long time = System.currentTimeMillis();
-		stopWorkTimes.add(time);
-		doneTime.set(time);
+		doneTime = System.currentTimeMillis();
+	}
+	
+	public void reportNumEvaluated(int numEvaluated) {
+		this.numEvaluated = numEvaluated;
 	}
 	
 	/**
@@ -76,45 +78,62 @@ public class VassalJobStats {
 		makeReportOnList(askForWorkLats.getAll(), sb);
 		
 		sb.append(",\n");
-
-		sb.append("\"nextNode_latencies_stats\": ");
-		makeReportOnList(nextNodeLats.getAll(), sb);
 		
-		sb.append("\"time_spent\": ");
-		List<List<Long>> workStartLists = startWorkTimes.getLists();
-		List<List<Long>> workStopLists = stopWorkTimes.getLists();
-		if (workStartLists.size() != workStopLists.size()) {
-			sb.append("-1");
-		} else {
-			List<Long> totalWorkingTimes = new ArrayList<Long>();
-			List<Long> totalTimes = new ArrayList<Long>();
-			loop:
-			for (int i = 0; i < workStartLists.size(); i++) {
-				long totalWorkingTime = 0;
-				
-				List<Long> startTimesList = workStartLists.get(i);
-				List<Long> stopTimesList = workStopLists.get(i);
-				Iterator<Long> startTimesIter = startTimesList.iterator();
-				Iterator<Long> stopTimesIter = stopTimesList.iterator();
-				while (startTimesIter.hasNext()) {
-					if (!stopTimesIter.hasNext()) {
-						sb.append("-1");
-						break loop;
-					}
-					long startTime = startTimesIter.next();
-					long stopTime = stopTimesIter.next();
-					if (stopTime < startTime) {
-						sb.append("-1");
-						break loop;
-					}
-					
-					totalWorkingTime += startTime - stopTime;
-				}
-				totalWorkingTimes.add(totalWorkingTime);
-				totalTimes.add(stopTimesList.get(stopTimesList.size()-1) - startTimesList.get(0));
-			}
-			sb.append("[" + totalWorkingTimes + ", " + totalTimes + "]");
-		}
+		sb.append("\"numEvaluated\": " + numEvaluated);
+		sb.append(",\n");
+
+//		sb.append("\"nextNode_latencies_stats\": ");
+//		makeReportOnList(nextNodeLats.getAll(), sb);
+		
+//		sb.append(",\n");
+		
+		List<List<Long>> toggleWorkingLists = toggleWorkingTimes.getLists();
+		
+		sb.append("\"toggleWorkingLists\": " + toggleWorkingLists);
+		
+		sb.append(",\n");
+		
+		sb.append("\"doneTime\": " + doneTime);
+		
+//		
+//		sb.append("\"time_spent\": ");
+//		if (workStartLists.size() != workStopLists.size()) {
+//			sb.append("\"workStartLists.size() != workStopLists.size()\"");
+//		} else {
+//			List<Long> totalWorkingTimes = new ArrayList<Long>();
+//			List<Long> totalTimes = new ArrayList<Long>();
+//			boolean failed = false;
+//			loop:
+//			for (int i = 0; i < workStartLists.size(); i++) {
+//				long totalWorkingTime = 0;
+//				
+//				List<Long> startTimesList = workStartLists.get(i);
+//				List<Long> stopTimesList = workStopLists.get(i);
+//				Iterator<Long> startTimesIter = startTimesList.iterator();
+//				Iterator<Long> stopTimesIter = stopTimesList.iterator();
+//				while (startTimesIter.hasNext()) {
+//					if (!stopTimesIter.hasNext()) {
+//						sb.append("\"no accompanying stop time for start time\"");
+//						failed = true;
+//						break loop;
+//					}
+//					long startTime = startTimesIter.next();
+//					long stopTime = stopTimesIter.next();
+//					if (stopTime < startTime) {
+//						sb.append("\"stopTime < startTime\"");
+//						failed = true;
+//						break loop;
+//					}
+//					
+//					totalWorkingTime += startTime - stopTime;
+//				}
+//				totalWorkingTimes.add(totalWorkingTime);
+//				totalTimes.add(stopTimesList.get(stopTimesList.size()-1) - startTimesList.get(0));
+//			}
+//			if (!failed) {
+//				sb.append("[" + totalWorkingTimes + ", " + totalTimes + "]");
+//			}
+//		}
 		
 		sb.append("}");
 		return sb.toString();

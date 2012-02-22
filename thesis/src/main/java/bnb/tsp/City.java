@@ -19,7 +19,13 @@ public class City {
 		return (int)Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 	}
 	
+	@Override
 	public String toString() {
 		return "City[x=" + x + ",y=" + y + ",id=" + id + "]";
+	}
+	
+	@Override
+	public int hashCode() {
+		return id;
 	}
 }

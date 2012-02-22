@@ -55,7 +55,10 @@ public abstract class BnbNode implements Byteable {
 	
 	public abstract boolean isEvaluated();
 	
-	public abstract BnbNode nextChild();
+	/**
+	 * Will only be called from within a synchronized block.
+	 */
+	public abstract BnbNode nextChild(boolean alwaysCopy);
 	
 	public abstract boolean hasNextChild();
 	

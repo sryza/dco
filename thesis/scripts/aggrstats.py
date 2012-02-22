@@ -13,10 +13,13 @@ while True:
 		break
 		
 	f = open(stats_file)
-	stats = json.load(f)
+	try:
+		stats = json.load(f)
 	
-	next_node_count = stats["nextNode_latencies_stats"]["count"]
-	next_node_counts.append(next_node_count)
+		next_node_count = stats["numEvaluated"]
+		next_node_counts.append(next_node_count)
+	except ValueError:
+		print("Failed to parse " + stats_file)
 	
 	vassal_id += 1
 

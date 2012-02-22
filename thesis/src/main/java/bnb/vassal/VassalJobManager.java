@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import bnb.BnbNode;
 import bnb.Problem;
 import bnb.Solution;
+import bnb.stats.VassalJobStats;
 
 public class VassalJobManager implements Runnable {
 	private static final Logger LOG = Logger.getLogger(VassalJobManager.class);
@@ -24,6 +25,8 @@ public class VassalJobManager implements Runnable {
 	private final int jobid;
 	private final int vassalid;
 	private final Problem problem;
+
+	private final VassalJobStats stats;
 	
 	private final VassalNodePool nodePool;
 	
@@ -37,9 +40,10 @@ public class VassalJobManager implements Runnable {
 	private final Object bestLock = new Object();
 	
 	public VassalJobManager(double initCost, VassalNodePool nodePool, 
-			Problem problem, LordProxy lordProxy, int vassalid, int jobid) {
+			Problem problem, LordProxy lordProxy, VassalJobStats stats, int vassalid, int jobid) {
 		minCost = initCost;
 		this.lordProxy = lordProxy;
+		this.stats = stats;
 		this.jobid = jobid;
 		this.vassalid = vassalid;
 		this.nodePool = nodePool;
@@ -92,19 +96,17 @@ public class VassalJobManager implements Runnable {
 	 * Returns true if the operation succeeded.
 	 * The caller should check isCompleted afterward to see whether
 	 * there was any more work to be done.
+	 * 
+	 * @param nodePool
+	 * 		used to check whether work is still needed at the time of request
 	 */
 	public boolean askForWork(TaskRunner taskRunner) {
 		synchronized(sendLock) {
 			if (isCompleted) {
 				return true;
 			}
-			for (TaskRunner runner : taskRunners) {
-				if (runner.working()) {
-					//work must've been fetched in between when this was called
-					//and when it started executing
-					//or let the next thread handle this
-					return true;
-				}
+			if (nodePool.hasNextNode()) {
+				return true;
 			}
 			
 			LOG.info("about to ask lord for work");
@@ -125,7 +127,6 @@ public class VassalJobManager implements Runnable {
 					LOG.debug("received work: " + node);
 					nodePool.post(node);
 				}
-				taskRunner.setWorking();
 				return true;
 			}
 		}
@@ -177,6 +178,7 @@ public class VassalJobManager implements Runnable {
 		for (TaskRunner runner : taskRunners) {
 			numEvaluated += runner.getNumEvaluated();
 		}
+		stats.reportNumEvaluated(numEvaluated);
 		LOG.info("Vassal " + vassalid + " evaluated " + numEvaluated + " nodes");
 	}
 	

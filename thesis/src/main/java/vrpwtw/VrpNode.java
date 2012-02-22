@@ -54,7 +54,7 @@ public class VrpNode extends BnbNode {
 	}
 
 	@Override
-	public BnbNode nextChild() {
+	public BnbNode nextChild(boolean fd) {
 		//here we don't actually make any changes to the data structures, we leave
 		//that to the evaluate method. that way, we don't have to undo anything before forking.
 			//not exactly true, because stuff will be modified down the line
@@ -144,5 +144,4 @@ public class VrpNode extends BnbNode {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

@@ -100,7 +100,7 @@ public class VassalRunner implements VassalPublic {
 	public void startJobTasks(List<BnbNode> nodes, Problem spec, double bestCost, int jobid, int numThreads) 
 		throws IOException {
 		if (numThreads < 1) {
-				LOG.error("Illegal number of threads: " + numThreads);
+			LOG.error("Illegal number of threads: " + numThreads);
 		}
 		
 		VassalNodePool nodePool = new SimpleVassalNodePool();
@@ -111,16 +111,17 @@ public class VassalRunner implements VassalPublic {
 			}
 			nodePool.post(node);
 		}
-		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordProxy, vassalId, jobid);
+		VassalJobStats stats = new VassalJobStats();
+		
+		VassalJobManager jobManager = new VassalJobManager(bestCost, nodePool, spec, lordProxy, stats, vassalId, jobid);
 		Thread jobManagerThread = new Thread(jobManager, "jobmanager" + jobid);
 		jobManagerThread.start();
 		
-		VassalJobStats stats = new VassalJobStats();
 
 		jobMap.put(jobid, jobManager);
 		List<Thread> taskThreads = new ArrayList<Thread>();
 		for (int i = 0; i < numThreads; i++) {
-			Thread t = startTaskRunner(lordProxy, nodePool, jobManager, stats);
+			Thread t = startTaskRunner(lordProxy, nodePool, jobManager, stats, i);
 			taskThreads.add(t);
 		}
 		
@@ -129,13 +130,15 @@ public class VassalRunner implements VassalPublic {
 	
 	/**
 	 * Returns the thread that the task is running on.
+	 * @param num
+	 * 		task runner num (for naming thread)
 	 */
 	public Thread startTaskRunner(LordProxy lordInfo, VassalNodePool nodePool,
-			VassalJobManager jobManager, VassalJobStats stats) {
+			VassalJobManager jobManager, VassalJobStats stats, int num) {
 		TaskRunner runner = new TaskRunner(jobManager, stats);
 		jobManager.registerTaskRunner(runner);
 		Thread taskThread = new Thread(runner);
-		taskThread.setName("Vassal " + vassalId + " TaskRunner");
+		taskThread.setName("Vassal " + vassalId + " TaskRunner " + num);
 		taskThread.start();
 		return taskThread;
 	}
@@ -152,7 +155,7 @@ public class VassalRunner implements VassalPublic {
 
 	@Override
 	public List<BnbNode> stealWork(int jobid) throws IOException {
-		LOG.info("About to try to steal work for job " + jobid);
+		LOG.info("About to try to donate work from this vassal for job " + jobid);
 		VassalJobManager jobManager = jobMap.get(jobid);
 		return jobManager.stealWork();
 	}
@@ -173,7 +176,7 @@ public class VassalRunner implements VassalPublic {
 		public void run() {
 			for (Thread thread : threads) {
 				try {
-					thread.join();	
+					thread.join();
 				} catch (InterruptedException ex) {
 					LOG.error("Interrupted while waiting to terminate", ex);
 				}

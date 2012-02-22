@@ -17,6 +17,8 @@ public interface VassalNodePool {
 	 */
 	public BnbNode nextNode();
 	
+	public boolean hasNextNode();
+	
 	/**
 	 * Posts an evaluated node to the pool.
 	 */
