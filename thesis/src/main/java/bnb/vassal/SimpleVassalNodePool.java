@@ -1,6 +1,6 @@
 package bnb.vassal;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +17,16 @@ public class SimpleVassalNodePool implements VassalNodePool {
 		nodeList = new LinkedList<BnbNode>();
 	}
 	
+//	@Override
+//	public synchronized List<BnbNode> stealNodes() {
+//		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
+//				(nodeList.getFirst().isEvaluated() && !nodeList.getFirst().hasNextChild()) ||
+//				nodeList.getFirst().dontSteal()) {
+//			return new LinkedList<BnbNode>();
+//		}
+//		return Arrays.asList(nodeList.removeFirst());
+//	}
+	
 	@Override
 	public synchronized List<BnbNode> stealNodes() {
 		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
@@ -24,8 +34,13 @@ public class SimpleVassalNodePool implements VassalNodePool {
 				nodeList.getFirst().dontSteal()) {
 			return new LinkedList<BnbNode>();
 		}
-		return Arrays.asList(nodeList.removeFirst());
+		BnbNode first = nodeList.getFirst();
+		BnbNode child = first.nextChild(true);
+		first.childDone();
+		
+		return Collections.singletonList(child);
 	}
+
 
 	@Override
 	public synchronized BnbNode nextNode() {
@@ -35,13 +50,19 @@ public class SimpleVassalNodePool implements VassalNodePool {
 			if (!lastNode.isEvaluated()) {
 				return lastNode;
 			}
-			if (lastNode.hasNextChild())
-				return lastNode.nextChild();
-			else
+			if (lastNode.hasNextChild()) {
+				return lastNode.nextChild(false);
+			} else {
 				nodeList.removeLast();
+			}
 		}
 			
 		return null;
+	}
+	
+	@Override
+	public synchronized boolean hasNextNode() {
+		return nodeList.size() > 0;
 	}
 
 	@Override

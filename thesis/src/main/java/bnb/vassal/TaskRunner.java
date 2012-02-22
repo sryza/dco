@@ -8,6 +8,8 @@ import bnb.stats.VassalJobStats;
 public class TaskRunner implements Runnable {
 	private static final Logger LOG = Logger.getLogger(TaskRunner.class);
 	
+	private static final int EVALUATED_LOG_INTERVAL= 1000;
+	
 	private final VassalJobManager jobManager;
 	private final VassalJobStats stats;
 	
@@ -22,44 +24,62 @@ public class TaskRunner implements Runnable {
 	
 	public void run() {
 		LOG.info("running task");
-		while (true) {
-			stats.reportNextNodeStart();
-			BnbNode node = jobManager.getNodePool().nextNode();
-			stats.reportNextNodeEnd();
-			if (node == null) {
-				stats.reportAskForWorkStart();
-				boolean workStolen = stealWork();
-				stats.reportAskForWorkEnd();
-				if (!workStolen) {
-					break;
-				}
-			} else {
-				node.evaluate(jobManager.getMinCost());
-				numEvaluated++;
-				if (node.isSolution()) {
-					if (node.getCost() < jobManager.getMinCost()) {
-						LOG.info("new best cost: " + node.getCost());
-						LOG.info("new best solution: " + node.getSolution());
-						jobManager.betterLocalSolution(node.getSolution(), node.getCost());
-						//TODO: mark as done
-						
-						node.whenAllChildrenDone();
-						node.getParent().childDone();
+		try {
+			stats.reportWorking();
+			while (true) {
+				BnbNode node = jobManager.getNodePool().nextNode();
+				if (node == null) {
+					if (working) {
+						stats.reportNotWorking();
+						working = false;
+					}
+					
+					stats.reportAskForWorkStart();
+					boolean succeeded = stealWork();
+					stats.reportAskForWorkEnd();
+					if (jobManager.isCompleted()) {
+						break;
 					}
 				} else {
-					if (!node.isLeaf()) {
-						jobManager.getNodePool().post(node);
-					} else {
-						//if we're not posting the node to do work with, let its parent
-						//know that we're done doing computation on it
-						node.whenAllChildrenDone();
-						if (node.getParent() != null) {
+					if (!working) {
+						stats.reportWorking();
+						working = true;
+					}
+					
+					node.evaluate(jobManager.getMinCost());
+					numEvaluated++;
+//					if (numEvaluated % EVALUATED_LOG_INTERVAL == 0) {
+//						LOG.info("evaluated " + numEvaluated + " nodes");
+//					}
+					if (node.isSolution()) {
+						if (node.getCost() < jobManager.getMinCost()) {
+							LOG.info("new best cost: " + node.getCost());
+							LOG.info("new best solution: " + node.getSolution());
+							jobManager.betterLocalSolution(node.getSolution(), node.getCost());
+							//TODO: mark as done
+							
+							node.whenAllChildrenDone();
 							node.getParent().childDone();
+						}
+					} else {
+						if (!node.isLeaf()) {
+							jobManager.getNodePool().post(node);
+						} else {
+							//if we're not posting the node to do work with, let its parent
+							//know that we're done doing computation on it
+							node.whenAllChildrenDone();
+							if (node.getParent() != null) {
+								node.getParent().childDone();
+							}
 						}
 					}
 				}
 			}
-		}		
+			stats.reportDone();
+		} catch (Exception ex) {
+			LOG.error("Error inside task running function", ex);
+		}
+
 //		LOG.info("numEvaluated: " + numEvaluated);
 	}
 	
@@ -71,17 +91,12 @@ public class TaskRunner implements Runnable {
 		return numEvaluated;
 	}
 	
-	public void setWorking() {
-		working  = true;
-	}
-	
 	/**
 	 * @return
-	 * 		true if computation should continue
+	 * 		true if work was stolen
 	 */
 	private boolean stealWork() {
-		working = false;
 		boolean succ = jobManager.askForWork(this);
-		return !jobManager.isCompleted();
+		return succ;
 	}
 }

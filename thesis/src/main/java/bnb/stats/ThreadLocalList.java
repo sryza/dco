@@ -10,7 +10,7 @@ import java.util.List;
  */
 
 public class ThreadLocalList<T> {
-	private List<List<T>> listOfLists = new LinkedList<List<T>>();
+	private List<List<T>> listOfLists = new ArrayList<List<T>>();
 	private ThreadLocal<List<T>> list = new ThreadLocal<List<T>>();
 	
 	public void add(T t) {
@@ -29,5 +29,9 @@ public class ThreadLocalList<T> {
 			all.addAll(list);
 		}
 		return all;
+	}
+	
+	public List<List<T>> getLists() {
+		return listOfLists;
 	}
 }

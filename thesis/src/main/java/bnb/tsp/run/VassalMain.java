@@ -27,6 +27,7 @@ public class VassalMain {
 		int lordPort = DEFAULT_LORD_PORT;
 		int vassalPort = DEFAULT_VASSAL_PORT;
 		int numSlots = Integer.parseInt(args[2]);
+		int testId = Integer.parseInt(args[3]);
 		
 		Appender appender = (Appender)Logger.getRootLogger().getAllAppenders().nextElement();
 		Logger.getRootLogger().removeAllAppenders();
@@ -36,13 +37,9 @@ public class VassalMain {
 		Logger.getRootLogger().addAppender(fileAppender);
 		
 		//create output file for stats
-		String statsFilePath = "logs/stats/" + id;
-		File statsFile = null;
-		int i = 0;
-		do {
-			statsFile = new File(statsFilePath + "_" + i + ".stats");
-			i++;
-		} while (statsFile.exists());
+		String statsFileDir = "logs/stats/";
+		File statsFile = new File(statsFileDir + id + "_" + testId + ".stats");
+
 		FileOutputStream sfos = new FileOutputStream(statsFile);
 		
 		LordProxy lordProxy = new LordProxy(lordHost, lordPort);

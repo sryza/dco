@@ -18,7 +18,9 @@ To Kill Vassals
 
 Where Are The Logs?
 -------------------
+The lord outputs its logs to stdout.
 Each vassal gets its own logs.  They're in $HOME/logs/vassal[#].log
+Each vassal creates a stat file - the first number in the name is the id of the vassal, the second is the id of the run (determined by looking at everything else in the stats directory).
 
 
 
@@ -30,7 +32,17 @@ ssh cslab2b netstat -tnlp | grep 4389
 To Run A Bunch of Vassals and Lords On The Grid
 -----------------------------------------------
 second argument is number of vassals
-./runlord.sh 3 ../../tsptests/eil51.258 15
-in a separate shell:
-qsub -pe smp 2 -q '*@@ang' -t 1-3 gridvassal.sh hoover 2
+./runlord.sh 3 ../../tsptests/eil51.258 40 500
+the fourth argument is an inital bound
 
+in a separate shell:
+qsub -pe smp 2 -q '*@@ang' -t 1-3 gridvassal.sh hoover 2 [test id]
+
+if we don't need homogenous machines
+qsub -pe smp 2 -t 1-3 gridvassal.sh hoover 2 [test id]
+
+
+Aggregate Stats Across All Vassals
+----------------------------------
+thesis/scripts/aggrstats.py [test id]
+currently computes the total number of nodes evaluated

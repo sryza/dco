@@ -6,10 +6,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
@@ -36,7 +38,7 @@ public class TspNode extends BnbNode {
 	
 	//children that are returned with nextChild are added to this list
 	//TODO: take this into account when constructing a node
-	private List<City> exploredChildren;
+	private Set<City> exploredChildren;
 	
 	private LinkedList<City> remainingCities;
 	//true if the city remains
@@ -144,7 +146,7 @@ public class TspNode extends BnbNode {
 //			System.out.println("bounded");
 		}
 		isEvaluated = true;
-		exploredChildren = new LinkedList<City>();
+		exploredChildren = new HashSet<City>();
 	}
 		
 	/**
@@ -261,7 +263,7 @@ public class TspNode extends BnbNode {
 	}
 	
 	@Override
-	public BnbNode nextChild() {
+	public BnbNode nextChild(boolean alwaysSplit) {
 		if (!hasNextChild()) {
 			throw new NoSuchElementException("Node has no next child.");
 		}
@@ -272,13 +274,20 @@ public class TspNode extends BnbNode {
 		LinkedList<City> remCities = remainingCities;
 		boolean[] remVec = remainingVector;
 		int count = activeChildCount.getAndIncrement();
-		if (count > 0) {
+		if (count > 0 || alwaysSplit) {
 //			LOG.info("Splitting, activeChildCount before increment=" + count);
 			remCities = new LinkedList<City>();
 			remVec = new boolean[problem.getNumCities()];
 			buildSinglePathStructures(remCities, remVec, new ParentCityIterator(this));
 		}
 		City city = remCities.remove(0);
+		while (exploredChildren.contains(city)) {
+			//this might occur in the case where we split and then activeChildCount falls back down to 0
+			//we've investigated the child in the split version of remCities, but we haven't added to the back
+			//of the list because we cloned remCities
+			remCities.add(city);
+			city = remCities.remove(0);
+		}
 		exploredChildren.add(city);
 		remVec[city.id] = false;
 		TspNode child = new TspNode(startCity, city, numChosen+1, this, remCities, remVec, 
@@ -289,20 +298,37 @@ public class TspNode extends BnbNode {
 		return child;
 	}
 	
+	@Override
+	public void whenAllChildrenDone() {
+		remainingCities.add(city);
+		remainingVector[city.id] = true;
+	}
+	
+	/**
+	 * 
+	 * @param remCities
+	 * @param remVec
+	 * @param iter
+	 * 		backwards iterator over cities set in current tour
+	 */
 	private void buildSinglePathStructures(LinkedList<City> remCities, boolean[] remVec, Iterator<City> iter) {
-		//build a new remainingCities
+		//clear thread local marks for all citiies
 		for (City city : problem.getCities()) {
 			city.threadLocalMark.set(0);
 		}
+		//set thread local marks for all cities in current tour to 1
 		while (iter.hasNext()) {
 			City usedCity = iter.next();
 			usedCity.threadLocalMark.set(1);
 		}
+		//set thread local marks for all explored children to 2
 		if (exploredChildren != null) {
 			for (City city : exploredChildren) {
 				city.threadLocalMark.set(2);
 			}
 		}
+		//build remCities, adding all remaining, unexplored children to the front, and all
+		//remaining explored to the back
 		for (City city : problem.getCities()) {
 			if (city.threadLocalMark.get() == 0) {
 				remCities.addFirst(city);
@@ -314,13 +340,7 @@ public class TspNode extends BnbNode {
 			}
 		}
 	}
-	
-	@Override
-	public void whenAllChildrenDone() {
-		remainingCities.add(city);
-		remainingVector[city.id] = true;
-	}
-	
+		
 	@Override
 	public void initFromBytes(byte[] bytes, Problem prob) {
 		if (!(prob instanceof TspProblem)) {
@@ -351,7 +371,7 @@ public class TspNode extends BnbNode {
 			//TODO: this can be an arraylist of the size we expect
 			int numExploredChildren = dis.readInt();
 			if (numExploredChildren != -1) {
-				exploredChildren = new LinkedList<City>();
+				exploredChildren = new HashSet<City>();
 				for (int i = 0; i < numExploredChildren; i++) {
 					int id = dis.readInt();
 					exploredChildren.add(problemCities[id]);
@@ -428,6 +448,11 @@ public class TspNode extends BnbNode {
 		} else {
 			return new TspSolution(new ParentCityIterator(this), heldKarpOptimalTour, problem.getNumCities());
 		}
+	}
+	
+	@Override
+	public int getDepth() {
+		return numChosen;
 	}
 	
 	@Override

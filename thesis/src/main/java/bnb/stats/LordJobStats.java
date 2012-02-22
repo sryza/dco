@@ -27,6 +27,7 @@ public class LordJobStats {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Total time: " + (finishTime - startTime) + "\n");
 		sb.append("Initialization time: " + (finishedInitialTime - startTime) + "\n");
+		sb.append("Finish time: " + finishTime + "\n");
 		return sb.toString();
 	}
 }

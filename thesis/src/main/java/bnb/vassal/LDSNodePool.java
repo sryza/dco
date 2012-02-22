@@ -32,4 +32,10 @@ public class LDSNodePool implements VassalNodePool {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public boolean hasNextNode() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
