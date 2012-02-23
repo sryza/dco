@@ -5,11 +5,12 @@ import sys
 job_id = sys.argv[1]
 stats_dir = "/home/sryza/logs/stats/"
 
-vassal_id = 1
+vassal_id = int(sys.argv[2])
 next_node_counts = []
 while True:
 	stats_file = stats_dir + str(vassal_id) + "_" + job_id + ".stats"
 	if not os.path.exists(stats_file):
+		print(stats_file + " does not exist");
 		break
 		
 	f = open(stats_file)

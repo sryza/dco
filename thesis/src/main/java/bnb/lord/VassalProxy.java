@@ -29,6 +29,11 @@ public class VassalProxy {
 		vassalClient = new ThriftVassal.Client(protocol);
 	}
 	
+	public VassalProxy(String host, int port, int idCache) {
+		this (host, port);
+		this.idCache = idCache;
+	}
+	
 	public int getVassalId() throws IOException {
 		if (idCache == -1) {
 			synchronized(this) {

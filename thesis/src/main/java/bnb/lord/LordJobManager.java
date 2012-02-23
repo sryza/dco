@@ -91,6 +91,7 @@ public class LordJobManager {
 			if (numFailedAttempts != null && numFailedAttempts >= MAX_FAILED_STEAL_ATTEMPTS) {
 				LOG.info("Failed to contact vassal " + proxy.getVassalIdCache() + " " + MAX_FAILED_STEAL_ATTEMPTS + " times, aborting job");
 				failed = true;
+				System.exit(0);
 				return new LinkedList<BnbNode>();
 			}
 			
@@ -105,9 +106,14 @@ public class LordJobManager {
 						hasWorkMap.put(vassalId, true); //TODO: defer this until after we've sent our response?
 						return stolenWork;
 					} else {
-						LOG.warn("vassal " + proxy.getVassalIdCache() + " that allegedly had work actually doesn't");
+//						LOG.warn("vassal " + proxy.getVassalIdCache() + " that allegedly had work actually doesn't. request from " + vassalId);
 						//there's a specific race condition in which this can happen:
 						//two threads going to the same one?
+//						if (failedAttempts.containsKey(proxy)) {
+//							failedAttempts.put(proxy, failedAttempts.get(proxy)+1);
+//						} else {
+//							failedAttempts.put(proxy, 1);
+//						}
 					}
 				} catch (IOException ex) {
 					LOG.error("problem stealing work from vassal " + proxy.getVassalIdCache(), ex);
@@ -117,9 +123,10 @@ public class LordJobManager {
 						failedAttempts.put(proxy, 1);
 					}
 				}
-			} else {
-				LOG.info("skipping vassal " + proxy.getVassalIdCache() + " because it does not have work");
 			}
+//			else {
+//				LOG.info("skipping vassal " + proxy.getVassalIdCache() + " because it does not have work");
+//			}
 		}
 	}
 	

@@ -48,12 +48,31 @@ public class LordRunner implements LordPublic {
 		if (vassalMap.containsKey(id)) {
 			LOG.warn("vassal already registered with id " + id);
 		} else {
-			vassalMap.put(id, proxy);
+			LOG.info("Registering vassal " + id);
+			synchronized (vassalMap) {
+				vassalMap.put(id, proxy);
+			}
 		}
 	}
 	
 	public void registerVassal(VassalProxy proxy) throws IOException {
-		vassalMap.put(proxy.getVassalId(), proxy);
+		int id = proxy.getVassalId();
+		LOG.info("Registering vassal " + id);
+		synchronized (vassalMap) {
+			vassalMap.put(id, proxy);
+		}
+	}
+	
+	@Override
+	public void registerVassal(String hostname, int port, int id) {
+		VassalProxy proxy = new VassalProxy(hostname, port, id);
+		LOG.info("Registering vassal " + id);
+		synchronized(vassalMap) {
+			vassalMap.put(id, proxy);
+		}
+		synchronized(waitToRunCondVar) {
+			waitToRunCondVar.notify();
+		}
 	}
 	
 	private void startServer(int port) {
@@ -86,11 +105,12 @@ public class LordRunner implements LordPublic {
 		synchronized(waitToRunCondVar) {
 			while (vassalMap.size() < numVassals) {
 				try {
+					LOG.info("Waiting for " + (numVassals - vassalMap.size()) + " vassals to register");
 					waitToRunCondVar.wait();
 				} catch (InterruptedException ex) {	}
 			}
 		}
-		
+		LOG.info("Done waiting for vassals to register");
 		runJob(root, spec, bestCost, numVassals, 0);
 	}
 	
@@ -171,14 +191,5 @@ public class LordRunner implements LordPublic {
 			jobManager.updateMinCost(bestCost, vassal);
 		}
 		return jobManager.askForWork(vassalid);
-	}
-	
-	@Override
-	public void registerVassal(String hostname, int port, int id) {
-		VassalProxy proxy = new VassalProxy(hostname, port);
-		vassalMap.put(id, proxy);
-		synchronized(waitToRunCondVar) {
-			waitToRunCondVar.notify();
-		}
 	}
 }

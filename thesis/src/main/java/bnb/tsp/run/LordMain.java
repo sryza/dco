@@ -56,6 +56,7 @@ public class LordMain {
 			}
 		}
 		
+		LOG.info("Starting lord");
 		lord.start();
 		
 		City[] cities = ProblemGen.read(citiesFile, numCities);

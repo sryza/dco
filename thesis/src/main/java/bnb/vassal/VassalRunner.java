@@ -56,6 +56,7 @@ public class VassalRunner implements VassalPublic {
 		    String hostname = addr.getHostName();
 		    LOG.info("My hostname is " + hostname);
 		    lordProxy.registerVassal(hostname, port, vassalId);
+		    LOG.info("Successfully registered with lord");
 		} catch (UnknownHostException ex) {
 			LOG.error("Failed to retrieve hostname, not going to register with lord", ex);
 		} catch (IOException ex) {

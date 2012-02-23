@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -21,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-public class TimesPanel extends JPanel {
+public class TimesPanel extends JPanel implements Scrollable {
 	
 	private static final Logger LOG = Logger.getLogger(TimesPanel.class);
 	
-	private static final int DEFAULT_HEIGHT = 700;
+//	private static final int DEFAULT_HEIGHT = 700;
 	private static final int DEFAULT_WIDTH = 700;
 	
 	private static final Color BACKGROUND_COLOR = Color.white;
@@ -74,7 +75,8 @@ public class TimesPanel extends JPanel {
 		
 		this.nodes = nodes;
 		
-		setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+		int preferredHeight = this.nodes.size() * 2 * (BAR_HEIGHT + BETWEEN_THREADS_PADDING) + TOP_PADDING * 2;
+		setPreferredSize(new Dimension(DEFAULT_WIDTH, preferredHeight));
 		addMouseListener(new ClickListener());
 	}
 	
@@ -102,6 +104,7 @@ public class TimesPanel extends JPanel {
 					long prevTime = times.get(k-1);
 					long time = times.get(k);
 
+					
 					int segStartX = (int)(barStartX + (prevTime - minStart) * pxPerMs);
 					int segLen = (int)((time - prevTime) * pxPerMs);
 					
@@ -150,7 +153,7 @@ public class TimesPanel extends JPanel {
 	
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
 		File dir = new File("/home/sryza/logs/stats/");
-		int testId = 14;
+		int testId = 20;
 		long finishTime = 1328561548728l;
 		
 		ObjectMapper mapper = new ObjectMapper();
@@ -174,11 +177,67 @@ public class TimesPanel extends JPanel {
 		System.out.println(nodes);
 		
 		JPanel timesPanel = new TimesPanel(nodes, finishTime);
+		JScrollPane scrollPane = new JScrollPane(timesPanel);
 		
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().add(timesPanel);
+		frame.getContentPane().add(scrollPane);
 		frame.pack();
 		frame.setVisible(true);
+	}
+	
+	
+	private int maxUnitIncrement = 1;
+	
+	public int getScrollableUnitIncrement(Rectangle visibleRect,
+			int orientation,
+			int direction) {
+		//Get the current position.
+		int currentPosition = 0;
+		if (orientation == SwingConstants.HORIZONTAL) {
+			currentPosition = visibleRect.x;
+		} else {
+			currentPosition = visibleRect.y;
+		}
+
+		//Return the number of pixels between currentPosition
+		//and the nearest tick mark in the indicated direction.
+		if (direction < 0) {
+			int newPosition = currentPosition -
+			(currentPosition / maxUnitIncrement)
+			* maxUnitIncrement;
+			return (newPosition == 0) ? maxUnitIncrement : newPosition;
+		} else {
+			return ((currentPosition / maxUnitIncrement) + 1)
+			* maxUnitIncrement
+			- currentPosition;
+		}
+	}
+
+	public int getScrollableBlockIncrement(Rectangle visibleRect,
+			int orientation,
+			int direction) {
+		if (orientation == SwingConstants.HORIZONTAL) {
+			return visibleRect.width - maxUnitIncrement;
+		} else {
+			return visibleRect.height - maxUnitIncrement;
+		}
+	}
+
+	public boolean getScrollableTracksViewportWidth() {
+		return false;
+	}
+
+	public boolean getScrollableTracksViewportHeight() {
+		return false;
+	}
+
+	public void setMaxUnitIncrement(int pixels) {
+		maxUnitIncrement = pixels;
+	}
+
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getPreferredSize();
 	}
 }

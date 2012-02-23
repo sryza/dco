@@ -17,16 +17,6 @@ public class SimpleVassalNodePool implements VassalNodePool {
 		nodeList = new LinkedList<BnbNode>();
 	}
 	
-//	@Override
-//	public synchronized List<BnbNode> stealNodes() {
-//		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
-//				(nodeList.getFirst().isEvaluated() && !nodeList.getFirst().hasNextChild()) ||
-//				nodeList.getFirst().dontSteal()) {
-//			return new LinkedList<BnbNode>();
-//		}
-//		return Arrays.asList(nodeList.removeFirst());
-//	}
-	
 	@Override
 	public synchronized List<BnbNode> stealNodes() {
 		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
@@ -34,12 +24,22 @@ public class SimpleVassalNodePool implements VassalNodePool {
 				nodeList.getFirst().dontSteal()) {
 			return new LinkedList<BnbNode>();
 		}
-		BnbNode first = nodeList.getFirst();
-		BnbNode child = first.nextChild(true);
-		first.childDone();
-		
-		return Collections.singletonList(child);
+		return Collections.singletonList(nodeList.removeFirst());
 	}
+	
+//	@Override
+//	public synchronized List<BnbNode> stealNodes() {
+//		if (nodeList.isEmpty() || nodeList.getFirst().isSolution() || 
+//				(nodeList.getFirst().isEvaluated() && !nodeList.getFirst().hasNextChild()) ||
+//				nodeList.getFirst().dontSteal()) {
+//			return new LinkedList<BnbNode>();
+//		}
+//		BnbNode first = nodeList.getFirst();
+//		BnbNode child = first.nextChild(true);
+//		first.childDone();
+//		
+//		return Collections.singletonList(child);
+//	}
 
 
 	@Override
