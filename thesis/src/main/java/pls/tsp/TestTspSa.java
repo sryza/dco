@@ -19,14 +19,14 @@ public class TestTspSa {
 		TspLsCity[] cities = read(f, Integer.MAX_VALUE);
 		Greedy greedy = new Greedy();
 		cities = greedy.computeGreedy(cities);
-		TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities));
+		double temp = 5.0;
+		TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp);
 		
 		Random rand = new Random();
 		SaStats stats = new SaStats();
 		
 		TspSaRunner runner = new TspSaRunner(solution, rand, stats);
 
-		double temp = 5.0;
 		long time = 15 * 1000;
 		
 		for (int i = 0; i < 20; i++) {

@@ -19,10 +19,10 @@ public class VrpCp {
 		
 		//impose that the vehicle servicing the successor of each node services that node
 		// (i.e. the same vehicle services a tour)
-		cp.post(vehicle[succ[n]] == vehicle[n]);
+//		cp.post(vehicle[succ[n]] == vehicle[n]);
 		
-		for (int i = 0; i < numCities; i++) {
-			store.impose(new Element(vehicles[i], successorVehicles[i]));
-		}
+//		for (int i = 0; i < numCities; i++) {
+//			store.impose(new Element(vehicles[i], successorVehicles[i]));
+//		}
 	}
 }

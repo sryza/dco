@@ -1,12 +1,18 @@
 package pls.tsp;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import pls.SaSolution;
 
 public class TspSaSolution implements SaSolution {
+	
+	private static final Logger LOG = Logger.getLogger(TspSaSolution.class);
+	
 	private TspLsCity[] tour;
 	private int cost;
 	private double temp;
@@ -69,5 +75,16 @@ public class TspSaSolution implements SaSolution {
 			dos.writeInt(city.x);
 			dos.writeInt(city.y);
 		}
+	}
+	
+	public byte[] toBytes() {
+		ByteArrayOutputStream bais = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bais);
+		try {
+			toStream(dos);
+		} catch (IOException ex) {
+			LOG.info("Failure to serialize solution to bytes, this shouldn't happen");
+		}
+		return bais.toByteArray();
 	}
 }
