@@ -9,10 +9,12 @@ import pls.SaSolution;
 public class TspSaSolution implements SaSolution {
 	private TspLsCity[] tour;
 	private int cost;
+	private double temp;
 	
-	public TspSaSolution(TspLsCity[] tour, int cost) {
+	public TspSaSolution(TspLsCity[] tour, int cost, double temp) {
 		this.cost = cost;
 		this.tour = tour;
+		this.temp = temp;
 	}
 	
 	@Override
@@ -32,6 +34,10 @@ public class TspSaSolution implements SaSolution {
 		return tour.length;
 	}
 	
+	public double getTemperature() {
+		return temp;
+	}
+	
 	/**
 	 * Verifies that the cost is accurate to the solution.
 	 */
@@ -40,6 +46,8 @@ public class TspSaSolution implements SaSolution {
 	}
 	
 	public static TspSaSolution fromStream(DataInputStream dis) throws IOException {
+		int cost = dis.readInt();
+		double temp = dis.readDouble();
 		int numCities = dis.readInt();
 		TspLsCity[] cities = new TspLsCity[numCities];
 		for (int i = 0; i < numCities; i++) {
@@ -49,15 +57,17 @@ public class TspSaSolution implements SaSolution {
 			cities[i] = new TspLsCity(id, x, y);
 		}
 		
-		return new TspSaSolution(cities, TspUtils.tourDist(cities));
+		return new TspSaSolution(cities, cost, temp);
 	}
 	
-	public void toStream(DataOutputStream dis) throws IOException {
-		dis.writeInt(tour.length);
+	public void toStream(DataOutputStream dos) throws IOException {
+		dos.writeInt(cost);
+		dos.writeDouble(temp);
+		dos.writeInt(tour.length);
 		for (TspLsCity city : tour) {
-			dis.writeInt(city.id);
-			dis.writeInt(city.x);
-			dis.writeInt(city.y);
+			dos.writeInt(city.id);
+			dos.writeInt(city.x);
+			dos.writeInt(city.y);
 		}
 	}
 }
