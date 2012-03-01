@@ -7,38 +7,38 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 import pls.SaRunner;
-import pls.SaSolution;
 import pls.SaStats;
 
-public class TspSaRunner implements SaRunner {
+public class TspSaRunner implements SaRunner<TspSaSolution> {
 
 	private static final Logger LOG = Logger.getLogger(SaRunner.class);
 	
 	private final SaStats stats;
-	private TspSaSolution initialSolution;
 	private final Random rand;
 	
-	public TspSaRunner(TspSaSolution initialSolution, Random rand, SaStats stats) {
-		this.initialSolution = initialSolution;
+	public TspSaRunner(Random rand, SaStats stats) {
 		this.rand = rand;
 		this.stats = stats;
 	}
 	
 	@Override
-	public SaSolution run(long timeMs, double temperature) {
+	public TspSaSolution[] run(TspSaSolution start, long timeMs) {
 		long startTime = System.currentTimeMillis();
 		long endTime = startTime + timeMs;
 		
-		TspSaSolution best = initialSolution;
+		TspSaSolution best = start;
 		TspLsCity[] nodes1 = new TspLsCity[best.numCities()];
 		System.arraycopy(best.getTour(), 0, nodes1, 0, best.numCities());
 		TspLsCity[] nodes2 = new TspLsCity[best.numCities()];
 		
 		int i = 0;
 		int totalCost = best.getCost();
+		double temperature = start.getTemperature();
+		double scaler = start.getScaler();
 		while (System.currentTimeMillis() < endTime) {
 
 			int delta = runStep(nodes1, nodes2, temperature, endTime);
+			temperature = temperature * scaler;
 			
 			if (delta == Integer.MAX_VALUE) {
 				//no solution found in time
@@ -48,8 +48,8 @@ public class TspSaRunner implements SaRunner {
 			
 			totalCost += delta;
 			if (totalCost < best.getCost()) {
+				best = new TspSaSolution(new TspLsCity[best.numCities()], totalCost, temperature, scaler);
 				System.arraycopy(nodes2, 0, best.getTour(), 0, nodes1.length);
-				best.setCost(totalCost);
 				stats.reportNewBestSolution(totalCost);
 				LOG.info("Solution verified " + best.verifyCost());
 			}
@@ -63,7 +63,9 @@ public class TspSaRunner implements SaRunner {
 //			System.out.println ("tourDist: " + Utils.tourDist(nodes1));
 			i++;
 		}
-		return best;
+		
+		TspSaSolution endSol = new TspSaSolution(nodes1, totalCost, temperature, scaler);
+		return new TspSaSolution[] {best, endSol};
 	}
 	
 	public int runStep(TspLsCity[] nodes, TspLsCity[] newNodes, double temp, long end) {

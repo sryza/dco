@@ -80,13 +80,6 @@ public class ChooserReducer extends MapReduceBase implements Reducer<Text, Bytes
 				solsThisRound.add(solData);
 			}
 		}
-		//if run best cost improves on input solution
-		
-		//we always pass on the ending solution of a run, but we use the cost of its best solution to decide whether it moves on
-		
-		//if the best solution found this round is better than the global best, we set all solutions to the new global best
-		
-		//the master program carries out a read to find the best solution in the mean time
 		
 		//prepare inputs to next round
 		

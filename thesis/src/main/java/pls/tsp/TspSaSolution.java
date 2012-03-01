@@ -16,11 +16,13 @@ public class TspSaSolution implements SaSolution {
 	private TspLsCity[] tour;
 	private int cost;
 	private double temp;
+	private double scaler;
 	
-	public TspSaSolution(TspLsCity[] tour, int cost, double temp) {
+	public TspSaSolution(TspLsCity[] tour, int cost, double temp, double scaler) {
 		this.cost = cost;
 		this.tour = tour;
 		this.temp = temp;
+		this.scaler = scaler;
 	}
 	
 	@Override
@@ -44,6 +46,10 @@ public class TspSaSolution implements SaSolution {
 		return temp;
 	}
 	
+	public double getScaler() {
+		return scaler;
+	}
+	
 	/**
 	 * Verifies that the cost is accurate to the solution.
 	 */
@@ -54,6 +60,7 @@ public class TspSaSolution implements SaSolution {
 	public static TspSaSolution fromStream(DataInputStream dis) throws IOException {
 		int cost = dis.readInt();
 		double temp = dis.readDouble();
+		double scaler = dis.readDouble();
 		int numCities = dis.readInt();
 		TspLsCity[] cities = new TspLsCity[numCities];
 		for (int i = 0; i < numCities; i++) {
@@ -63,18 +70,23 @@ public class TspSaSolution implements SaSolution {
 			cities[i] = new TspLsCity(id, x, y);
 		}
 		
-		return new TspSaSolution(cities, cost, temp);
+		return new TspSaSolution(cities, cost, temp, scaler);
 	}
 	
 	public void toStream(DataOutputStream dos) throws IOException {
 		dos.writeInt(cost);
 		dos.writeDouble(temp);
+		dos.writeDouble(scaler);
 		dos.writeInt(tour.length);
 		for (TspLsCity city : tour) {
 			dos.writeInt(city.id);
 			dos.writeInt(city.x);
 			dos.writeInt(city.y);
 		}
+	}
+	
+	public int serializedSize() {
+		return 4 + 8 + 8 + 4 + tour.length * 4 * 3;
 	}
 	
 	public byte[] toBytes() {

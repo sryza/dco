@@ -4,25 +4,25 @@ import java.util.*;
 
 public class Greedy {
 	
-	public TspLsCity[] computeGreedy(TspLsCity[] nodes) {
+	public TspLsCity[] computeGreedy(ArrayList<TspLsCity> nodes) {
 		//find farthest nodes and add them to the linked list
 		TspLsCity node1 = null, node2 = null;
 		int maxDist = Integer.MIN_VALUE;
-		for (int i = 0; i < nodes.length; i++) {
-			for (int j = i + 1; j < nodes.length; j++) {
-				int dist = TspUtils.dist(nodes[i], nodes[j]);
+		for (int i = 0; i < nodes.size(); i++) {
+			for (int j = i + 1; j < nodes.size(); j++) {
+				int dist = TspUtils.dist(nodes.get(i), nodes.get(j));
 				if (dist > maxDist) {
 					maxDist = dist;
-					node1 = nodes[i];
-					node2 = nodes[j];
+					node1 = nodes.get(i);
+					node2 = nodes.get(j);
 				}
 			}
 		}
 		
-		ArrayList<TspLsCity> sol = new ArrayList<TspLsCity>(nodes.length);
-		ArrayList<TspLsCity> remaining = new ArrayList<TspLsCity>(nodes.length-2);
-		int[] minDists = new int[nodes.length];
-		TspLsCity[] minDistNodes = new TspLsCity[nodes.length];
+		ArrayList<TspLsCity> sol = new ArrayList<TspLsCity>(nodes.size());
+		ArrayList<TspLsCity> remaining = new ArrayList<TspLsCity>(nodes.size()-2);
+		int[] minDists = new int[nodes.size()];
+		TspLsCity[] minDistNodes = new TspLsCity[nodes.size()];
 		for (TspLsCity node : nodes) {
 			if (node != node1 && node != node2) {
 				remaining.add(node);

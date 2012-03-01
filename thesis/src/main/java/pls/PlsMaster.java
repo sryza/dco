@@ -1,7 +1,13 @@
 package pls;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
+import javax.swing.event.ListSelectionEvent;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -21,11 +27,39 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.log4j.Logger;
 
+import pls.tsp.Greedy;
+import pls.tsp.TspLsCity;
+import pls.tsp.TspSaRunner;
 import pls.tsp.TspSaSolution;
+import pls.tsp.TspUtils;
 
 public class PlsMaster {
 
 	private static final Logger LOG = Logger.getLogger(PlsMaster.class);
+	
+	public static void main(String[] args) throws IOException {
+		//TODO: these should be arguments
+		int numTasks = 5;;
+		File f = new File("../tsptests/eil51.258");
+		double temp = 5.0;
+		double scaler = .9;
+		int numRuns = 5;
+		
+		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
+		Greedy greedy = new Greedy();
+		
+		List<TspSaSolution> startSolutions = new ArrayList<TspSaSolution>(numTasks);
+		for (int i = 0; i < numTasks; i++) {
+			if (i > 0) {
+				Collections.shuffle(citiesList);
+			}
+			TspLsCity[] cities = greedy.computeGreedy(citiesList);
+			TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp, scaler);
+		}
+		
+		PlsMaster master = new PlsMaster();
+		master.run(numRuns, startSolutions, "/users/sryza/testdir/");
+	}
 	
 	public void run(int numRuns, List<TspSaSolution> startSolutions, String dir) throws IOException {
 		//write out start solutions to HDFS

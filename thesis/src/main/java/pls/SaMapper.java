@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.Random;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -43,13 +44,27 @@ public class SaMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 		}
 		
 		SaStats stats = new SaStats();
-		Random rand = new Random();
-		TspSaRunner runner = new TspSaRunner(sol, rand, stats);
+		//use host name to add some randomness in case multiple mappers are started at the same time
+		Random rand = new Random(System.currentTimeMillis() + InetAddress.getLocalHost().getHostName().hashCode());
+		TspSaRunner runner = new TspSaRunner(rand, stats);
 		
-		TspSaSolution bestSol = (TspSaSolution)runner.run(TIME, sol.getTemperature());
+		TspSaSolution[] solutions = runner.run(sol, TIME);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
-		bestSol.toStream(dos);
+		
+		//write out metadata before solutions
+		int bestSolLen = solutions[0].serializedSize();
+		int endSolLen = solutions[1].serializedSize();
+		int bestSolOffset = 4 * 5;
+		int endSolOffset = bestSolOffset + bestSolLen;
+		dos.writeInt(solutions[0].getCost());
+		dos.writeInt(bestSolOffset);
+		dos.writeInt(bestSolLen);
+		dos.writeInt(endSolOffset);
+		dos.writeInt(endSolLen);
+
+		solutions[0].toStream(dos);
+		solutions[1].toStream(dos);
 		output.collect(THEKEY, new BytesWritable(baos.toByteArray()));
 	}
 }

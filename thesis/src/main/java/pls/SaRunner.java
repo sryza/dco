@@ -1,5 +1,8 @@
 package pls;
 
-public interface SaRunner {
-	public SaSolution run(long timeMs, double temperature);
+public interface SaRunner<T extends SaSolution> {
+	/**
+	 * Returns the final state and the best state.
+	 */
+	public SaSolution[] run(T start, long timeMs);
 }
