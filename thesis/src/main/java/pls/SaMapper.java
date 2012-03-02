@@ -22,7 +22,7 @@ import pls.tsp.TspSaSolution;
 public class SaMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
 	private static final int TIME = 60000;
-	private final static BytesWritable THEKEY = new BytesWritable("rest".getBytes());
+	private static final BytesWritable THEKEY = new BytesWritable("rest".getBytes());
 	
 	@Override
 	public void map(BytesWritable key, BytesWritable value, OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)

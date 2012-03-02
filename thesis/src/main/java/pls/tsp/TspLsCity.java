@@ -1,14 +1,10 @@
 package pls.tsp;
 
-public class TspLsCity {
-	public int id;
-	public int x;
-	public int y;
-	
+import tsp.TspCity;
+
+public class TspLsCity extends TspCity {
 	public TspLsCity(int id, int x, int y) {
-		this.id = id;
-		this.x = x;
-		this.y = y;
+		super(id, x, y);
 	}
 	
 	public TspLsCity copy() {

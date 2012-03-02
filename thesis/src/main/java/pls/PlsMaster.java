@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-
-import javax.swing.event.ListSelectionEvent;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -29,7 +25,6 @@ import org.apache.log4j.Logger;
 
 import pls.tsp.Greedy;
 import pls.tsp.TspLsCity;
-import pls.tsp.TspSaRunner;
 import pls.tsp.TspSaSolution;
 import pls.tsp.TspUtils;
 
@@ -55,6 +50,7 @@ public class PlsMaster {
 			}
 			TspLsCity[] cities = greedy.computeGreedy(citiesList);
 			TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp, scaler);
+			startSolutions.add(solution);
 		}
 		
 		PlsMaster master = new PlsMaster();
@@ -100,6 +96,8 @@ public class PlsMaster {
 
 		conf.setOutputKeyClass(Text.class);
 		conf.setOutputValueClass(IntWritable.class);
+		
+		conf.setJar("tspls.jar");
 		
 		conf.setMapperClass(SaMapper.class);
 		conf.setReducerClass(ChooserReducer.class);

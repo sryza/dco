@@ -69,7 +69,7 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 	}
 	
 	public int runStep(TspLsCity[] nodes, TspLsCity[] newNodes, double temp, long end) {
-		//TODO: if we use a counter for every second we could 
+		//TODO: if we use a counter we could call System.currentTimeMillis() less
 		while (System.currentTimeMillis() < end) {
 			
 			if (Math.random() < .5) { //try a random 2 opt move
