@@ -64,9 +64,9 @@ public class PlsMaster {
 		Path dirPath = new Path(dir);
 		
 		//write out initial input file
-		Path initDirPath = new Path(dirPath, "0");
+		Path initDirPath = new Path(dirPath, "0/");
 		if (!fs.mkdirs(initDirPath)) {
-			LOG.info("Failed to create directory: " + dir);
+			LOG.info("Failed to create directory: " + initDirPath);
 		}
 		
 		Path initFilePath = new Path(initDirPath, "sols");
@@ -81,8 +81,8 @@ public class PlsMaster {
 		
 		//run the waves
 		for (int i = 0; i < numRuns; i++) {
-			Path inputPath = new Path(dirPath, i + "");
-			Path outputPath = new Path(dirPath, (i+1) + "");
+			Path inputPath = new Path(dirPath, i + "/");
+			Path outputPath = new Path(dirPath, (i+1) + "/");
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
 			runHadoopJob(inputPath, outputPath);
