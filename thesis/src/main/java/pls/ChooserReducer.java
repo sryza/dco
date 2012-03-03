@@ -1,9 +1,11 @@
 package pls;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,11 +22,13 @@ import org.apache.hadoop.mapred.Reporter;
 
 import pls.tsp.TspSaSolution;
 
-public class ChooserReducer extends MapReduceBase implements Reducer<Text, BytesWritable, IntWritable, BytesWritable> {
+public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
 	private int k = -1;
 	private int bestCostAlways = -1;
 	
+	private static final BytesWritable REST_KEY = new BytesWritable("rest".getBytes());
+	private static final BytesWritable METADATA_KEY = new BytesWritable("metadata".getBytes());
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -42,11 +46,11 @@ public class ChooserReducer extends MapReduceBase implements Reducer<Text, Bytes
 	 * 				containing T
 	 */
 	@Override
-	public void reduce(Text key, Iterator<BytesWritable> values,
-			OutputCollector<IntWritable, BytesWritable> output, Reporter reporter)
+	public void reduce(BytesWritable key, Iterator<BytesWritable> values,
+			OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
 			throws IOException {
 		
-		if (key.equals("best")) {
+		if (new String(key.getBytes()).equals("metadata")) {
 			//first value is info regarding the problem and best solution
 			BytesWritable auxInfo = values.next();
 			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes());
@@ -93,7 +97,7 @@ public class ChooserReducer extends MapReduceBase implements Reducer<Text, Bytes
 			for (SolutionData solution : solsThisRound) {
 				BytesWritableSection solutionSection = new BytesWritableSection(solution.solutionBytes, 
 						solution.endSolOffset, solution.endSolLen);
-				output.collect(new IntWritable(solution.cost), solutionSection);
+				output.collect(REST_KEY, solutionSection);
 			}
 			
 			//then write out the rest of the bestSolutionAlways as many times as the difference
@@ -101,14 +105,19 @@ public class ChooserReducer extends MapReduceBase implements Reducer<Text, Bytes
 			BytesWritableSection bestSection = new BytesWritableSection(bestSolThisRound.solutionBytes,
 					bestSolThisRound.bestSolOffset, bestSolThisRound.bestSolLen);
 			for (int i = 0; i < nBest; i++) {
-				output.collect(new IntWritable(bestCostThisRound), bestSection);
+				output.collect(REST_KEY, bestSection);
 			}
+		} else { //just continue with what we've got {
+			
 		}
 		
-		//also write out the key for the best solution always
-		
-		//write out the inputs list
-//		output.collect(arg0, arg1);
+		//write out the metadata key
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+		dos.writeInt(k);
+		dos.writeInt(bestCostAlways);
+		BytesWritable metadata = new BytesWritable(baos.toByteArray());
+		output.collect(METADATA_KEY, metadata);
 	}
 	
 	private ArrayList<SolutionData> chooseKBest(ArrayList<SolutionData> solDatas, int k) {

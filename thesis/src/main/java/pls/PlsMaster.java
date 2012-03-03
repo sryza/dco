@@ -1,5 +1,7 @@
 package pls;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public class PlsMaster {
 	
 	public static void main(String[] args) throws IOException {
 		//TODO: these should be arguments
-		int numTasks = 5;;
+		int numTasks = 5;
 		File f = new File("../tsptests/eil51.258");
 		double temp = 5.0;
 		double scaler = .9;
@@ -44,20 +46,22 @@ public class PlsMaster {
 		Greedy greedy = new Greedy();
 		
 		List<TspSaSolution> startSolutions = new ArrayList<TspSaSolution>(numTasks);
+		int bestStartCost = Integer.MAX_VALUE;
 		for (int i = 0; i < numTasks; i++) {
 			if (i > 0) {
 				Collections.shuffle(citiesList);
 			}
 			TspLsCity[] cities = greedy.computeGreedy(citiesList);
 			TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp, scaler);
+			bestStartCost = Math.min(bestStartCost, solution.getCost());
 			startSolutions.add(solution);
 		}
 		
 		PlsMaster master = new PlsMaster();
-		master.run(numRuns, startSolutions, "/users/sryza/testdir/");
+		master.run(numRuns, startSolutions, bestStartCost, "/users/sryza/testdir/");
 	}
 	
-	public void run(int numRuns, List<TspSaSolution> startSolutions, String dir) throws IOException {
+	public void run(int numRuns, List<TspSaSolution> startSolutions, int bestCost, String dir) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
@@ -71,12 +75,21 @@ public class PlsMaster {
 		
 		Path initFilePath = new Path(initDirPath, "sols");
 		
+		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
 		BytesWritable key = new BytesWritable("rest".getBytes());
 		for (TspSaSolution sol : startSolutions) {
 			byte[] solBytes = sol.toBytes();
 			writer.append(key, new BytesWritable(solBytes));
 		}
+		//write out metadata
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(baos);
+		int k = startSolutions.size() / 2;
+		dos.writeInt(k);
+		dos.writeInt(bestCost);
+		BytesWritable metadata = new BytesWritable(baos.toByteArray());
+		writer.append(new BytesWritable("metadata".getBytes()), metadata);
 		writer.close();
 		
 		//run the waves
@@ -85,7 +98,7 @@ public class PlsMaster {
 			Path outputPath = new Path(dirPath, (i+1) + "/");
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
-			runHadoopJob(inputPath, outputPath);
+			runHadoopJob(inputPath, outputPath, startSolutions.size());
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
 		}
@@ -94,7 +107,7 @@ public class PlsMaster {
 	/**
 	 * Involves sending a solution (or location of a solution) to each node.
 	 */
-	private void runHadoopJob(Path inputPath, Path outputPath) throws IOException {
+	private void runHadoopJob(Path inputPath, Path outputPath, int numMaps) throws IOException {
 		JobConf conf = new JobConf();
 
 		conf.setOutputKeyClass(Text.class);
@@ -107,6 +120,9 @@ public class PlsMaster {
 
 		conf.setInputFormat(SequenceFileInputFormat.class);
 		conf.setOutputFormat(SequenceFileOutputFormat.class);
+		
+		conf.setNumMapTasks(numMaps);
+		conf.setNumReduceTasks(1);
 		
 		FileInputFormat.addInputPath(conf, inputPath);
 		FileOutputFormat.setOutputPath(conf, outputPath);
