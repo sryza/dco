@@ -62,12 +62,15 @@ public class PlsMaster {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
 		Path dirPath = new Path(dir);
-		if (!fs.mkdirs(dirPath)) {
+		
+		//write out initial input file
+		Path initDirPath = new Path(dirPath, "0");
+		if (!fs.mkdirs(initDirPath)) {
 			LOG.info("Failed to create directory: " + dir);
 		}
 		
-		//write out initial input file
-		Path initFilePath = new Path(dirPath, "0");
+		Path initFilePath = new Path(initDirPath, "sols");
+		
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
 		BytesWritable key = new BytesWritable("rest".getBytes());
 		for (TspSaSolution sol : startSolutions) {

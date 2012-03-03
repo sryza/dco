@@ -134,9 +134,11 @@ public class TspPanel extends JPanel{
 		frame.setVisible(true);
 		
 		MouseListener clickListener = new MouseListener() {
+			double temp = 5.0;
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				runner.runStepAndDisplay();
+				runner.runStepAndDisplay(temp);
+				temp = temp * .9;
 			}
 			
 			@Override
