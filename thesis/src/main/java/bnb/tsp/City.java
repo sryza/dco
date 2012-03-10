@@ -1,16 +1,13 @@
 package bnb.tsp;
 
-public class City {
+import tsp.TspCity;
 
-	public int x;
-	public int y;
-	public int id;
+public class City extends TspCity {
+
 	public ThreadLocal<Integer> threadLocalMark = new ThreadLocal<Integer>();
 	
 	public City(int x, int y, int id) {
-		this.x = x;
-		this.y = y;
-		this.id = id;
+		super(id, x, y);
 	}
 	
 	public int dist(City other) {

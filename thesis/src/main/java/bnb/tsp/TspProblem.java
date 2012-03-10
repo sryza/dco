@@ -30,7 +30,7 @@ public class TspProblem implements Problem {
 		this.cities = cities;
 	}
 	
-	private void makeEdges() {
+	public void makeEdges() {
 		edges = new ArrayList<Edge>((cities.length - 1) * cities.length / 2);
 		for (int i = 0; i < cities.length; i++) {
 			for (int j = i+1; j < cities.length; j++) {

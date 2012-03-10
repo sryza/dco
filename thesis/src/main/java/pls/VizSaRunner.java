@@ -13,6 +13,8 @@ public class VizSaRunner {
 	private TspLsCity[] cities;
 	private int tourCost;
 	
+	private int bestCost = Integer.MAX_VALUE;
+	
 	public VizSaRunner(TspLsCity[] cities, TspPanel panel) {
 		this.cities = cities;
 		tourCost = TspUtils.tourDist(cities);
@@ -27,6 +29,11 @@ public class VizSaRunner {
 		if (cost != Integer.MAX_VALUE) {
 			cities = newNodes;
 			tourCost += cost;
+			if (tourCost < bestCost) {
+				bestCost = tourCost;
+				System.out.println("New best cost : " +  bestCost);
+				panel.setBest(newNodes);
+			}
 		}
 		System.out.println("Cost: " + tourCost + " (" + cost + ") | Temp: " + temp);
 

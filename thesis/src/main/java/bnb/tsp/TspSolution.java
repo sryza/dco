@@ -37,6 +37,10 @@ public class TspSolution implements Solution {
 		}
 	}
 	
+	public City[] getCities() {
+		return cities;
+	}
+	
 	public String toString() {
 		StringBuilder sb =  new StringBuilder();
 		for (City city : cities) {

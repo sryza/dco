@@ -1,5 +1,7 @@
 package bnb.tsp;
 
+import java.util.Iterator;
+
 public class TspUtils {
 	public static int cost3opt(City[] nodes, int index1, int index2, int index3)
 	{
@@ -78,5 +80,42 @@ public class TspUtils {
 	
 	public static int wrap(City[] nodes, int index) {
 		return (index + nodes.length) % nodes.length;
-	}	
+	}
+	
+	public static boolean edgeCrossesPath(Iterator<City> path, Edge edge) {
+		City prev = path.next();
+		while (path.hasNext()) {
+			City cur = path.next();
+			if (intersects(edge, cur, prev)) {
+				return true;
+			}
+			prev = cur;
+		}
+		return false;
+	}
+	
+	public static boolean intersects(Edge edge, City city1, City city2) {
+		int x1 = edge.node1.x;
+		int x2 = edge.node2.x;
+		int x3 = city1.x;
+		int x4 = city2.x;
+		int y1 = edge.node1.y;
+		int y2 = edge.node2.y;
+		int y3 = city1.y;
+		int y4 = city2.y;
+
+		int denom = (y4-y3)*(x2-x1)-(x4-x3)*(y2-y1);
+		double ua = (double)((x4-x3)*(y1-y3)-(y4-y3)*(x1-x3)) / denom;
+		double ub = (double)((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3)) / denom;
+		return ua > 0 && ub > 0 && ua < 1 && ua < 1;
+	}
+	
+	public static void main(String[] args) {
+		City c1 = new City(0, 5, -1);
+		City c2 = new City(5, 5, -1);
+		City c3 = new City(0, 5, -1);
+		City c4 = new City(5, 0, -1);
+		Edge edge = new Edge(c3, c4);
+		System.out.println(intersects(edge, c1, c2));
+	}
 }
