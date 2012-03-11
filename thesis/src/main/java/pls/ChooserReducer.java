@@ -159,7 +159,9 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 		
 		@Override
 		public int compareTo(SolutionData other) {
-			return other.cost - this.cost; //TODO: other way around?
+			//right because this returns positive if other is smaller,
+			//which ensures the max heap that we want
+			return other.cost - this.cost;
 		}
 	}
 	

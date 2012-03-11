@@ -110,8 +110,8 @@ public class PlsMaster {
 	private void runHadoopJob(Path inputPath, Path outputPath, int numMaps) throws IOException {
 		JobConf conf = new JobConf();
 
-		conf.setOutputKeyClass(Text.class);
-		conf.setOutputValueClass(IntWritable.class);
+		conf.setOutputKeyClass(BytesWritable.class);
+		conf.setOutputValueClass(BytesWritable.class);
 		
 		conf.setJar("tspls.jar");
 		
