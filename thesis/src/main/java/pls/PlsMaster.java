@@ -35,12 +35,11 @@ public class PlsMaster {
 	private static final Logger LOG = Logger.getLogger(PlsMaster.class);
 	
 	public static void main(String[] args) throws IOException {
-		//TODO: these should be arguments
-		int numTasks = 5;
-		File f = new File("../tsptests/eil51.258");
+		int numTasks = Integer.parseInt(args[0]);
+		int numRuns = Integer.parseInt(args[1]);
+		File f = new File("../tsptests/eil101.258");
 		double temp = 5.0;
-		double scaler = .9;
-		int numRuns = 5;
+		double scaler = .95;
 		
 		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
 		Greedy greedy = new Greedy();
@@ -58,14 +57,18 @@ public class PlsMaster {
 		}
 		
 		PlsMaster master = new PlsMaster();
-		master.run(numRuns, startSolutions, bestStartCost, "/users/sryza/testdir/");
+		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
+		LOG.info("results going to " + dir);
+		master.run(numRuns, startSolutions, bestStartCost, dir);
 	}
 	
 	public void run(int numRuns, List<TspSaSolution> startSolutions, int bestCost, String dir) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
+		
 		FileSystem fs = FileSystem.get(conf);
 		Path dirPath = new Path(dir);
+		fs.delete(dirPath, true);
 		
 		//write out initial input file
 		Path initDirPath = new Path(dirPath, "0/");
@@ -77,19 +80,18 @@ public class PlsMaster {
 		
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
-		BytesWritable key = new BytesWritable("rest".getBytes());
 		for (TspSaSolution sol : startSolutions) {
 			byte[] solBytes = sol.toBytes();
-			writer.append(key, new BytesWritable(solBytes));
+			writer.append(PlsUtil.SOLS_KEY, new BytesWritable(solBytes));
 		}
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
-		int k = startSolutions.size() / 2;
+		int k = Math.max(1, startSolutions.size() / 2);
 		dos.writeInt(k);
 		dos.writeInt(bestCost);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
-		writer.append(new BytesWritable("metadata".getBytes()), metadata);
+		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();
 		
 		//run the waves
@@ -110,8 +112,12 @@ public class PlsMaster {
 	private void runHadoopJob(Path inputPath, Path outputPath, int numMaps) throws IOException {
 		JobConf conf = new JobConf();
 
+//		conf.set("mapred.job.tracker", "local"); //TODO: this just here for debugging
+		
 		conf.setOutputKeyClass(BytesWritable.class);
 		conf.setOutputValueClass(BytesWritable.class);
+		conf.setMapOutputKeyClass(BytesWritable.class);
+		conf.setMapOutputValueClass(BytesWritable.class);
 		
 		conf.setJar("tspls.jar");
 		

@@ -16,15 +16,17 @@ public class TestTspSa {
 	private static final Logger LOG = Logger.getLogger(TestTspSa.class);
 	
 	public static void main(String[] args) throws IOException {
-		File f = new File("../tsptests/eil51.258");
+		File f = new File("../tsptests/eil101.258");
 		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
 		Greedy greedy = new Greedy();
 		TspLsCity[] cities = greedy.computeGreedy(citiesList);
 		double temp = 5.0;
-		double scaler = 2.0/3.0;
+		double scaler = .95;
 		TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp, scaler);
 		
-		Random rand = new Random();
+		long seed = System.currentTimeMillis();
+		LOG.info("seed: " + seed);
+		Random rand = new Random(seed);
 		SaStats stats = new SaStats();
 		
 		TspSaRunner runner = new TspSaRunner(rand, stats);
@@ -35,7 +37,8 @@ public class TestTspSa {
 			LOG.info("temp is " + temp);
 			TspSaSolution[] solutions = runner.run(solution, time);
 			LOG.info("best solution cost: " + solutions[0].getCost());
-			temp = temp * 2 / 3;
+//			temp = temp * 2 / 3;
+			solution = solutions[0];
 		}
 	}
 }

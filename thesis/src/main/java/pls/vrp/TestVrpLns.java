@@ -12,10 +12,10 @@ import viz.VrpPanel;
 public class TestVrpLns {
 	public static void main(String[] args) throws IOException {
 		final int numRoutes = 8;
-		final int numVehicles = 100;
+		final int numCities = 10;
 		
 		File f = new File("../vrptests/r1.txt");
-		VrpProblem problem = VrpReader.readSolomon(f, numVehicles);
+		VrpProblem problem = VrpReader.readSolomon(f, numCities);
 		//seems like more for the first two and less for the last works
 		VrpGreedyInitializer init = new VrpGreedyInitializer(1.0, 1.0, 0);
 		VrpSolution sol = init.nearestNeighborHeuristic(problem);
@@ -33,7 +33,7 @@ public class TestVrpLns {
 		
 		int numToRelax = 5;
 		int numFailures = 0;
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 3; i++) {
 			int dist =  sol.getToursCost(); //to bound cp
 			LnsRelaxer relaxer = new LnsRelaxer(25, problem.getMaxDistance());
 			VrpSolution partialSol = relaxer.relaxShaw(sol, numToRelax);
@@ -49,13 +49,12 @@ public class TestVrpLns {
 					numFailures = 0;
 					System.out.println("INCREASING NUM TO RELAX TO " + numToRelax);
 				}
-				
 			} else {
 				System.out.println("verified: " + newSol.verify(problem));
 				numFailures = 0;
 				sol = newSol;
-				panel.setSolution(sol);
 			}
+			panel.setSolution(sol);
 		}
 	}
 }

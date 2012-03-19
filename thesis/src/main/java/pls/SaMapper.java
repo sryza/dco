@@ -15,22 +15,27 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.log4j.Logger;
 
 import pls.tsp.TspSaRunner;
 import pls.tsp.TspSaSolution;
 
 public class SaMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
+	private static final Logger LOG = Logger.getLogger(SaMapper.class);
+	
 	private static final int TIME = 60000;
-	private static final BytesWritable THEKEY = new BytesWritable("rest".getBytes());
 	
 	@Override
 	public void map(BytesWritable key, BytesWritable value, OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
 		throws IOException {
 		
+		LOG.info("Received map input with key \"" + new String(key.getBytes()) + "\"");
+		
 		//pass metadata on through
-		if (new String(key.getBytes()).equals("metadata")) {
+		if (key.equals(PlsUtil.METADATA_KEY)) {
 			output.collect(key, value);
+			LOG.info("Passing on metadata");
 			return;
 		}
 		
@@ -41,7 +46,11 @@ public class SaMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 		try {
 			sol = TspSaSolution.fromStream(dis);
 		} catch (IOException ex) {
+			LOG.error("Failed to read initial solution, aborting", ex);
+			return;
 		}
+		
+		LOG.info("Initial solution cost: " + sol.getCost());
 		
 		SaStats stats = new SaStats();
 		//use host name to add some randomness in case multiple mappers are started at the same time
@@ -65,6 +74,6 @@ public class SaMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 
 		solutions[0].toStream(dos);
 		solutions[1].toStream(dos);
-		output.collect(THEKEY, new BytesWritable(baos.toByteArray()));
+		output.collect(PlsUtil.SOLS_KEY, new BytesWritable(baos.toByteArray()));
 	}
 }
