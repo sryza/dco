@@ -11,7 +11,7 @@ import pls.SaStats;
 
 public class TspSaRunner implements SaRunner<TspSaSolution> {
 
-	private static final Logger LOG = Logger.getLogger(SaRunner.class);
+	private static final Logger LOG = Logger.getLogger(TspSaRunner.class);
 	
 	private final SaStats stats;
 	private final Random rand;
@@ -21,6 +21,9 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 		this.stats = stats;
 	}
 	
+	/**
+	 * Returns an array containing the best solution and the ending solution.
+	 */
 	@Override
 	public TspSaSolution[] run(TspSaSolution start, long timeMs) {
 		long startTime = System.currentTimeMillis();
@@ -30,14 +33,18 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 		TspLsCity[] nodes1 = new TspLsCity[best.numCities()];
 		System.arraycopy(best.getTour(), 0, nodes1, 0, best.numCities());
 		TspLsCity[] nodes2 = new TspLsCity[best.numCities()];
+		TspUtils.WRAP_NUM_NODES = nodes1.length;
 		
 		int i = 0;
 		int totalCost = best.getCost();
+		
 		double temperature = start.getTemperature();
 		double scaler = start.getScaler();
 		while (System.currentTimeMillis() < endTime) {
 
 			int delta = runStep(nodes1, nodes2, temperature, endTime);
+			TspSaSolution curSol = new TspSaSolution(new TspLsCity[best.numCities()], totalCost+delta, temperature, scaler);
+			System.arraycopy(nodes2, 0, curSol.getTour(), 0, nodes1.length);
 			temperature = temperature * scaler;
 			
 			if (delta == Integer.MAX_VALUE) {
@@ -51,7 +58,7 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 				best = new TspSaSolution(new TspLsCity[best.numCities()], totalCost, temperature, scaler);
 				System.arraycopy(nodes2, 0, best.getTour(), 0, nodes1.length);
 				stats.reportNewBestSolution(totalCost);
-				LOG.info("Solution verified " + best.verifyCost());
+//				System.out.println(best.verifyCost());
 			}
 			
 			TspLsCity[] temp = nodes2;
@@ -72,7 +79,7 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 		//TODO: if we use a counter we could call System.currentTimeMillis() less
 		while (System.currentTimeMillis() < end) {
 			
-			if (Math.random() < .5) { //try a random 2 opt move
+			if (rand.nextDouble() < .5) { //try a random 2 opt move
 				int i = rand.nextInt(nodes.length);
 				int j = rand.nextInt(nodes.length);
 				

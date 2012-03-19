@@ -19,16 +19,16 @@ import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
+import org.apache.log4j.Logger;
 
 import pls.tsp.TspSaSolution;
 
 public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
+	private static final Logger LOG = Logger.getLogger(ChooserReducer.class);
+	
 	private int k = -1;
 	private int bestCostAlways = -1;
-	
-	private static final BytesWritable REST_KEY = new BytesWritable("rest".getBytes());
-	private static final BytesWritable METADATA_KEY = new BytesWritable("metadata".getBytes());
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -50,15 +50,18 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 			OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
 			throws IOException {
 		
-		if (new String(key.getBytes()).equals("metadata")) {
+		if (key.equals(PlsUtil.METADATA_KEY)) {
 			//first value is info regarding the problem and best solution
 			BytesWritable auxInfo = values.next();
 			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes());
 			DataInputStream dis = new DataInputStream(bais);
 			k = dis.readInt();
 			bestCostAlways = dis.readInt();
+			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways);
 			return;
 		} else if (k == -1) {
+			LOG.info("Received solutions before metadata, aborting");
+			return;
 			//log something here
 			//output some sort of error code
 		}
@@ -93,22 +96,28 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 			int nMappers = solsThisRound.size();
 			//choose best k solutions
 			solsThisRound = chooseKBest(solsThisRound, k);
+			BytesWritable val;
 			//first write out the k best
 			for (SolutionData solution : solsThisRound) {
-				BytesWritableSection solutionSection = new BytesWritableSection(solution.solutionBytes, 
-						solution.endSolOffset, solution.endSolLen);
-				output.collect(REST_KEY, solutionSection);
+				val = new BytesWritable();
+				val.set(solution.solutionBytes.getBytes(), solution.endSolOffset, solution.endSolLen);
+				output.collect(PlsUtil.SOLS_KEY, val);
 			}
 			
 			//then write out the rest of the bestSolutionAlways as many times as the difference
 			int nBest = nMappers - k;
-			BytesWritableSection bestSection = new BytesWritableSection(bestSolThisRound.solutionBytes,
-					bestSolThisRound.bestSolOffset, bestSolThisRound.bestSolLen);
+			val = new BytesWritable();
+			val.set(bestSolThisRound.solutionBytes.getBytes(), bestSolThisRound.bestSolOffset, bestSolThisRound.bestSolLen);
 			for (int i = 0; i < nBest; i++) {
-				output.collect(REST_KEY, bestSection);
+				output.collect(PlsUtil.SOLS_KEY, val);
 			}
-		} else { //just continue with what we've got {
-			
+		} else { //just continue with what we've got
+			for (SolutionData solution : solsThisRound) {
+				//TODO: should we need to copy here?
+				BytesWritable val = new BytesWritable();
+				val.set(solution.solutionBytes.getBytes(), solution.endSolOffset, solution.endSolLen);
+				output.collect(PlsUtil.SOLS_KEY, val);
+			}
 		}
 		
 		//write out the metadata key
@@ -117,13 +126,16 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 		dos.writeInt(k);
 		dos.writeInt(bestCostAlways);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
-		output.collect(METADATA_KEY, metadata);
+		output.collect(PlsUtil.METADATA_KEY, metadata);
 	}
 	
-	private ArrayList<SolutionData> chooseKBest(ArrayList<SolutionData> solDatas, int k) {
+	/**
+	 * Returns in order of highest cost first.
+	 */
+	protected ArrayList<SolutionData> chooseKBest(ArrayList<SolutionData> solDatas, int k) {
 		PriorityQueue<SolutionData> maxHeap = new PriorityQueue<SolutionData>();
 		for (SolutionData solData : solDatas) {
-			if (solData.cost < maxHeap.peek().cost) {
+			if (maxHeap.size() < k || solData.cost < maxHeap.peek().cost) {
 				if (maxHeap.size() >= k) {
 					maxHeap.remove();
 				}
@@ -139,7 +151,7 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 		return kbest;
 	}
 	
-	private class SolutionData implements Comparable<SolutionData> {
+	protected static class SolutionData implements Comparable<SolutionData> {
 		public final int cost;
 		public final int endSolOffset;
 		public final int endSolLen;
@@ -162,29 +174,6 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 			//right because this returns positive if other is smaller,
 			//which ensures the max heap that we want
 			return other.cost - this.cost;
-		}
-	}
-	
-	private class BytesWritableSection extends BytesWritable implements Writable {
-		private final BytesWritable wrapped;
-		private final int offset;
-		private final int len;
-		
-		public BytesWritableSection(BytesWritable wrapped, int offset, int len) {
-			this.wrapped = wrapped;
-			this.offset = offset;
-			this.len = len;
-		}
-		
-		@Override
-		public void readFields(DataInput input) throws IOException {
-			throw new IllegalStateException("this method should never be called");
-		}
-		
-		@Override
-		public void write(DataOutput output) throws IOException {
-			byte[] bytes = wrapped.getBytes();
-			output.write(bytes, offset, len);
 		}
 	}
 }

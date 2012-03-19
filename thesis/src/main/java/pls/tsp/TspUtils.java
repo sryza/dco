@@ -2,7 +2,7 @@ package pls.tsp;
 
 public class TspUtils 
 {
-	public static int WRAP_NUM_NODES = -1;
+	public static int WRAP_NUM_NODES = 0; //0 ensures we'll get an exception if it's not set
 	
 	public static int dist(TspLsCity n1, TspLsCity n2)
 	{
