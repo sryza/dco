@@ -51,7 +51,11 @@ public class SimpleVassalNodePool implements VassalNodePool {
 				return lastNode;
 			}
 			if (lastNode.hasNextChild()) {
-				return lastNode.nextChild(false);
+				BnbNode child = lastNode.nextChild(false);
+				if (!lastNode.hasNextChild()) {
+					nodeList.removeLast();
+				}
+				return child;
 			} else {
 				nodeList.removeLast();
 			}
