@@ -74,7 +74,6 @@ public class VrpCp {
 		//impose constraints
 		store.impose(new Circuit(successors));
 		
-		imposePartialSolutionConstraints(partialSolution, store, nodePositions, vehicles, numCities);
 		IntVar[] visitTimes = imposeTimeWindowConstraints(store, successors, numCities, numNodes, windowStartTimes, windowEndTimes, timeDists);
 		imposeVehicleCapacityConstraints(store, vehicles, numCities, demands, numVehicles, vehicleCapacity);
 		
@@ -130,6 +129,15 @@ public class VrpCp {
 		
 		//TODO: do we need to do something to ensure that the visit times take their minimum values?
 		//will need the min and max constraints
+		
+//		System.out.println("toursCost min: " + toursCost.dom().min());
+		store.consistency();
+//		System.out.println("toursCost min after consistency: " + toursCost.dom().min());
+		imposePartialSolutionConstraints(partialSolution, store, nodePositions, vehicles, numCities);
+//		System.out.println("toursCost after imposing partial solution constraints: " + toursCost.dom().min());
+		store.consistency();
+//		System.out.println("toursCost min after consistency: " + toursCost.dom().min());
+		
 		
 		//carry out the search
 		Search<IntVar> search = new DepthFirstSearch<IntVar>();

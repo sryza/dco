@@ -1,5 +1,9 @@
 package pls.vrp;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,24 +13,15 @@ import java.util.List;
 public class VrpSolution {
 	//values of -1 point to the depot
 	private List<List<Integer>> routes;
-	private int[] cityVehicles;
 	private List<Integer> unrouted;
 	private int numVehicles;
 	private VrpProblem problem;
+	private int toursCost = -1;
 	
 	public VrpSolution(List<List<Integer>> routes, VrpProblem problem) {
 		this.routes = routes;
 		this.problem = problem;
 		this.numVehicles = routes.size();
-		
-		cityVehicles = new int[problem.getNumCities()];
-		int vehicle = 0;
-		for (List<Integer> route : routes) {
-			for (int cityId : route) {
-				cityVehicles[cityId] = vehicle;
-			}
-			vehicle++;
-		}
 	}
 	
 	public VrpSolution(List<List<Integer>> routes, List<Integer> unroutedNodes, VrpProblem problem) {
@@ -54,10 +49,6 @@ public class VrpSolution {
 			toursCost += distancesFromDepot[prev];
 		}
 		return toursCost;
-	}
-	
-	public int[] getCityVehicles() {
-		return cityVehicles;
 	}
 	
 	public VrpProblem getProblem() {
@@ -146,6 +137,34 @@ public class VrpSolution {
 	}
 	
 	public int getToursCost() {
-		return calcToursCost(routes, problem);
+		if (toursCost != -1) {
+			return toursCost;
+		} else {
+			return toursCost = calcToursCost(routes, problem);
+		}
+	}
+	
+	public void toStream(DataOutputStream dos) throws IOException {
+		dos.writeInt(routes.size());
+		for (List<Integer> route : routes) {
+			dos.writeInt(route.size());
+			for (int custId : route) {
+				dos.writeInt(custId);
+			}
+		}
+	}
+	
+	public static VrpSolution fromStream(DataInputStream dis, VrpProblem problem) throws IOException {
+		int numRoutes = dis.readInt();
+		List<List<Integer>> routes = new ArrayList<List<Integer>>(numRoutes);
+		for (int i = 0; i < numRoutes; i++) {
+			int numCusts = dis.readInt();
+			List<Integer> route = new ArrayList<Integer>(numCusts);
+			routes.add(route);
+			for (int j = 0; j < numCusts; j++) {
+				route.add(dis.readInt());
+			}
+		}
+		return new VrpSolution(routes, problem);
 	}
 }

@@ -1,6 +1,8 @@
 package pls.vrp;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class VrpProblem {
 	private int vehicleCapacity;
@@ -35,12 +37,12 @@ public class VrpProblem {
 		for (int i = 0; i < demands.length; i++) {
 			int xDiffFromDepot = xCoors[i] - depotX;
 			int yDiffFromDepot = yCoors[i] - depotY;
-			distsFromDepot[i] = (int)Math.sqrt(xDiffFromDepot * xDiffFromDepot + yDiffFromDepot * yDiffFromDepot);
+			distsFromDepot[i] = (int)Math.round(Math.sqrt(xDiffFromDepot * xDiffFromDepot + yDiffFromDepot * yDiffFromDepot));
 			
 			for (int j = 0; j < demands.length; j++) {
 				int xDiff = xCoors[i] - xCoors[j];
 				int yDiff = yCoors[i] - yCoors[j];
-				cityDists[i][j] = (int)Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+				cityDists[i][j] = (int)Math.round(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
 				if (cityDists[i][j] > maxDist) {
 					maxDist = cityDists[i][j];
 				}
@@ -92,6 +94,19 @@ public class VrpProblem {
 		return demands;
 	}
 	
+	//if id's are negative, they refer to the depot
+	public int getDistance(int custId1, int custId2) {
+		if (custId1 >= 0 && custId2 >= 0) {
+			return cityDists[custId1][custId2];
+		} else if (custId1 >= 0) {
+			return distsFromDepot[custId1];
+		} else if (custId2 >= 0){
+			return distsFromDepot[custId2];
+		} else {
+			return 0; //both depot
+		}
+	}
+	
 	public int getVehicleCapacity() {
 		return vehicleCapacity;
 	}
@@ -100,7 +115,41 @@ public class VrpProblem {
 		return demands.length;
 	}
 	
-	public void toStream(DataOutputStream dos) {
-		
+	public void toStream(DataOutputStream dos) throws IOException {
+		dos.writeInt(demands.length);
+		dos.writeInt(depotX);
+		dos.writeInt(depotY);
+		dos.writeInt(vehicleCapacity);
+		for (int i = 0; i < demands.length; i++) {
+			dos.writeInt(demands[i]);
+			dos.writeInt(serviceTimes[i]);
+			dos.writeInt(windowStartTimes[i]);
+			dos.writeInt(windowEndTimes[i]);
+			dos.writeInt(xCoors[i]);
+			dos.writeInt(yCoors[i]);
+		}
+	}
+	
+	public static VrpProblem fromStream(DataInputStream dis) throws IOException {
+		int numCities = dis.readInt();
+		int depotX = dis.readInt();
+		int depotY = dis.readInt();
+		int vehicleCapacity = dis.readInt();
+		int[] serviceTimes = new int[numCities];
+		int[] demands = new int[numCities];
+		int[] windowStartTimes = new int[numCities];
+		int[] windowEndTimes = new int[numCities];
+		int[] xCoors = new int[numCities];
+		int[] yCoors = new int[numCities];
+		for (int i = 0; i < numCities; i++) {
+			demands[i] = dis.readInt();
+			serviceTimes[i] = dis.readInt();
+			windowStartTimes[i] = dis.readInt();
+			windowEndTimes[i] = dis.readInt();
+			xCoors[i] = dis.readInt();
+			yCoors[i] = dis.readInt();
+		}
+		return new VrpProblem(demands, xCoors, yCoors, serviceTimes, windowStartTimes, windowEndTimes, depotX, depotY, 
+				vehicleCapacity);
 	}
 }

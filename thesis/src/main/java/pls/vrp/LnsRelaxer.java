@@ -4,27 +4,41 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 public class LnsRelaxer {
 	
 	private int randomnessMeasure;
 	private int maxDist; //used for normalizing distances for relatedness measure
+	private final Random rand;
 	
-	public LnsRelaxer(int randomnessMeasure, int maxDist) {
+	public LnsRelaxer(int randomnessMeasure, int maxDist, Random rand) {
 		this.randomnessMeasure = randomnessMeasure;
 		this.maxDist = maxDist;
+		this.rand = rand;
 	}
 	
 	/**
 	 * The input solution is not modified.
 	 */
-	public VrpSolution relaxShaw(VrpSolution sol, int numToRelax) {
+	public VrpSolution relaxShaw(VrpSolution sol, int numToRelax, int firstToRemove) {
 		VrpProblem problem = sol.getProblem();
 		ArrayList<Integer> removedCities = new ArrayList<Integer>(numToRelax);
 		HashSet<Integer> remainingCities = new HashSet<Integer>();
 		
+		int[] cityVehicles = new int[problem.getNumCities()];
+		int vehicle = 0;
+		for (List<Integer> route : sol.getRoutes()) {
+			for (int cityId : route) {
+				cityVehicles[cityId] = vehicle;
+			}
+			vehicle++;
+		}
+		
 		//choose first to remove
-		int firstToRemove = (int)(Math.random() * problem.getNumCities());
+		if (firstToRemove == -1) {
+			firstToRemove = (int)(rand.nextDouble() * problem.getNumCities());
+		}
 		for (int i = 0; i < problem.getNumCities(); i++) {
 			if (i == firstToRemove) {
 				removedCities.add(i);
@@ -35,10 +49,10 @@ public class LnsRelaxer {
 		//remove the rest
 		for (int i = 1; i < numToRelax; i++) {
 			//take a random removed node
-			int removedCityId = removedCities.get((int)(Math.random() * removedCities.size()));
+			int removedCityId = removedCities.get((int)(rand.nextDouble() * removedCities.size()));
 			int rank = (randomnessMeasure == Integer.MAX_VALUE) ? 0 :
-					(int)(Math.pow(Math.random(), randomnessMeasure) * remainingCities.size());
-			int cityId = chooseByRankAndRelatedness(remainingCities, sol, rank, removedCityId);
+					(int)(Math.pow(rand.nextDouble(), randomnessMeasure) * remainingCities.size());
+			int cityId = chooseByRankAndRelatedness(remainingCities, sol, rank, removedCityId, cityVehicles);
 			remainingCities.remove(cityId);
 			removedCities.add(cityId);
 		}
@@ -55,9 +69,6 @@ public class LnsRelaxer {
 				}
 			}
 		}
-		System.out.println(removedCities);
-		System.out.println(newRoutes);
-
 		
 		return new VrpSolution(newRoutes, removedCities, problem);
 	}
@@ -66,13 +77,13 @@ public class LnsRelaxer {
 	 * @param cityId
 	 * 		the id of the city that we're determining relatedness in relation to
 	 */
-	private int chooseByRankAndRelatedness(HashSet<Integer> remaining, VrpSolution sol, int rank, int cityId) {
+	private int chooseByRankAndRelatedness(HashSet<Integer> remaining, VrpSolution sol, int rank, int cityId, int[] cityVehicles) {
 		//the head is the least element, i.e. the one whose compareTo(any other element) is less than 0
 		//we want the head of the queue to be the least related customer
 		//thus, we want compareTo to return negative if the argument is more related than us
 		PriorityQueue<CityRelatedness> heap = new PriorityQueue<CityRelatedness>(rank+1);
 		for (int remainingCityId : remaining) {
-			double relatedness = relatedness(cityId, remainingCityId, sol);
+			double relatedness = relatedness(cityId, remainingCityId, sol, cityVehicles);
 			if (heap.size() < rank + 1 || relatedness > heap.peek().relatedness) {
 				if (heap.size() == rank + 1) {
 					heap.remove();
@@ -83,10 +94,10 @@ public class LnsRelaxer {
 		return heap.peek().cityId;
 	}
 	
-	private double relatedness(int nodeId1, int nodeId2, VrpSolution sol) {
+	private double relatedness(int nodeId1, int nodeId2, VrpSolution sol, int[] cityVehicles) {
 		int dist = sol.getProblem().getDistances()[nodeId1][nodeId2];
 		double denom = (double)dist / maxDist;
-		if (sol.getCityVehicles()[nodeId1] == sol.getCityVehicles()[nodeId2]) {
+		if (cityVehicles[nodeId1] == cityVehicles[nodeId2]) {
 			denom += 1.0;
 		}
 		return 1/denom;

@@ -22,7 +22,7 @@ public class VrpPanel extends JPanel {
 	private static final int PADDING = 20;
 	private static final Color NODES_COLOR = Color.black;
 
-	private static final int MAX_ROUTES = 40;
+	private static final int MAX_ROUTES = 200;
 	
 	private Color[] routeColors = new Color[MAX_ROUTES];
 	private VrpSolution sol;
@@ -100,6 +100,10 @@ public class VrpPanel extends JPanel {
 				y2 = cityToPix(yCoors[cur], yOffset, scale, PADDING);
 				g.drawLine(x1, y1, x2, y2);
 
+				int cityX = cityToPix(xCoors[cur], xOffset, scale, PADDING);
+				int cityY = cityToPix(yCoors[cur], yOffset, scale, PADDING);
+				g.fillOval(cityX-DOT_RADIUS, cityY-DOT_RADIUS, DOT_RADIUS*2, DOT_RADIUS*2);
+				
 				prev = cur;
 			}
 			x1 = cityToPix(xCoors[prev], xOffset, scale, PADDING);
@@ -113,12 +117,12 @@ public class VrpPanel extends JPanel {
 		}
 		
 		//paint the cities
-		g.setColor(NODES_COLOR);
-		for (int i = 0; i < xCoors.length; i++) {
-			int x = cityToPix(xCoors[i], xOffset, scale, PADDING);
-			int y = cityToPix(yCoors[i], yOffset, scale, PADDING);
-			g.fillOval(x-DOT_RADIUS, y-DOT_RADIUS, DOT_RADIUS*2, DOT_RADIUS*2);
-		}
+//		g.setColor(NODES_COLOR);
+//		for (int i = 0; i < xCoors.length; i++) {
+//			int x = cityToPix(xCoors[i], xOffset, scale, PADDING);
+//			int y = cityToPix(yCoors[i], yOffset, scale, PADDING);
+//			g.fillOval(x-DOT_RADIUS, y-DOT_RADIUS, DOT_RADIUS*2, DOT_RADIUS*2);
+//		}
 		//paint the depot
 		int x = cityToPix(depotX, xOffset, scale, PADDING);
 		int y = cityToPix(depotY, yOffset, scale, PADDING);

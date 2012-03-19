@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -31,12 +32,14 @@ public class TestVrpLns {
 		frame.pack();
 		frame.setVisible(true);
 		
+		LnsRelaxer relaxer = new LnsRelaxer(25, problem.getMaxDistance(), new Random());
+		
 		int numToRelax = 5;
 		int numFailures = 0;
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 1; i++) {
 			int dist =  sol.getToursCost(); //to bound cp
-			LnsRelaxer relaxer = new LnsRelaxer(25, problem.getMaxDistance());
-			VrpSolution partialSol = relaxer.relaxShaw(sol, numToRelax);
+			VrpSolution partialSol = relaxer.relaxShaw(sol, numToRelax, -1);
+			System.out.println("partialSol cost: " + partialSol.getToursCost());
 			panel.setSolution(partialSol);
 		
 			VrpCp solver = new VrpCp();
