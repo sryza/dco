@@ -6,30 +6,27 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 
-import pls.SaRunner;
+import pls.PlsRunner;
+import pls.PlsSolution;
 import pls.SaStats;
 
-public class TspSaRunner implements SaRunner<TspSaSolution> {
+public class TspSaRunner implements PlsRunner {
 
 	private static final Logger LOG = Logger.getLogger(TspSaRunner.class);
 	
-	private final SaStats stats;
-	private final Random rand;
-	
-	public TspSaRunner(Random rand, SaStats stats) {
-		this.rand = rand;
-		this.stats = stats;
-	}
+	private Random rand;
 	
 	/**
 	 * Returns an array containing the best solution and the ending solution.
 	 */
 	@Override
-	public TspSaSolution[] run(TspSaSolution start, long timeMs) {
+	public TspSaSolution[] run(PlsSolution start, long timeMs, Random rand) {
+		this.rand = rand;
+		
 		long startTime = System.currentTimeMillis();
 		long endTime = startTime + timeMs;
 		
-		TspSaSolution best = start;
+		TspSaSolution best = (TspSaSolution)start;
 		TspLsCity[] nodes1 = new TspLsCity[best.numCities()];
 		System.arraycopy(best.getTour(), 0, nodes1, 0, best.numCities());
 		TspLsCity[] nodes2 = new TspLsCity[best.numCities()];
@@ -38,8 +35,8 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 		int i = 0;
 		int totalCost = best.getCost();
 		
-		double temperature = start.getTemperature();
-		double scaler = start.getScaler();
+		double temperature = best.getTemperature();
+		double scaler = best.getScaler();
 		while (System.currentTimeMillis() < endTime) {
 
 			int delta = runStep(nodes1, nodes2, temperature, endTime);
@@ -49,7 +46,7 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 			
 			if (delta == Integer.MAX_VALUE) {
 				//no solution found in time
-				stats.reportNoSolutionFoundInTime();
+				LOG.info("No solution found in time");
 				break;
 			}
 			
@@ -57,7 +54,7 @@ public class TspSaRunner implements SaRunner<TspSaSolution> {
 			if (totalCost < best.getCost()) {
 				best = new TspSaSolution(new TspLsCity[best.numCities()], totalCost, temperature, scaler);
 				System.arraycopy(nodes2, 0, best.getTour(), 0, nodes1.length);
-				stats.reportNewBestSolution(totalCost);
+				LOG.info("Found new best solution with cost " + totalCost);
 //				System.out.println(best.verifyCost());
 			}
 			

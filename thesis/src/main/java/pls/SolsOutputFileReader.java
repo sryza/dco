@@ -55,7 +55,7 @@ public class SolsOutputFileReader {
 				LOG.warn("Found unexpected key " + new String(key.getBytes()));
 			}
 			
-			TspSaSolution sol = TspSaSolution.fromStream(new DataInputStream(new ByteArrayInputStream(value.getBytes())));
+			TspSaSolution sol = new TspSaSolution().buildFromStream(new DataInputStream(new ByteArrayInputStream(value.getBytes())));
 			sols.add(sol);
 		}
 		return sols;

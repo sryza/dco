@@ -121,7 +121,7 @@ public class PlsMaster {
 		
 		conf.setJar("tspls.jar");
 		
-		conf.setMapperClass(SaMapper.class);
+		conf.setMapperClass(PlsMapper.class);
 		conf.setReducerClass(ChooserReducer.class);
 
 		conf.setInputFormat(SequenceFileInputFormat.class);

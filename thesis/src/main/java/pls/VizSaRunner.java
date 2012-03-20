@@ -1,7 +1,5 @@
 package pls;
 
-import java.util.Random;
-
 import pls.tsp.TspLsCity;
 import pls.tsp.TspSaRunner;
 import pls.tsp.TspUtils;
@@ -19,7 +17,7 @@ public class VizSaRunner {
 		this.cities = cities;
 		tourCost = TspUtils.tourDist(cities);
 		this.panel = panel;
-		lsRunner = new TspSaRunner(new Random(), new SaStats());
+		lsRunner = new TspSaRunner();
 	}
 	
 	public void runStepAndDisplay(double temp) {

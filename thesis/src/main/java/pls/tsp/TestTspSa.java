@@ -27,15 +27,14 @@ public class TestTspSa {
 		long seed = System.currentTimeMillis();
 		LOG.info("seed: " + seed);
 		Random rand = new Random(seed);
-		SaStats stats = new SaStats();
 		
-		TspSaRunner runner = new TspSaRunner(rand, stats);
+		TspSaRunner runner = new TspSaRunner();
 
 		long time = 15 * 1000;
 		
 		for (int i = 0; i < 20; i++) {
 			LOG.info("temp is " + temp);
-			TspSaSolution[] solutions = runner.run(solution, time);
+			TspSaSolution[] solutions = runner.run(solution, time, rand);
 			LOG.info("best solution cost: " + solutions[0].getCost());
 //			temp = temp * 2 / 3;
 			solution = solutions[0];

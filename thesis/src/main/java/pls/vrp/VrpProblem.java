@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pls.PlsSolution;
+
 public class VrpProblem {
 	private int vehicleCapacity;
 	private int[] demands;
@@ -32,6 +34,10 @@ public class VrpProblem {
 		this.depotX = depotX;
 		this.depotY = depotY;
 		
+		buildDistsArrays();
+	}
+	
+	private void buildDistsArrays() {
 		cityDists = new int[demands.length][demands.length];
 		distsFromDepot = new int[demands.length];
 		for (int i = 0; i < demands.length; i++) {
@@ -113,43 +119,5 @@ public class VrpProblem {
 	
 	public int getNumCities() {
 		return demands.length;
-	}
-	
-	public void toStream(DataOutputStream dos) throws IOException {
-		dos.writeInt(demands.length);
-		dos.writeInt(depotX);
-		dos.writeInt(depotY);
-		dos.writeInt(vehicleCapacity);
-		for (int i = 0; i < demands.length; i++) {
-			dos.writeInt(demands[i]);
-			dos.writeInt(serviceTimes[i]);
-			dos.writeInt(windowStartTimes[i]);
-			dos.writeInt(windowEndTimes[i]);
-			dos.writeInt(xCoors[i]);
-			dos.writeInt(yCoors[i]);
-		}
-	}
-	
-	public static VrpProblem fromStream(DataInputStream dis) throws IOException {
-		int numCities = dis.readInt();
-		int depotX = dis.readInt();
-		int depotY = dis.readInt();
-		int vehicleCapacity = dis.readInt();
-		int[] serviceTimes = new int[numCities];
-		int[] demands = new int[numCities];
-		int[] windowStartTimes = new int[numCities];
-		int[] windowEndTimes = new int[numCities];
-		int[] xCoors = new int[numCities];
-		int[] yCoors = new int[numCities];
-		for (int i = 0; i < numCities; i++) {
-			demands[i] = dis.readInt();
-			serviceTimes[i] = dis.readInt();
-			windowStartTimes[i] = dis.readInt();
-			windowEndTimes[i] = dis.readInt();
-			xCoors[i] = dis.readInt();
-			yCoors[i] = dis.readInt();
-		}
-		return new VrpProblem(demands, xCoors, yCoors, serviceTimes, windowStartTimes, windowEndTimes, depotX, depotY, 
-				vehicleCapacity);
 	}
 }

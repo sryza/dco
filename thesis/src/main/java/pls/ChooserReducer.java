@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -23,7 +24,7 @@ import org.apache.log4j.Logger;
 
 import pls.tsp.TspSaSolution;
 
-public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
+public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
 	private static final Logger LOG = Logger.getLogger(ChooserReducer.class);
 	
@@ -66,26 +67,29 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 			//output some sort of error code
 		}
 		
-		//find the best solution
+		Class<SolutionData> solDataClass = getSolutionDataClass();
+		
 		int bestCostThisRound = Integer.MAX_VALUE;
 		SolutionData bestSolThisRound = null;
 		ArrayList<SolutionData> solsThisRound = new ArrayList<SolutionData>();
-		while (values.hasNext()) {
-			BytesWritable bytes = values.next();
-			ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
-			DataInputStream dis = new DataInputStream(bais);
-			int runsBestCost = dis.readInt();
-			int bestSolOffset = dis.readInt();
-			int bestSolLen = dis.readInt();
-			int endSolOffset = dis.readInt();
-			int endSolLen = dis.readInt();
-			SolutionData solData = new SolutionData(runsBestCost, bytes, bestSolOffset, bestSolLen, endSolOffset, endSolLen);
-			
-			if (runsBestCost < bestCostThisRound) {
-				bestCostThisRound = runsBestCost;
-				bestSolThisRound = solData;
-				solsThisRound.add(solData);
+		//find the best solution
+		try {
+			while (values.hasNext()) {
+				BytesWritable bytes = values.next();
+				SolutionData solData = solDataClass.newInstance();
+				solData.init(bytes);
+				if (solData.getBestCost() < bestCostThisRound) {
+					bestCostThisRound = solData.getBestCost();
+					bestSolThisRound = solData;
+					solsThisRound.add(solData);
+				}
 			}
+		} catch (IOException ex) {
+			LOG.error("Error reading data, this shouldn't happen, aborting...", ex);
+			return;
+		} catch (Exception ex) {
+			LOG.error("Error interpreting SolutionData class, aborting...", ex);
+			return;
 		}
 		
 		//prepare inputs to next round
@@ -95,27 +99,24 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 			bestCostAlways = bestCostThisRound; //for passing on
 			int nMappers = solsThisRound.size();
 			//choose best k solutions
-			solsThisRound = chooseKBest(solsThisRound, k);
+			List<SolutionData> bestSols = chooseKBest(solsThisRound, k);
 			BytesWritable val;
 			//first write out the k best
-			for (SolutionData solution : solsThisRound) {
-				val = new BytesWritable();
-				val.set(solution.solutionBytes.getBytes(), solution.endSolOffset, solution.endSolLen);
+			for (SolutionData solData : bestSols) {
+				val = solData.getEndSolutionBytes();
 				output.collect(PlsUtil.SOLS_KEY, val);
 			}
 			
 			//then write out the rest of the bestSolutionAlways as many times as the difference
 			int nBest = nMappers - k;
-			val = new BytesWritable();
-			val.set(bestSolThisRound.solutionBytes.getBytes(), bestSolThisRound.bestSolOffset, bestSolThisRound.bestSolLen);
+			val = bestSolThisRound.getBestSolutionBytes();
 			for (int i = 0; i < nBest; i++) {
 				output.collect(PlsUtil.SOLS_KEY, val);
 			}
 		} else { //just continue with what we've got
 			for (SolutionData solution : solsThisRound) {
 				//TODO: should we need to copy here?
-				BytesWritable val = new BytesWritable();
-				val.set(solution.solutionBytes.getBytes(), solution.endSolOffset, solution.endSolLen);
+				BytesWritable val = solution.getEndSolutionBytes();
 				output.collect(PlsUtil.SOLS_KEY, val);
 			}
 		}
@@ -132,10 +133,10 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 	/**
 	 * Returns in order of highest cost first.
 	 */
-	protected ArrayList<SolutionData> chooseKBest(ArrayList<SolutionData> solDatas, int k) {
+	protected ArrayList<SolutionData> chooseKBest(List<SolutionData> solDatas, int k) {
 		PriorityQueue<SolutionData> maxHeap = new PriorityQueue<SolutionData>();
 		for (SolutionData solData : solDatas) {
-			if (maxHeap.size() < k || solData.cost < maxHeap.peek().cost) {
+			if (maxHeap.size() < k || solData.getBestCost() < maxHeap.peek().getBestCost()) {
 				if (maxHeap.size() >= k) {
 					maxHeap.remove();
 				}
@@ -151,29 +152,5 @@ public class ChooserReducer extends MapReduceBase implements Reducer<BytesWritab
 		return kbest;
 	}
 	
-	protected static class SolutionData implements Comparable<SolutionData> {
-		public final int cost;
-		public final int endSolOffset;
-		public final int endSolLen;
-		public final int bestSolOffset;
-		public final int bestSolLen;
-		public final BytesWritable solutionBytes;
-		
-		public SolutionData(int cost, BytesWritable solutionBytes, int bestSolOffset, int bestSolLen, 
-				int endSolOffset, int endSolLen) {
-			this.cost = cost;
-			this.solutionBytes = solutionBytes;
-			this.bestSolOffset = bestSolOffset;
-			this.bestSolLen = bestSolLen;
-			this.endSolOffset = endSolOffset;
-			this.endSolLen = endSolLen;
-		}
-		
-		@Override
-		public int compareTo(SolutionData other) {
-			//right because this returns positive if other is smaller,
-			//which ensures the max heap that we want
-			return other.cost - this.cost;
-		}
-	}
+	public abstract Class<SolutionData> getSolutionDataClass();
 }

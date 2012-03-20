@@ -8,8 +8,9 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import pls.SaSolution;
+import pls.PlsSolution;
 
-public class TspSaSolution implements SaSolution {
+public class TspSaSolution implements PlsSolution {
 	
 	private static final Logger LOG = Logger.getLogger(TspSaSolution.class);
 	
@@ -18,6 +19,9 @@ public class TspSaSolution implements SaSolution {
 	private double temp;
 	private double scaler;
 	
+	public TspSaSolution() {
+	}
+	
 	public TspSaSolution(TspLsCity[] tour, int cost, double temp, double scaler) {
 		this.cost = cost;
 		this.tour = tour;
@@ -25,7 +29,6 @@ public class TspSaSolution implements SaSolution {
 		this.scaler = scaler;
 	}
 	
-	@Override
 	public int getCost() {
 		return cost;
 	}
@@ -57,23 +60,24 @@ public class TspSaSolution implements SaSolution {
 		return TspUtils.tourDist(tour) - cost;
 	}
 	
-	public static TspSaSolution fromStream(DataInputStream dis) throws IOException {
-		int cost = dis.readInt();
-		double temp = dis.readDouble();
-		double scaler = dis.readDouble();
+	@Override
+	public TspSaSolution buildFromStream(DataInputStream dis) throws IOException {
+		cost = dis.readInt();
+		temp = dis.readDouble();
+		scaler = dis.readDouble();
 		int numCities = dis.readInt();
-		TspLsCity[] cities = new TspLsCity[numCities];
+		tour = new TspLsCity[numCities];
 		for (int i = 0; i < numCities; i++) {
 			int id = dis.readInt();
 			int x = dis.readInt();
 			int y = dis.readInt();
-			cities[i] = new TspLsCity(id, x, y);
+			tour[i] = new TspLsCity(id, x, y);
 		}
-		
-		return new TspSaSolution(cities, cost, temp, scaler);
+		return this;
 	}
 	
-	public void toStream(DataOutputStream dos) throws IOException {
+	@Override
+	public void writeToStream(DataOutputStream dos) throws IOException {
 		dos.writeInt(cost);
 		dos.writeDouble(temp);
 		dos.writeDouble(scaler);
@@ -93,7 +97,7 @@ public class TspSaSolution implements SaSolution {
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bais);
 		try {
-			toStream(dos);
+			writeToStream(dos);
 		} catch (IOException ex) {
 			LOG.info("Failure to serialize solution to bytes, this shouldn't happen");
 		}
