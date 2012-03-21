@@ -17,6 +17,11 @@ public class VrpHadoopMain {
 	public static void main(String[] args) throws IOException {
 		int numTasks = Integer.parseInt(args[0]);
 		int numRuns = Integer.parseInt(args[1]);
+		boolean runLocal = false;
+		if (args.length > 2) {
+			runLocal = Boolean.parseBoolean(args[2]);
+		}
+		
 		File inputFile = new File("../vrptests/rc110_1.txt");
 		final int maxDiscrepancies = 5;
 		final int relaxationRandomness = 25;
@@ -43,7 +48,7 @@ public class VrpHadoopMain {
 			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies));
 		}
 		
-		PlsMaster master = new PlsMaster();
+		PlsMaster master = new PlsMaster(runLocal);
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
 		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class);

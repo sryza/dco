@@ -34,6 +34,16 @@ public class PlsMaster {
 
 	private static final Logger LOG = Logger.getLogger(PlsMaster.class);
 	
+	private boolean runLocal;
+	
+	public PlsMaster() {
+		
+	}
+	
+	public PlsMaster(boolean runLocal) {
+		this.runLocal = runLocal;
+	}
+	
 	public static void main(String[] args) throws IOException {
 		int numTasks = Integer.parseInt(args[0]);
 		int numRuns = Integer.parseInt(args[1]);
@@ -116,7 +126,9 @@ public class PlsMaster {
 		throws IOException {
 		JobConf conf = new JobConf();
 
-//		conf.set("mapred.job.tracker", "local"); //TODO: this just here for debugging
+		if (runLocal) {
+			conf.set("mapred.job.tracker", "local");
+		}
 		
 		conf.setOutputKeyClass(BytesWritable.class);
 		conf.setOutputValueClass(BytesWritable.class);
