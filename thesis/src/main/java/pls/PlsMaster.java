@@ -44,7 +44,7 @@ public class PlsMaster {
 		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
 		Greedy greedy = new Greedy();
 		
-		List<TspSaSolution> startSolutions = new ArrayList<TspSaSolution>(numTasks);
+		List<PlsSolution> startSolutions = new ArrayList<PlsSolution>(numTasks);
 		int bestStartCost = Integer.MAX_VALUE;
 		for (int i = 0; i < numTasks; i++) {
 			if (i > 0) {
@@ -59,10 +59,11 @@ public class PlsMaster {
 		PlsMaster master = new PlsMaster();
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
-		master.run(numRuns, startSolutions, bestStartCost, dir);
+//		master.run(numRuns, startSolutions, bestStartCost, dir, );
 	}
 	
-	public void run(int numRuns, List<TspSaSolution> startSolutions, int bestCost, String dir) throws IOException {
+	public void run(int numRuns, List<PlsSolution> startSolutions, int bestCost, String dir, Class mapperClass,
+			Class reducerClass) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		
@@ -80,9 +81,11 @@ public class PlsMaster {
 		
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
-		for (TspSaSolution sol : startSolutions) {
-			byte[] solBytes = sol.toBytes();
-			writer.append(PlsUtil.SOLS_KEY, new BytesWritable(solBytes));
+		for (PlsSolution sol : startSolutions) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			sol.writeToStream(new DataOutputStream(baos));
+			BytesWritable solWritable = new BytesWritable(baos.toByteArray());
+			writer.append(PlsUtil.SOLS_KEY, solWritable);
 		}
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -100,7 +103,7 @@ public class PlsMaster {
 			Path outputPath = new Path(dirPath, (i+1) + "/");
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
-			runHadoopJob(inputPath, outputPath, startSolutions.size());
+			runHadoopJob(inputPath, outputPath, startSolutions.size(), mapperClass, reducerClass);
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
 		}
@@ -109,7 +112,8 @@ public class PlsMaster {
 	/**
 	 * Involves sending a solution (or location of a solution) to each node.
 	 */
-	private void runHadoopJob(Path inputPath, Path outputPath, int numMaps) throws IOException {
+	private void runHadoopJob(Path inputPath, Path outputPath, int numMaps, Class mapperClass, Class reducerClass)
+		throws IOException {
 		JobConf conf = new JobConf();
 
 //		conf.set("mapred.job.tracker", "local"); //TODO: this just here for debugging
@@ -121,8 +125,8 @@ public class PlsMaster {
 		
 		conf.setJar("tspls.jar");
 		
-		conf.setMapperClass(PlsMapper.class);
-		conf.setReducerClass(ChooserReducer.class);
+		conf.setMapperClass(mapperClass);
+		conf.setReducerClass(reducerClass);
 
 		conf.setInputFormat(SequenceFileInputFormat.class);
 		conf.setOutputFormat(SequenceFileOutputFormat.class);

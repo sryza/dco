@@ -32,6 +32,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		
 		LOG.info("Received map input with key \"" + new String(key.getBytes()) + "\"");
 		
+		long startTime = System.currentTimeMillis();
+		
 		//pass metadata on through
 		if (key.equals(PlsUtil.METADATA_KEY)) {
 			output.collect(key, value);
@@ -86,6 +88,9 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			solutions[i].writeToStream(dos);
 		}
 		output.collect(PlsUtil.SOLS_KEY, new BytesWritable(baos.toByteArray()));
+		
+		long endTime = System.currentTimeMillis();
+		LOG.info("Total time: " + (endTime-startTime) + " ms");
 	}
 	
 	public abstract Class<PlsSolution> getSolutionClass();

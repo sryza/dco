@@ -4,16 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VrpReader {
 	public static VrpProblem readSolomon(File f, int numCities) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(f));
-		int[] xCoors = new int[numCities];
-		int[] yCoors = new int[numCities];
-		int[] demands = new int[numCities];
-		int[] windowStarts = new int[numCities];
-		int[] windowEnds = new int[numCities];
-		int[] serviceTimes = new int[numCities];
 		
 		String line = br.readLine();
 		int capacity = Integer.parseInt(line.trim());
@@ -21,11 +17,22 @@ public class VrpReader {
 		String[] tokens = line.trim().split("\\s+");
 		int depotX = (int)(Double.parseDouble(tokens[1]));
 		int depotY = (int)(Double.parseDouble(tokens[2]));
-		//get coordinates of depot
-//		while ((line = br.readLine()) != null) {
+		
+		List<String> lines = new ArrayList<String>();
+		for (int i = 0; i < numCities && (line = br.readLine()) != null; i++) {
+			lines.add(line);
+		}
+		
+		numCities = lines.size();
+		int[] xCoors = new int[numCities];
+		int[] yCoors = new int[numCities];
+		int[] demands = new int[numCities];
+		int[] windowStarts = new int[numCities];
+		int[] windowEnds = new int[numCities];
+		int[] serviceTimes = new int[numCities];
+
 		for (int i = 0; i < numCities; i++) {
-			line = br.readLine();
-			tokens = line.trim().split("\\s+");
+			tokens = lines.get(i).trim().split("\\s+");
 			//CUST NO.   XCOORD.   YCOORD.    DEMAND   READY TIME   DUE DATE   SERVICE TIME
 			int x = (int)(Double.parseDouble(tokens[1]));
 			xCoors[i] = (x);

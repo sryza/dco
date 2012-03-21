@@ -22,10 +22,11 @@ public class VrpPlsSolution implements PlsSolution {
 	public VrpPlsSolution() {
 	}
 	
-	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness) {
+	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies) {
 		this.sol = sol;
 		this.maxIter = maxIter;
 		this.maxEscalation = maxEscalation;
+		this.maxDiscrepancies = maxDiscrepancies;
 	}
 	
 	public int getCurEscalation() {

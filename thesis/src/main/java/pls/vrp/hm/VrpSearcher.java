@@ -148,7 +148,7 @@ public class VrpSearcher {
 		}
 		
 		iter = insertionPoints.inCostOrderIterator();
-		while (iter.hasNext()) {
+		while (iter.hasNext() && discrepancies > 0) {
 			RouteNode insertAfter = iter.next();
 			//make sure capacity not violated
 			if (demands[custToInsert] > insertAfter.route.remainingCapacity) {

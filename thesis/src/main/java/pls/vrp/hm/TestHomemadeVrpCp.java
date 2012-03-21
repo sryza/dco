@@ -24,7 +24,7 @@ public class TestHomemadeVrpCp {
 //		File f = new File("../vrptests/r1.txt");
 		VrpProblem problem = VrpReader.readSolomon(f, numCities);
 		//seems like more for the first two and less for the last works
-		VrpGreedyInitializer init = new VrpGreedyInitializer(1.0, 1.0, 0);
+		VrpGreedyInitializer init = new VrpGreedyInitializer(1.0, 1.0, 0.0);
 		VrpSolution sol = init.nearestNeighborHeuristic(problem);
 		System.out.println(sol.getRoutes());
 		System.out.println("Initial tour cost: " + sol.getToursCost());
@@ -41,8 +41,9 @@ public class TestHomemadeVrpCp {
 		frame.setVisible(true);
 		
 		final int maxIter = 30;
-		final int maxSearches = 80;
-		final int maxEscalation = 25;
+		final int maxSearches = 1600;
+		final int maxEscalation = 30;
+		final int maxDiscrepancies = 5;
 //		int numToRelax = 7;
 //		int numFailures = 0;
 //		int failuresBeforeEscalate = 25;
@@ -57,15 +58,17 @@ public class TestHomemadeVrpCp {
 				for (int i = 0; i < maxIter; i++) {
 					int dist =  sol.getToursCost(); //to bound cp
 					VrpSolution partialSol = relaxer.relaxShaw(sol, n, -1);
-					System.out.println("partial sol: " + partialSol.getRoutes());
-					System.out.println("relaxed: " + partialSol.getUninsertedNodes());
+//					System.out.println("partial sol: " + partialSol.getRoutes());
+//					System.out.println("relaxed: " + partialSol.getUninsertedNodes());
+					System.out.println("cur search: " + j);
+					System.out.println("num relaxed: " + n);
 					System.out.println("partialSol cost: " + partialSol.getToursCost());
-					panel.setSolution(partialSol);
+//					panel.setSolution(partialSol);
 
 					VrpSearcher solver = new VrpSearcher(problem);
 					VrpCpStats stats = new VrpCpStats();
 					long solveStartTime = System.currentTimeMillis();
-					VrpSolution newSol = solver.solve(partialSol, dist, 5, stats);
+					VrpSolution newSol = solver.solve(partialSol, dist, maxDiscrepancies, stats);
 					long solveEndTime = System.currentTimeMillis();
 					System.out.println("# nodes evaluated: " + stats.getNumNodesEvaluated());
 					System.out.println("max insert time: " + stats.getMaxInsertTime());
@@ -91,7 +94,8 @@ public class TestHomemadeVrpCp {
 						panel.setSolution(sol);
 						i = 0;
 					}
-					System.out.println("best cost so far: " + sol.getToursCost() + "\n");
+					System.out.println("best cost so far: " + sol.getToursCost() + "\n" + "# nodes: " + sol.getNumVehicles());
+					System.out.println();
 					
 					if (solveEndTime - solveStartTime > 10000) {
 						break outer;
