@@ -75,8 +75,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		
 		//write out metadata before solutions
 		int offset = solutions.length * 4 * 2 + 4;
-		dos.writeInt(solutions[0].getCost());
 		if (solutions.length > 1) {
+			dos.writeInt(solutions[0].getCost());
 			for (int i = 0; i < solutions.length; i++) {
 				dos.writeInt(offset);
 				dos.writeInt(solutions[i].serializedSize());

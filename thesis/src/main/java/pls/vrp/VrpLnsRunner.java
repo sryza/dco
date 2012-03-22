@@ -19,28 +19,32 @@ public class VrpLnsRunner implements PlsRunner {
 		VrpProblem problem = sol.getProblem();
 		LnsRelaxer relaxer = new LnsRelaxer(solAndStuff.getRelaxationRandomness(), problem.getMaxDistance(), rand);
 		
-		for (int n = solAndStuff.getCurEscalation(); n <= solAndStuff.getMaxEscalation(); n++) { 
-			for (int i = solAndStuff.getCurIteration(); i < solAndStuff.getMaxIterations(); i++) {
-				if (System.currentTimeMillis() >= endTime) {
-					break;
+		outer:
+		while (true) {
+			for (int n = solAndStuff.getCurEscalation(); n <= solAndStuff.getMaxEscalation(); n++) { 
+				for (int i = solAndStuff.getCurIteration(); i < solAndStuff.getMaxIterations(); i++) {
+					if (System.currentTimeMillis() >= endTime) {
+						break outer;
+					}
+					
+					VrpSearcher solver = new VrpSearcher(problem);
+					VrpCpStats stats = new VrpCpStats();
+					
+					VrpSolution partialSol = relaxer.relaxShaw(sol, n, -1);
+					
+					VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats);
+					if (newSol != null) {
+						sol = newSol;
+						solAndStuff.setSolution(sol);
+					}
+					solAndStuff.setCurEscalation(n);
+					solAndStuff.setCurIteration(i);
 				}
-				
-				VrpSearcher solver = new VrpSearcher(problem);
-				VrpCpStats stats = new VrpCpStats();
-				
-				VrpSolution partialSol = relaxer.relaxShaw(sol, n, -1);
-				
-				VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats);
-				if (newSol != null) {
-					sol = newSol;
-					solAndStuff.setSolution(sol);
-				}
-				solAndStuff.setCurEscalation(n);
-				solAndStuff.setCurIteration(i);
-			}
+			}	
+			solAndStuff.setCurEscalation(1);
+			solAndStuff.setCurIteration(0);
 		}
 
-		// TODO Auto-generated method stub
 		return new PlsSolution[] {solAndStuff};
 	}
 }

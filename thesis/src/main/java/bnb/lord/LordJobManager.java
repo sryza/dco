@@ -33,6 +33,7 @@ public class LordJobManager {
 	private final LinkedBlockingQueue<VassalProxy> nextVassalQueue;
 	
 	private boolean failed;
+	private boolean done;
 	
 	public LordJobManager(int jobid, List<BnbNode> unevaluated, Problem problem, List<VassalProxy> vassalProxies, LordJobStats stats) {
 		this.jobid = jobid;
@@ -102,7 +103,7 @@ public class LordJobManager {
 					List<BnbNode> stolenWork = proxy.stealWork(this);
 					if (stolenWork.size() > 0) {
 						//TODO: synchronize this?
-						LOG.info("stole work from " + proxy.getVassalIdCache() + " for " + vassalId + ". first node's depth is " + stolenWork.get(0).getDepth()); 
+//						LOG.info("stole work from " + proxy.getVassalIdCache() + " for " + vassalId + ". first node's depth is " + stolenWork.get(0).getDepth()); 
 						hasWorkMap.put(vassalId, true); //TODO: defer this until after we've sent our response?
 						return stolenWork;
 					} else {
@@ -132,10 +133,17 @@ public class LordJobManager {
 	
 	//WARNING: I've noticed this called more than once
 	private void done() {
-		stats.finished();
-		LOG.info("Computation completed!");
-		LOG.info("Best cost: " + minCost);
-		LOG.info("Stats: \n" + stats.makeReport());
+		synchronized(this) {
+			if (done == true) {
+				return;
+			} else {
+				done = true;
+				stats.finished();
+				LOG.info("Computation completed!");
+				LOG.info("Best cost: " + minCost);
+				LOG.info("Stats: \n" + stats.makeReport());
+			}
+		}
 	}
 		
 	public Problem getProblem() {

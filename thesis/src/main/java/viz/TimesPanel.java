@@ -153,7 +153,7 @@ public class TimesPanel extends JPanel implements Scrollable {
 	
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
 		File dir = new File("/home/sryza/logs/stats/");
-		int testId = 20;
+		int testId = 40;
 		long finishTime = 1328561548728l;
 		
 		ObjectMapper mapper = new ObjectMapper();
@@ -163,7 +163,7 @@ public class TimesPanel extends JPanel implements Scrollable {
 		List<List<List<Long>>> nodes = new ArrayList<List<List<Long>>>();
 		
 		File f;
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 500; i++) {
 			if ((f = new File(dir, i + "_" + testId + ".stats")).exists()) {
 				LOG.info("about to parse: " + f.getAbsolutePath());
 				

@@ -6,7 +6,7 @@ public class VrpMapper extends PlsMapper {
 
 	@Override
 	public Class getSolutionClass() {
-		return VrpSolution.class;
+		return VrpPlsSolution.class;
 	}
 
 	@Override
