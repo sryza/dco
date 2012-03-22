@@ -18,9 +18,9 @@ import viz.VrpPanel;
 
 public class TestHomemadeVrpCp {
 	public static void main(String[] args) throws IOException {
-		final int numCities = 1000;
+		final int numCities = 600;
 		
-		File f = new File("../vrptests/r110_1.txt");
+		File f = new File("../vrptests/rc2_6_1.txt");
 //		File f = new File("../vrptests/r1.txt");
 		VrpProblem problem = VrpReader.readSolomon(f, numCities);
 		//seems like more for the first two and less for the last works
@@ -41,8 +41,8 @@ public class TestHomemadeVrpCp {
 		frame.setVisible(true);
 		
 		final int maxIter = 30;
-		final int maxSearches = 1600;
-		final int maxEscalation = 30;
+		final int maxSearches = 1600000;
+		final int maxEscalation = 35;
 		final int maxDiscrepancies = 5;
 //		int numToRelax = 7;
 //		int numFailures = 0;
