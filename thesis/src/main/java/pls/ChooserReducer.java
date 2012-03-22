@@ -81,8 +81,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				if (solData.getBestCost() < bestCostThisRound) {
 					bestCostThisRound = solData.getBestCost();
 					bestSolThisRound = solData;
-					solsThisRound.add(solData);
 				}
+				solsThisRound.add(solData);
 			}
 		} catch (IOException ex) {
 			LOG.error("Error reading data, this shouldn't happen, aborting...", ex);
@@ -92,10 +92,13 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			return;
 		}
 		
+		LOG.info("Received " + solsThisRound.size() + " solution(s)");
+		
 		//prepare inputs to next round
 		
 		//TODO: do the temperatures
 		if (bestCostThisRound < bestCostAlways) {
+			LOG.info("New best cost this round: " + bestCostThisRound);
 			bestCostAlways = bestCostThisRound; //for passing on
 			int nMappers = solsThisRound.size();
 			//choose best k solutions
@@ -114,6 +117,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				output.collect(PlsUtil.SOLS_KEY, val);
 			}
 		} else { //just continue with what we've got
+			LOG.info("No best cost improvement, still " + bestCostAlways);
 			for (SolutionData solution : solsThisRound) {
 				//TODO: should we need to copy here?
 				BytesWritable val = solution.getEndSolutionBytes();
