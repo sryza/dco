@@ -79,7 +79,7 @@ public class VrpPlsSolution implements PlsSolution {
 	
 	@Override
 	public void writeToStream(DataOutputStream dos) throws IOException {
-		dos.writeInt((int)sol.getToursCost());
+		dos.writeDouble(sol.getToursCost());
 		dos.writeInt(traceId);
 		dos.writeInt(sol.getNumVehicles());
 		for (List<Integer> route : sol.getRoutes()) {
