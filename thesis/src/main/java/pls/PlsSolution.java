@@ -15,4 +15,6 @@ public interface PlsSolution {
 	public int serializedSize();
 	
 	public int getCost();
+	
+	public int getTraceId();
 }

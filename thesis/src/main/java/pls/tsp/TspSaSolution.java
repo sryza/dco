@@ -103,4 +103,9 @@ public class TspSaSolution implements PlsSolution {
 		}
 		return bais.toByteArray();
 	}
+
+	@Override
+	public int getTraceId() {
+		return -1;
+	}
 }

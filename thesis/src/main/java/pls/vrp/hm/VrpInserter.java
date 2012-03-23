@@ -59,7 +59,7 @@ public class VrpInserter {
 		
 		//need to add custId to insertion point lists of all nodes remaining in newNode.insertableAfter
 		for (int insertableCustId : newNode.insertableAfter) {
-			int cost = VrpUtils.costOfInsertion(custId, afterNode.custId, insertableCustId, problem);
+			double cost = VrpUtils.costOfInsertion(custId, afterNode.custId, insertableCustId, problem);
 			custInsertionPoints[insertableCustId].add(newNode, cost);
 		}
 		
@@ -76,7 +76,7 @@ public class VrpInserter {
 		//for all customers still in beforeNode.insertableAfter, need to update cost of insertion (by taking into account)
 		//new successor for the beforeNode entry in their insertion point lists
 		for (int insertableCustId : beforeNode.insertableAfter) {
-			int newCost = VrpUtils.costOfInsertion(beforeNode.custId, custId, insertableCustId, problem);
+			double newCost = VrpUtils.costOfInsertion(beforeNode.custId, custId, insertableCustId, problem);
 			custInsertionPoints[insertableCustId].update(beforeNode, newCost);
 		}
 		//for all customers in removedFromBeforeNode, need to remove beforeNode from their insertion point lists

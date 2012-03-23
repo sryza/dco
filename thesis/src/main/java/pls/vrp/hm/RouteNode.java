@@ -7,10 +7,10 @@ public class RouteNode {
 	public RouteNode next;
 	public RouteNode prev;
 	//the earliest that the current path allows us to arrive at customer
-	public int minDepartTime;
+	public double minDepartTime;
 	//the latest that the current path allows us to depart and not violate
 	//time windows in the future, - our service time
-	public int maxArriveTime;
+	public double maxArriveTime;
 	public Route route;
 	
 	//ids of customers that can be inserted after this node

@@ -35,7 +35,7 @@ import JaCoP.search.SmallestDomain;
 
 public class VrpCp {
 	
-	public VrpSolution solve(VrpProblem problem, VrpSolution partialSolution, int bound) {
+	public VrpSolution solve(VrpProblem problem, VrpSolution partialSolution, double bound) {
 		//gather info from problem
 		int numVehicles = partialSolution.getNumVehicles();
 		int numCities = problem.getNumCities();
@@ -69,7 +69,7 @@ public class VrpCp {
 			vehicles[i] = new IntVar(store, "vehicle of " + (i+1), 1, numVehicles);
 			successorDistances[i] = new IntVar(store, "successor distance of " + (i+1), 0, Integer.MAX_VALUE);
 		}
-		IntVar toursCost = new IntVar(store, "toursCost", 0, bound);
+		IntVar toursCost = new IntVar(store, "toursCost", 0, (int)Math.floor(bound));
 		
 		//impose constraints
 		store.impose(new Circuit(successors));
@@ -303,24 +303,24 @@ public class VrpCp {
 	}
 	
 	private void buildDistArrays(int[][] distances, int[][] timeDists, VrpProblem problem, int numCities, int numNodes) {
-		int[][] cityDistances = problem.getDistances();
-		int[] distsFromOrigin = problem.getDistancesFromDepot();
+		double[][] cityDistances = problem.getDistances();
+		double[] distsFromOrigin = problem.getDistancesFromDepot();
 		//copy over cityDistances
 		for (int i = 0; i < numCities; i++) {
 			System.arraycopy(cityDistances[i], 0, distances[i], 0, cityDistances.length);
-			Arrays.fill(distances[i], numCities, numNodes, distsFromOrigin[i]);
+//			Arrays.fill(distances[i], numCities, numNodes, distsFromOrigin[i]); TODO
 		}
 		//because all the depots are at the same point, we can speed things up a little by calculating
 		//distances once
-		int[] depotDists = new int[numNodes];
+		double[] depotDists = new double[numNodes];
 		System.arraycopy(distsFromOrigin, 0, depotDists, 0, distsFromOrigin.length);
 		for (int i = numCities; i < numNodes; i++) {
-			distances[i] = depotDists;
+//			distances[i] = depotDists; TODO
 		}
 		//fill in timeDists
 		for (int r = 0; r < numNodes; r++) {
 			for (int c = 0; c < numNodes; c++) {
-				timeDists[r][c] = distances[r][c];
+				timeDists[r][c] = (int)Math.round(distances[r][c]);
 				if (r < numCities) {
 					timeDists[r][c] += problem.getServiceTimes()[r];
 				}

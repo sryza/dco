@@ -18,9 +18,9 @@ import viz.VrpPanel;
 
 public class TestHomemadeVrpCp {
 	public static void main(String[] args) throws IOException {
-		final int numCities = 600;
+		final int numCities = 1000;
 		
-		File f = new File("../vrptests/rc2_6_1.txt");
+		File f = new File("../vrptests/rc110_1.txt");
 //		File f = new File("../vrptests/r1.txt");
 		VrpProblem problem = VrpReader.readSolomon(f, numCities);
 		//seems like more for the first two and less for the last works
@@ -40,7 +40,7 @@ public class TestHomemadeVrpCp {
 		frame.pack();
 		frame.setVisible(true);
 		
-		final int maxIter = 30;
+		final int maxIter = 35;
 		final int maxSearches = 1600000;
 		final int maxEscalation = 35;
 		final int maxDiscrepancies = 5;
@@ -50,13 +50,13 @@ public class TestHomemadeVrpCp {
 		
 		long start = System.currentTimeMillis();
 		
-		LnsRelaxer relaxer = new LnsRelaxer(25, problem.getMaxDistance(), new Random());
+		LnsRelaxer relaxer = new LnsRelaxer(15, problem.getMaxDistance(), new Random());
 		
 		outer:
 		for (int j = 0; j < maxSearches; j++) {
 			for (int n = 1; n <= maxEscalation; n++) { 
 				for (int i = 0; i < maxIter; i++) {
-					int dist =  sol.getToursCost(); //to bound cp
+					double dist =  sol.getToursCost(); //to bound cp
 					VrpSolution partialSol = relaxer.relaxShaw(sol, n, -1);
 //					System.out.println("partial sol: " + partialSol.getRoutes());
 //					System.out.println("relaxed: " + partialSol.getUninsertedNodes());
@@ -78,7 +78,7 @@ public class TestHomemadeVrpCp {
 					//				System.out.println("jacop sol: " + newSol2.getRoutes());
 					//			}
 					
-					if (newSol == null) {
+					if (newSol == null || Math.abs(newSol.getToursCost() - sol.getToursCost()) < .001) {
 						System.out.println("failed to find better");
 						//				numFailures++;
 						//				if (numFailures > failuresBeforeEscalate) {
@@ -97,9 +97,9 @@ public class TestHomemadeVrpCp {
 					System.out.println("best cost so far: " + sol.getToursCost() + "\n" + "# nodes: " + sol.getNumVehicles());
 					System.out.println();
 					
-					if (solveEndTime - solveStartTime > 10000) {
-						break outer;
-					}
+//					if (solveEndTime - solveStartTime > 10000) {
+//						break outer;
+//					}
 				}
 			}
 		}

@@ -5,14 +5,14 @@ package pls.vrp.hm;
  */
 public class BoundRemaining {
 	
-	private int[] minInsertionCosts;
-	private int bound;
+	private double[] minInsertionCosts;
+	private double bound;
 	
 	public BoundRemaining(int numCusts) {
-		minInsertionCosts = new int[numCusts];
+		minInsertionCosts = new double[numCusts];
 	}
 	
-	public void updateMinInsertionCost(int custId, int minCost) {
+	public void updateMinInsertionCost(int custId, double minCost) {
 		bound = bound - minInsertionCosts[custId] + minCost;
 		minInsertionCosts[custId] = minCost;
 	}
@@ -25,7 +25,7 @@ public class BoundRemaining {
 		bound += minInsertionCosts[custId];
 	}
 	
-	public int getBound() {
+	public double getBound() {
 		return bound;
 	}
 }

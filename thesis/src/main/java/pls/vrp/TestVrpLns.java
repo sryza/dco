@@ -37,7 +37,7 @@ public class TestVrpLns {
 		int numToRelax = 5;
 		int numFailures = 0;
 		for (int i = 0; i < 1; i++) {
-			int dist =  sol.getToursCost(); //to bound cp
+			double dist =  sol.getToursCost(); //to bound cp
 			VrpSolution partialSol = relaxer.relaxShaw(sol, numToRelax, -1);
 			System.out.println("partialSol cost: " + partialSol.getToursCost());
 			panel.setSolution(partialSol);

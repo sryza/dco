@@ -10,11 +10,11 @@ public class VrpCpSearchNode {
 	public Set<Integer> unrouted;
 	public CustInsertionPoints[] custsInsertionPoints;
 	public BoundRemaining boundRemaining;
-	public int curCost;
+	public double curCost;
 	public List<RouteNode> routeStarts;
 	
 	public VrpCpSearchNode(Set<Integer> unrouted, CustInsertionPoints[] custsInsertionPoints, 
-			BoundRemaining boundRemaining, int curCost, List<RouteNode> routeStarts) {
+			BoundRemaining boundRemaining, double curCost, List<RouteNode> routeStarts) {
 		this.unrouted = unrouted;
 		this.custsInsertionPoints = custsInsertionPoints;
 		this.curCost = curCost;

@@ -31,7 +31,7 @@ public class VrpHadoopMain {
 		VrpProblem problem = VrpReader.readSolomon(inputFile, Integer.MAX_VALUE); 
 		
 		List<PlsSolution> initSols = new ArrayList<PlsSolution>();
-		int bestStartCost = Integer.MAX_VALUE;
+		double bestStartCost = Double.MAX_VALUE;
 		//create different initializations by varying weights on initializer
 		for (int i = 0; i < numTasks; i++) {
 			double timeDiffWeight = Math.random() * .3;
@@ -45,7 +45,7 @@ public class VrpHadoopMain {
 			if (sol.getToursCost() < bestStartCost) {
 				bestStartCost = sol.getToursCost();
 			}
-			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies));
+			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i));
 		}
 		
 		PlsMaster master = new PlsMaster(runLocal);

@@ -24,10 +24,10 @@ public class VrpUtils {
 		
 		RouteNode curNode = newNode.next;
 		while (curNode.custId != -1) { //while we haven't reached depot
-			int newCurNodeMinDepartTime = Math.max(curNode.prev.minDepartTime + 
+			double newCurNodeMinDepartTime = Math.max(curNode.prev.minDepartTime + 
 					problem.getDistance(curNode.prev.custId, curNode.custId), windowStartTimes[curNode.custId]) +
 					serviceTimes[curNode.custId];
-			if (newCurNodeMinDepartTime == curNode.minDepartTime) {
+			if (Math.abs(newCurNodeMinDepartTime - curNode.minDepartTime) < .001) {
 				//if nothing's changed here, nothing's gonna change in the future
 				break;
 			}
@@ -55,10 +55,10 @@ public class VrpUtils {
 		RouteNode curNode = newNode.prev;
 		while (curNode.custId != -1) {
 			//not sure this is right
-			int newCurNodeMaxDepartTime = curNode.next.maxArriveTime - problem.getDistance(curNode.next.custId, curNode.custId);
-			int newCurNodeMaxArriveTime = Math.min(windowEndTimes[curNode.custId], 
+			double newCurNodeMaxDepartTime = curNode.next.maxArriveTime - problem.getDistance(curNode.next.custId, curNode.custId);
+			double newCurNodeMaxArriveTime = Math.min(windowEndTimes[curNode.custId], 
 					newCurNodeMaxDepartTime - serviceTimes[curNode.custId]);
-			if (newCurNodeMaxArriveTime == curNode.maxArriveTime) {
+			if (Math.abs(newCurNodeMaxArriveTime - curNode.maxArriveTime) < .001) {
 				break;
 			}
 			curNode.maxArriveTime = newCurNodeMaxArriveTime;
@@ -68,7 +68,7 @@ public class VrpUtils {
 		return affectedList;
 	}
 	
-	public static int costOfInsertion(int custIdBefore, int custIdAfter, int custIdToInsert, VrpProblem problem) {
+	public static double costOfInsertion(int custIdBefore, int custIdAfter, int custIdToInsert, VrpProblem problem) {
 		return problem.getDistance(custIdBefore, custIdToInsert) + 
 			problem.getDistance(custIdToInsert, custIdAfter) - 
 			problem.getDistance(custIdBefore, custIdAfter);
@@ -91,25 +91,25 @@ public class VrpUtils {
 	 * 		Otherwise, the returned list will be those that remain.
 	 * @return
 	 */
-	public static Set<Integer> validateInsertableCusts(Iterator<Integer> custsIter, int custBefore, int custAfter, int minDepartTime, 
-			int maxVisitTime, VrpProblem problem, boolean remove) {
+	public static Set<Integer> validateInsertableCusts(Iterator<Integer> custsIter, int custBefore, int custAfter, double minDepartTime, 
+			double maxVisitTime, VrpProblem problem, boolean remove) {
 		
 		int[] serviceTimes = problem.getServiceTimes();
 		int[] windowStartTimes = problem.getWindowStartTimes();
 		int[] windowEndTimes = problem.getWindowEndTimes();
-		int[][] distances = problem.getDistances();
-		int[] distsFromBefore = (custBefore == -1) ? problem.getDistancesFromDepot() : distances[custBefore];
-		int[] distsFromAfter = (custAfter == -1) ? problem.getDistancesFromDepot() : distances[custAfter];
+		double[][] distances = problem.getDistances();
+		double[] distsFromBefore = (custBefore == -1) ? problem.getDistancesFromDepot() : distances[custBefore];
+		double[] distsFromAfter = (custAfter == -1) ? problem.getDistancesFromDepot() : distances[custAfter];
 		Set<Integer> list = new HashSet<Integer>();
 		
 		while (custsIter.hasNext()) {
 			int custId = custsIter.next();
 			boolean insertable = true;
-			int custMinArriveTime = minDepartTime + distsFromBefore[custId];
+			double custMinArriveTime = minDepartTime + distsFromBefore[custId];
 			if (custMinArriveTime > windowEndTimes[custId]) {
 				insertable = false;
 			} else {
-				int custMinDepartTime = Math.max(windowStartTimes[custId], custMinArriveTime) + serviceTimes[custId];
+				double custMinDepartTime = Math.max(windowStartTimes[custId], custMinArriveTime) + serviceTimes[custId];
 				if (custMinDepartTime + distsFromAfter[custId] > maxVisitTime) {
 					insertable = false;
 				}
@@ -125,11 +125,11 @@ public class VrpUtils {
 		return list;
 	}
 	
-	public static int calcMinDepartTime(int prevMinDepartTime, int dist, int windowStartTime, int serviceTime) {
+	public static double calcMinDepartTime(double prevMinDepartTime, double dist, int windowStartTime, int serviceTime) {
 		return Math.max(prevMinDepartTime + dist, windowStartTime) + serviceTime;
 	}
 	
-	public static int calcMaxArriveTime(int nextMaxArriveTime, int dist, int windowEndTime, int serviceTime) {
+	public static double calcMaxArriveTime(double nextMaxArriveTime, double dist, int windowEndTime, int serviceTime) {
 		return Math.min(nextMaxArriveTime - dist - serviceTime, windowEndTime);
 	}
 }

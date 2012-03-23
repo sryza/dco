@@ -71,18 +71,18 @@ public class VrpSearcher {
 				node.insertableAfter = VrpUtils.validateInsertableCusts(unrouted.iterator(), node.custId, node.next.custId, 
 						node.minDepartTime, node.next.maxArriveTime, problem, false);
 				for (int insertableCustId : node.insertableAfter) {
-					int cost = VrpUtils.costOfInsertion(node.custId, node.next.custId, insertableCustId, problem);
+					double cost = VrpUtils.costOfInsertion(node.custId, node.next.custId, insertableCustId, problem);
 					custsInsertionPoints[insertableCustId].add(node, cost);
 				}
 				node = node.next;
 			} while (node.custId != -1);
 		}
 		
-		int curCost = partialSol.getToursCost();
+		double curCost = partialSol.getToursCost();
 		return new VrpCpSearchNode(new HashSet<Integer>(unrouted), custsInsertionPoints, boundRemaining, curCost, routeStarts);
 	}
 	
-	public VrpSolution solve(VrpSolution partialSol, int bestCost, int discrepancies, VrpCpStats stats) {
+	public VrpSolution solve(VrpSolution partialSol, double bestCost, int discrepancies, VrpCpStats stats) {
 		VrpCpSearchNode root = initialize(partialSol);
 		return search(root.unrouted, root.custsInsertionPoints, root.boundRemaining, bestCost, root.curCost, root.routeStarts,
 				discrepancies, stats);
@@ -91,7 +91,7 @@ public class VrpSearcher {
 	//TODO: we can include the sum of min insertion costs in our bound
 	
 	private VrpSolution search(Set<Integer> remainingToInsert, CustInsertionPoints[] custsInsertionPoints, 
-			BoundRemaining boundRemaining, int bestCost, int curCost, List<RouteNode> routeStarts, int discrepancies,
+			BoundRemaining boundRemaining, double bestCost, double curCost, List<RouteNode> routeStarts, int discrepancies,
 			VrpCpStats stats) {
 		
 		int[] demands = problem.getDemands();
@@ -155,7 +155,7 @@ public class VrpSearcher {
 				continue;
 			}
 			//make sure bound not violated
-			int costOfInsertion = VrpUtils.costOfInsertion(insertAfter.custId, insertAfter.next.custId, custToInsert, problem);
+			double costOfInsertion = VrpUtils.costOfInsertion(insertAfter.custId, insertAfter.next.custId, custToInsert, problem);
 			if (curCost + costOfInsertion >= bestCost) {
 				continue;
 			}
@@ -193,11 +193,11 @@ public class VrpSearcher {
 	
 	private int chooseCustToInsert(Collection<Integer> remainingToInsert, CustInsertionPoints[] custsInsertionPoints) {
 		Iterator<Integer> iter = remainingToInsert.iterator();
-		int maxMinCost = Integer.MIN_VALUE;
+		double maxMinCost = Integer.MIN_VALUE;
 		int bestCustId = -1;
 		while (iter.hasNext()) {
 			int custToInsertId = iter.next();
-			int cost = custsInsertionPoints[custToInsertId].getMinCost();
+			double cost = custsInsertionPoints[custToInsertId].getMinCost();
 			if (cost > maxMinCost) {
 				maxMinCost = cost;
 				bestCustId = custToInsertId;

@@ -12,8 +12,8 @@ public class CustInsertionPoints {
 	private BoundRemaining boundRemaining;
 	
 	//cost of inserting at node with id index. last is depot.
-	private HashMap<RouteNode, Integer> costs;
-	private int minCost;
+	private HashMap<RouteNode, Double> costs;
+	private double minCost;
 	private TreeSet<InsertionPointCost> insertionPointCosts;
 	private int custId;
 	private int numCusts;
@@ -22,7 +22,7 @@ public class CustInsertionPoints {
 		insertionPointCosts = new TreeSet<InsertionPointCost>();
 		this.boundRemaining = boundRemaining;
 		this.custId = custId;
-		this.costs = new HashMap<RouteNode, Integer>();
+		this.costs = new HashMap<RouteNode, Double>();
 		this.numCusts = numCusts;
 	}
 		
@@ -30,7 +30,7 @@ public class CustInsertionPoints {
 		return new InsertionPointIterator(insertionPointCosts.iterator());
 	}
 	
-	public void add(RouteNode node, int cost) {
+	public void add(RouteNode node, double cost) {
 		if (insertionPointCosts.contains(new InsertionPointCost(node, cost))) {
 			LOG.error("Already contains " + node.custId);
 		}
@@ -54,7 +54,7 @@ public class CustInsertionPoints {
 		}
 	}
 	
-	public void update(RouteNode node, int cost) {
+	public void update(RouteNode node, double cost) {
 		if (!insertionPointCosts.remove(new InsertionPointCost(node, getCost(node)))) {
 			LOG.error("Update to element not already in insertion points");
 		}
@@ -63,16 +63,16 @@ public class CustInsertionPoints {
 		propagateBound();
 	}
 	
-	private void setCost(RouteNode node, int cost) {
+	private void setCost(RouteNode node, double cost) {
 		costs.put(node,	cost);
 	}
 	
-	private int getCost(RouteNode node) {
+	private double getCost(RouteNode node) {
 		return costs.get(node);
 	}
 	
 	private void propagateBound() {
-		int newMinCost = insertionPointCosts.first().cost;
+		double newMinCost = insertionPointCosts.first().cost;
 		if (newMinCost != minCost) {
 			boundRemaining.updateMinInsertionCost(custId, newMinCost);
 			minCost = newMinCost;
@@ -83,7 +83,7 @@ public class CustInsertionPoints {
 		return insertionPointCosts.isEmpty();
 	}
 	
-	public int getMinCost() {
+	public double getMinCost() {
 		return minCost;
 	}
 	
@@ -98,9 +98,9 @@ public class CustInsertionPoints {
 	
 	protected static class InsertionPointCost implements Comparable<InsertionPointCost> {
 		public RouteNode insertAfter;
-		public int cost;
+		public double cost;
 		
-		public InsertionPointCost(RouteNode node, int cost) {
+		public InsertionPointCost(RouteNode node, double cost) {
 			this.insertAfter = node;
 			this.cost = cost;
 //			TODO: if (cost < 0) {
@@ -110,7 +110,7 @@ public class CustInsertionPoints {
 		
 		@Override
 		public int compareTo(InsertionPointCost other) {
-			int costDiff = this.cost - other.cost;
+			int costDiff = (int)Math.signum(this.cost - other.cost);
 //			return costDiff != 0 ? costDiff : this.insertAfter.custId - other.insertAfter.custId;
 			return costDiff != 0 ? costDiff : this.insertAfter.hashCode() - other.insertAfter.hashCode();
 		}

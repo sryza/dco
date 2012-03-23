@@ -9,10 +9,10 @@ import java.util.Random;
 public class LnsRelaxer {
 	
 	private int randomnessMeasure;
-	private int maxDist; //used for normalizing distances for relatedness measure
+	private double maxDist; //used for normalizing distances for relatedness measure
 	private final Random rand;
 	
-	public LnsRelaxer(int randomnessMeasure, int maxDist, Random rand) {
+	public LnsRelaxer(int randomnessMeasure, double maxDist, Random rand) {
 		this.randomnessMeasure = randomnessMeasure;
 		this.maxDist = maxDist;
 		this.rand = rand;
@@ -95,8 +95,8 @@ public class LnsRelaxer {
 	}
 	
 	private double relatedness(int nodeId1, int nodeId2, VrpSolution sol, int[] cityVehicles) {
-		int dist = sol.getProblem().getDistances()[nodeId1][nodeId2];
-		double denom = (double)dist / maxDist;
+		double dist = sol.getProblem().getDistances()[nodeId1][nodeId2];
+		double denom = dist / maxDist;
 		if (cityVehicles[nodeId1] == cityVehicles[nodeId2]) {
 			denom += 1.0;
 		}

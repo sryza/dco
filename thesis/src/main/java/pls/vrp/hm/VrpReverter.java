@@ -33,7 +33,7 @@ public class VrpReverter {
 		
 		//update costs for insertion for all nodes still in beforeNode.insertableAfter
 		for (int insertableCustId : beforeNode.insertableAfter) {
-			int cost = VrpUtils.costOfInsertion(beforeNode.custId, afterNode.custId, insertableCustId, problem);
+			double cost = VrpUtils.costOfInsertion(beforeNode.custId, afterNode.custId, insertableCustId, problem);
 			custInsertionPoints[insertableCustId].update(beforeNode, cost);
 		}
 		
@@ -48,7 +48,7 @@ public class VrpReverter {
 			for (int insertableCustId : removedAtPoint.custIds) {
 				RouteNode insertAfter = removedAtPoint.insertAfter;
 				insertAfter.insertableAfter.add(insertableCustId);
-				int cost = VrpUtils.costOfInsertion(insertAfter.custId, insertAfter.next.custId, insertableCustId, problem);
+				double cost = VrpUtils.costOfInsertion(insertAfter.custId, insertAfter.next.custId, insertableCustId, problem);
 				custInsertionPoints[insertableCustId].add(insertAfter, cost);
 			}
 		}

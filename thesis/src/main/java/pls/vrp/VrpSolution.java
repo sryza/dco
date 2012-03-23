@@ -12,7 +12,7 @@ public class VrpSolution {
 	private List<Integer> unrouted;
 	private int numVehicles;
 	private VrpProblem problem;
-	private int toursCost = -1;
+	private double toursCost = -1;
 	
 	public VrpSolution(List<List<Integer>> routes, VrpProblem problem) {
 		this.routes = routes;
@@ -20,7 +20,7 @@ public class VrpSolution {
 		this.numVehicles = routes.size();
 	}
 	
-	public VrpSolution(List<List<Integer>> routes, VrpProblem problem, int toursCost) {
+	public VrpSolution(List<List<Integer>> routes, VrpProblem problem, double toursCost) {
 		this(routes, problem);
 		this.toursCost = toursCost;
 	}
@@ -30,11 +30,11 @@ public class VrpSolution {
 		this.unrouted = unroutedNodes;
 	}
 	
-	private int calcToursCost(List<List<Integer>> routes, VrpProblem problem) {
-		int[][] distances = problem.getDistances();
-		int[] distancesFromDepot = problem.getDistancesFromDepot();
+	private double calcToursCost(List<List<Integer>> routes, VrpProblem problem) {
+		double[][] distances = problem.getDistances();
+		double[] distancesFromDepot = problem.getDistancesFromDepot();
 		
-		int toursCost = 0;
+		double toursCost = 0;
 		for (List<Integer> route : routes) {
 			Iterator<Integer> iter = route.iterator();
 			if (!iter.hasNext()) {
@@ -73,8 +73,8 @@ public class VrpSolution {
 	 * and that the reported values for the objective function are correct.
 	 */
 	public boolean verify(VrpProblem problem) {
-		int[][] distances = problem.getDistances();
-		int[] distancesFromDepot = problem.getDistancesFromDepot();
+		double[][] distances = problem.getDistances();
+		double[] distancesFromDepot = problem.getDistancesFromDepot();
 		
 //		int toursCost = calcToursCost(routes, problem);
 		
@@ -99,12 +99,12 @@ public class VrpSolution {
 			}
 			visited[prev] = true;
 			int remCapacity = problem.getVehicleCapacity() - demands[prev];
-			int minVisitTime = Math.max(windowStartTimes[prev], distancesFromDepot[prev]);
+			double minVisitTime = Math.max(windowStartTimes[prev], distancesFromDepot[prev]);
 			
 			while (iter.hasNext()) {
 				int cur = iter.next();
 				visited[cur] = true;
-				int nextMinVisitTime = Math.max(minVisitTime + serviceTimes[prev] + distances[prev][cur], windowStartTimes[cur]);
+				double nextMinVisitTime = Math.max(minVisitTime + serviceTimes[prev] + distances[prev][cur], windowStartTimes[cur]);
 				if (nextMinVisitTime > windowEndTimes[cur]) {
 					System.out.println(minVisitTime + "\t" + serviceTimes[prev] + "\t" + distances[prev][cur]);
 					System.out.println("violated time constraint for " + prev + "->" + cur + 
@@ -137,8 +137,8 @@ public class VrpSolution {
 		return true;
 	}
 	
-	public int getToursCost() {
-		if (toursCost != -1) {
+	public double getToursCost() {
+		if (toursCost >= 0) {
 			return toursCost;
 		} else {
 			return toursCost = calcToursCost(routes, problem);

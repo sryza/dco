@@ -72,7 +72,7 @@ public class PlsMaster {
 //		master.run(numRuns, startSolutions, bestStartCost, dir, );
 	}
 	
-	public void run(int numRuns, List<PlsSolution> startSolutions, int bestCost, String dir, Class mapperClass,
+	public void run(int numRuns, List<PlsSolution> startSolutions, double bestCost, String dir, Class mapperClass,
 			Class reducerClass) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
@@ -87,7 +87,7 @@ public class PlsMaster {
 			LOG.info("Failed to create directory: " + initDirPath);
 		}
 		
-		Path initFilePath = new Path(initDirPath, "sols");
+		Path initFilePath = new Path(initDirPath, "part-0000");
 		
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
@@ -102,7 +102,7 @@ public class PlsMaster {
 		DataOutputStream dos = new DataOutputStream(baos);
 		int k = Math.max(1, startSolutions.size() / 2);
 		dos.writeInt(k);
-		dos.writeInt(bestCost);
+		dos.writeInt((int)bestCost);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();

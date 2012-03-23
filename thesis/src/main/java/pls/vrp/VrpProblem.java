@@ -12,15 +12,15 @@ public class VrpProblem {
 	private int[] serviceTimes;
 	private int[] windowStartTimes;
 	private int[] windowEndTimes;
-	private int[][] cityDists;
-	private int[] distsFromDepot;
+	private double[][] cityDists;
+	private double[] distsFromDepot;
 	
 	private int depotX;
 	private int depotY;
 	private int[] xCoors;
 	private int[] yCoors;
 	
-	private int maxDist;
+	private double maxDist;
 	
 	public VrpProblem(int[] demands, int[] xCoors, int[] yCoors, int[] serviceTimes, int[] windowStartTimes, int[] windowEndTimes,
 			int depotX, int depotY, int capacity) {
@@ -38,17 +38,17 @@ public class VrpProblem {
 	}
 	
 	private void buildDistsArrays() {
-		cityDists = new int[demands.length][demands.length];
-		distsFromDepot = new int[demands.length];
+		cityDists = new double[demands.length][demands.length];
+		distsFromDepot = new double[demands.length];
 		for (int i = 0; i < demands.length; i++) {
 			int xDiffFromDepot = xCoors[i] - depotX;
 			int yDiffFromDepot = yCoors[i] - depotY;
-			distsFromDepot[i] = (int)Math.round(Math.sqrt(xDiffFromDepot * xDiffFromDepot + yDiffFromDepot * yDiffFromDepot));
+			distsFromDepot[i] = Math.sqrt(xDiffFromDepot * xDiffFromDepot + yDiffFromDepot * yDiffFromDepot);
 			
 			for (int j = 0; j < demands.length; j++) {
 				int xDiff = xCoors[i] - xCoors[j];
 				int yDiff = yCoors[i] - yCoors[j];
-				cityDists[i][j] = (int)Math.round(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
+				cityDists[i][j] = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
 				if (cityDists[i][j] > maxDist) {
 					maxDist = cityDists[i][j];
 				}
@@ -72,11 +72,11 @@ public class VrpProblem {
 		return yCoors;
 	}
 	
-	public int getMaxDistance() {
+	public double getMaxDistance() {
 		return maxDist;
 	}
 	
-	public int[] getDistancesFromDepot() {
+	public double[] getDistancesFromDepot() {
 		return distsFromDepot;
 	}
 	
@@ -84,7 +84,7 @@ public class VrpProblem {
 		return serviceTimes;
 	}
 	
-	public int[][] getDistances() {
+	public double[][] getDistances() {
 		return cityDists;
 	}
 	
@@ -101,7 +101,7 @@ public class VrpProblem {
 	}
 	
 	//if id's are negative, they refer to the depot
-	public int getDistance(int custId1, int custId2) {
+	public double getDistance(int custId1, int custId2) {
 		if (custId1 >= 0 && custId2 >= 0) {
 			return cityDists[custId1][custId2];
 		} else if (custId1 >= 0) {

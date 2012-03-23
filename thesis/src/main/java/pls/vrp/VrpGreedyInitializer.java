@@ -34,16 +34,16 @@ public class VrpGreedyInitializer {
 		List<Integer> curRoute = new ArrayList<Integer>();
 		routes.add(curRoute);
 		int curNodeId = -1;
-		int curVisitTime = 0;
+		double curVisitTime = 0;
 		int remCapacity = problem.getVehicleCapacity();
 		while (remainingNodes.size() > 0) {
-			int[] ret = findClosest(curNodeId, curVisitTime, remCapacity, remainingNodes, problem);
-			int nextNodeId = ret[0];
+			Number[] ret = findClosest(curNodeId, curVisitTime, remCapacity, remainingNodes, problem);
+			int nextNodeId = (Integer)ret[0];
 			if (nextNodeId != -1) {
 				remainingNodes.remove(nextNodeId);
 				curRoute.add(nextNodeId);
 				curNodeId = nextNodeId;
-				curVisitTime = ret[1];
+				curVisitTime = (Double)ret[1];
 				remCapacity -= problem.getDemands()[nextNodeId];
 			} else {
 				curRoute = new ArrayList<Integer>();
@@ -67,20 +67,20 @@ public class VrpGreedyInitializer {
 	 * @return
 	 * 		array containing best node id and visit time
 	 */
-	private int[] findClosest(int curLastId, int curLastVisitTime, int remCapacity,
+	private Number[] findClosest(int curLastId, double curLastVisitTime, int remCapacity,
 			Set<Integer> remainingNodes, VrpProblem problem) {
 		
 		int[] demands = problem.getDemands();
 		int[] windowStartTimes = problem.getWindowStartTimes();
 		int[] windowEndTimes = problem.getWindowEndTimes();
-		int[][] distances = problem.getDistances();
-		int[] distancesFromDepot = problem.getDistancesFromDepot();
+		double[][] distances = problem.getDistances();
+		double[] distancesFromDepot = problem.getDistancesFromDepot();
 		int[] serviceTimes = problem.getServiceTimes();
 		int curLastServiceTime = (curLastId == -1) ? 0 : serviceTimes[curLastId];
 		
 		double bestVal = Integer.MAX_VALUE;
 		int bestNodeId = -1;
-		int bestNodeVisitTime = -1;
+		double bestNodeVisitTime = -1;
 		
 		//bj = time when service begins, for depot its 0
 		Iterator<Integer> iter = remainingNodes.iterator();
@@ -90,13 +90,13 @@ public class VrpGreedyInitializer {
 				continue;
 			}
 			
-			int distance = (curLastId == -1) ? distancesFromDepot[nodeId] : distances[curLastId][nodeId];
-			int minVisitTime = Math.max(windowStartTimes[nodeId], curLastVisitTime + curLastServiceTime + distance);
+			double distance = (curLastId == -1) ? distancesFromDepot[nodeId] : distances[curLastId][nodeId];
+			double minVisitTime = Math.max(windowStartTimes[nodeId], curLastVisitTime + curLastServiceTime + distance);
 			if (minVisitTime > windowEndTimes[nodeId]) {
 				continue;
 			}
-			int timeDiff = minVisitTime - (curLastVisitTime + curLastVisitTime);
-			int urgency = windowEndTimes[nodeId] - (curLastVisitTime + curLastServiceTime + distance);
+			double timeDiff = minVisitTime - (curLastVisitTime + curLastVisitTime);
+			double urgency = windowEndTimes[nodeId] - (curLastVisitTime + curLastServiceTime + distance);
 			double val = timeDiff * timeDiffWeight + distance * distanceWeight + urgency * urgencyWeight;
 			if (val < bestVal) {
 				bestVal = val;
@@ -105,6 +105,6 @@ public class VrpGreedyInitializer {
 			}
 		}
 		
-		return new int[] {bestNodeId, bestNodeVisitTime};
+		return new Number[] {new Integer(bestNodeId), new Double(bestNodeVisitTime)};
 	}
 }

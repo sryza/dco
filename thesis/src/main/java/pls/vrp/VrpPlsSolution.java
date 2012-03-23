@@ -17,16 +17,20 @@ public class VrpPlsSolution implements PlsSolution {
 	private int curIter;
 	private int curEscalation;
 	
+	private int traceId;
+	
 	private VrpSolution sol;
 	
 	public VrpPlsSolution() {
 	}
 	
-	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies) {
+	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies, 
+			int traceId) {
 		this.sol = sol;
 		this.maxIter = maxIter;
 		this.maxEscalation = maxEscalation;
 		this.maxDiscrepancies = maxDiscrepancies;
+		this.traceId = traceId;
 	}
 	
 	public int getCurEscalation() {
@@ -69,9 +73,14 @@ public class VrpPlsSolution implements PlsSolution {
 		this.sol = sol;
 	}
 	
+	public int getTraceId() {
+		return traceId;
+	}
+	
 	@Override
 	public void writeToStream(DataOutputStream dos) throws IOException {
-		dos.writeInt(sol.getToursCost());
+		dos.writeInt((int)sol.getToursCost());
+		dos.writeInt(traceId);
 		dos.writeInt(sol.getNumVehicles());
 		for (List<Integer> route : sol.getRoutes()) {
 			dos.writeInt(route.size());
@@ -92,7 +101,8 @@ public class VrpPlsSolution implements PlsSolution {
 	
 	@Override
 	public VrpPlsSolution buildFromStream(DataInputStream dis) throws IOException {
-		int toursCost = dis.readInt();
+		double toursCost = dis.readDouble();
+		traceId = dis.readInt();
 		int numVehicles = dis.readInt();
 		List<List<Integer>> routes = new ArrayList<List<Integer>>(numVehicles);
 		for (int i = 0; i < numVehicles; i++) {
@@ -127,7 +137,7 @@ public class VrpPlsSolution implements PlsSolution {
 
 	@Override
 	public int getCost() {
-		return sol.getToursCost();
+		return (int)sol.getToursCost();
 	}
 	
 	private VrpProblem buildProblemFromStream(DataInputStream dis) throws IOException {
