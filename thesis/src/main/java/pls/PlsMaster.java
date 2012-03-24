@@ -87,7 +87,7 @@ public class PlsMaster {
 			LOG.info("Failed to create directory: " + initDirPath);
 		}
 		
-		Path initFilePath = new Path(initDirPath, "part-0000");
+		Path initFilePath = new Path(initDirPath, "part-00000");
 		
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
@@ -100,7 +100,8 @@ public class PlsMaster {
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
-		int k = Math.max(1, startSolutions.size() / 2);
+		int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
+		LOG.info("k=" + k);
 		dos.writeInt(k);
 		dos.writeInt((int)bestCost);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());

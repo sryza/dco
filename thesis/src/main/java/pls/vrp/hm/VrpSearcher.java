@@ -112,14 +112,17 @@ public class VrpSearcher {
 					solRoutes.add(routeCustIds);
 				}
 			}
-			VrpSolution sol = new VrpSolution(solRoutes, problem);
-			if (sol.getToursCost() != curCost) {
-				LOG.error("costs inconsistent! " + sol.getToursCost() + " != " + curCost);
-			} else {
-				LOG.info("found solution with cost " + curCost);
-			}
 			stats.reportNodeEvaluated();
-			return sol;
+			VrpSolution sol = new VrpSolution(solRoutes, problem);
+			if (Math.abs(sol.getToursCost() - curCost) > .001) {
+				LOG.error("costs inconsistent! " + sol.getToursCost() + " != " + curCost);
+				return null;
+			} else if (Math.abs(curCost - bestCost) > .001) {
+				LOG.info("found solution with cost " + curCost);
+				return sol;
+			} else {
+				return null;
+			}
 		}
 		
 		if (discrepancies <= 0) {

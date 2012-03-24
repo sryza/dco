@@ -96,9 +96,9 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		//prepare inputs to next round
 		
+		LOG.info("Best cost this round: " + bestCostThisRound);
 		//TODO: do the temperatures
 		if (bestCostThisRound < bestCostAlways) {
-			LOG.info("New best cost this round: " + bestCostThisRound);
 			bestCostAlways = bestCostThisRound; //for passing on
 			int nMappers = solsThisRound.size();
 			//choose best k solutions

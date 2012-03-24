@@ -24,7 +24,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 
 	private static final Logger LOG = Logger.getLogger(PlsMapper.class);
 	
-	private static final int TIME = 60000;
+	private static final int TIME = 30000;
 	
 	@Override
 	public void map(BytesWritable key, BytesWritable value, OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
