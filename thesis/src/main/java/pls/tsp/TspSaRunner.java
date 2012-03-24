@@ -33,7 +33,7 @@ public class TspSaRunner implements PlsRunner {
 		TspUtils.WRAP_NUM_NODES = nodes1.length;
 		
 		int i = 0;
-		int totalCost = best.getCost();
+		int totalCost = (int)best.getCost();
 		
 		double temperature = best.getTemperature();
 		double scaler = best.getScaler();

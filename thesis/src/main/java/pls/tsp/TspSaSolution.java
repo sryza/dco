@@ -29,7 +29,7 @@ public class TspSaSolution implements PlsSolution {
 		this.scaler = scaler;
 	}
 	
-	public int getCost() {
+	public double getCost() {
 		return cost;
 	}
 	

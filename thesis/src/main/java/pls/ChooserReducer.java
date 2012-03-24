@@ -29,7 +29,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	private static final Logger LOG = Logger.getLogger(ChooserReducer.class);
 	
 	private int k = -1;
-	private int bestCostAlways = -1;
+	private double bestCostAlways = -1;
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -57,7 +57,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes());
 			DataInputStream dis = new DataInputStream(bais);
 			k = dis.readInt();
-			bestCostAlways = dis.readInt();
+			bestCostAlways = dis.readDouble();
 			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways);
 			return;
 		} else if (k == -1) {
@@ -69,7 +69,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		Class<SolutionData> solDataClass = getSolutionDataClass();
 		
-		int bestCostThisRound = Integer.MAX_VALUE;
+		double bestCostThisRound = Integer.MAX_VALUE;
 		SolutionData bestSolThisRound = null;
 		ArrayList<SolutionData> solsThisRound = new ArrayList<SolutionData>();
 		//find the best solution
@@ -129,7 +129,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
 		dos.writeInt(k);
-		dos.writeInt(bestCostAlways);
+		dos.writeDouble(bestCostAlways);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		output.collect(PlsUtil.METADATA_KEY, metadata);
 	}

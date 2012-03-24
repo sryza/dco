@@ -136,8 +136,8 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 
 	@Override
-	public int getCost() {
-		return (int)sol.getToursCost();
+	public double getCost() {
+		return sol.getToursCost();
 	}
 	
 	private VrpProblem buildProblemFromStream(DataInputStream dis) throws IOException {

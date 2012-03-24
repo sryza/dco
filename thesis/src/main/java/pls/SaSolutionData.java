@@ -8,7 +8,7 @@ import org.apache.hadoop.io.BytesWritable;
 
 
 public class SaSolutionData extends SolutionData {
-	public int cost;
+	public double cost;
 	public int endSolOffset;
 	public int endSolLen;
 	public int bestSolOffset;
@@ -32,7 +32,7 @@ public class SaSolutionData extends SolutionData {
 	public void init(BytesWritable bytes) throws IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
 		DataInputStream dis = new DataInputStream(bais);
-		cost = dis.readInt();
+		cost = dis.readDouble();
 		bestSolOffset = dis.readInt();
 		bestSolLen = dis.readInt();
 		endSolOffset = dis.readInt();
@@ -41,7 +41,7 @@ public class SaSolutionData extends SolutionData {
 	}
 
 	@Override
-	public int getBestCost() {
+	public double getBestCost() {
 		return cost;
 	}
 

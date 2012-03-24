@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.BytesWritable;
 
 public class LnsSolutionData extends SolutionData {
-	private int cost;
+	private double cost;
 	private BytesWritable bytes;
 	
 	public LnsSolutionData(){
@@ -19,7 +19,7 @@ public class LnsSolutionData extends SolutionData {
 	}
 	
 	@Override
-	public int getBestCost() {
+	public double getBestCost() {
 		return cost;
 	}
 
@@ -27,7 +27,7 @@ public class LnsSolutionData extends SolutionData {
 	public void init(BytesWritable bytes) throws IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
 		DataInputStream dis = new DataInputStream(bais);
-		cost = dis.readInt();
+		cost = dis.readDouble();
 		this.bytes = bytes;
 	}
 	

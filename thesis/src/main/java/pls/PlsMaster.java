@@ -55,7 +55,7 @@ public class PlsMaster {
 		Greedy greedy = new Greedy();
 		
 		List<PlsSolution> startSolutions = new ArrayList<PlsSolution>(numTasks);
-		int bestStartCost = Integer.MAX_VALUE;
+		double bestStartCost = Integer.MAX_VALUE;
 		for (int i = 0; i < numTasks; i++) {
 			if (i > 0) {
 				Collections.shuffle(citiesList);
@@ -105,7 +105,7 @@ public class PlsMaster {
 		LOG.info("k=" + k);
 		
 		dos.writeInt(k);
-		dos.writeInt((int)bestCost);
+		dos.writeDouble(bestCost);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();
