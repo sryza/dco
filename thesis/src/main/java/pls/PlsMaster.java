@@ -100,8 +100,10 @@ public class PlsMaster {
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
+
 		int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
 		LOG.info("k=" + k);
+		
 		dos.writeInt(k);
 		dos.writeInt((int)bestCost);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
