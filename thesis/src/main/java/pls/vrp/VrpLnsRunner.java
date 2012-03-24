@@ -46,7 +46,7 @@ public class VrpLnsRunner implements PlsRunner {
 					solAndStuff.setCurIteration(i);
 				}
 			}
-			LOG.info("Starting new search");
+			//LOG.info("Starting new search");
 			solAndStuff.setCurEscalation(1);
 			solAndStuff.setCurIteration(0);
 		}

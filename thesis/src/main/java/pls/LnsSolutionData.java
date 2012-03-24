@@ -28,7 +28,9 @@ public class LnsSolutionData extends SolutionData {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
 		DataInputStream dis = new DataInputStream(bais);
 		cost = dis.readDouble();
-		this.bytes = bytes;
+		byte[] bytesArr = new byte[bytes.getBytes().length];
+		System.arraycopy(bytes.getBytes(), 0, bytesArr, 0, bytesArr.length);
+		this.bytes = new BytesWritable(bytesArr);
 	}
 	
 	@Override

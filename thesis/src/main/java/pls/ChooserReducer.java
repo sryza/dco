@@ -98,6 +98,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		LOG.info("Best cost this round: " + bestCostThisRound);
 		//TODO: do the temperatures
+		List<BytesWritable> outSols = new ArrayList<BytesWritable>(solsThisRound.size());
 		if (bestCostThisRound < bestCostAlways) {
 			bestCostAlways = bestCostThisRound; //for passing on
 			int nMappers = solsThisRound.size();
@@ -107,24 +108,35 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			//first write out the k best
 			for (SolutionData solData : bestSols) {
 				val = solData.getEndSolutionBytes();
-				output.collect(PlsUtil.SOLS_KEY, val);
+				LOG.info("Writing out sol with cost " + solData.getBestCost());
+				outSols.add(val);
+				//output.collect(PlsUtil.SOLS_KEY, val);
 			}
 			
 			//then write out the rest of the bestSolutionAlways as many times as the difference
 			int nBest = nMappers - k;
 			val = bestSolThisRound.getBestSolutionBytes();
 			for (int i = 0; i < nBest; i++) {
-				output.collect(PlsUtil.SOLS_KEY, val);
+				LOG.info("Writing out best sol with cost " + bestSolThisRound.getBestCost());
+				outSols.add(val);
+				//output.collect(PlsUtil.SOLS_KEY, val);
 			}
 		} else { //just continue with what we've got
 			LOG.info("No best cost improvement, still " + bestCostAlways);
 			for (SolutionData solution : solsThisRound) {
 				//TODO: should we need to copy here?
 				BytesWritable val = solution.getEndSolutionBytes();
-				output.collect(PlsUtil.SOLS_KEY, val);
+				outSols.add(val);
+				//output.collect(PlsUtil.SOLS_KEY, val);
 			}
 		}
 		
+		//write out sols
+		for (BytesWritable outSol : outSols) {
+			LOG.info("output bytes hashCode: " + outSol.hashCode());
+			output.collect(PlsUtil.SOLS_KEY, outSol);
+		}
+
 		//write out the metadata key
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);

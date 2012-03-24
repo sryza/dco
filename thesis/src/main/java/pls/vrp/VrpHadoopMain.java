@@ -24,9 +24,9 @@ public class VrpHadoopMain {
 		
 		File inputFile = new File("../vrptests/rc110_1.txt");
 		final int maxDiscrepancies = 5;
-		final int relaxationRandomness = 25;
-		final int maxIter = 30;
-		final int maxEscalation = 25;
+		final int relaxationRandomness = 15;
+		final int maxIter = 35;
+		final int maxEscalation = 35;
 		
 		VrpProblem problem = VrpReader.readSolomon(inputFile, Integer.MAX_VALUE); 
 		

@@ -34,7 +34,7 @@ public class SolsOutputFileReader {
 		for (FileStatus fileStatus : statuses) {
 			Path subpath = fileStatus.getPath();
 			subpath = new Path(subpath, "part-00000");
-			System.out.println("Sols for " + subpath.getName());
+			System.out.println("Sols for " + subpath.toString());
 			List<PlsSolution> solutions = getFileSolutions(subpath, fs, conf, solutionClass);
 			for (PlsSolution sol : solutions) {
 				LOG.info("sol cost=" + sol.getCost() + ", id=" + sol.getTraceId());

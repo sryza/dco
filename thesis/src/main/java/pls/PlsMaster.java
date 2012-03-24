@@ -101,7 +101,8 @@ public class PlsMaster {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
 
-		int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
+		//int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
+		int k = 1;
 		LOG.info("k=" + k);
 		
 		dos.writeInt(k);
