@@ -14,7 +14,7 @@ public class TspSaRunner implements PlsRunner {
 
 	private static final Logger LOG = Logger.getLogger(TspSaRunner.class);
 	
-	private Random rand;
+	private Random rand = new Random();
 	
 	/**
 	 * Returns an array containing the best solution and the ending solution.

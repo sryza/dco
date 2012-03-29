@@ -1,5 +1,6 @@
 package viz;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,10 +21,11 @@ import bnb.vassal.SimpleVassalNodePool;
 
 public class TspBnbViz {
 	public static void main(String[] args) throws IOException {
-		final int bestCost = 400;
+		final int bestCost = 644;
 		
 		//initialize tsp
-		City[] cities = ProblemGen.genCities(40);
+//		City[] cities = ProblemGen.genCities(30);
+		City[] cities = ProblemGen.read(new File("../tsptests/eil101.258"), 101);
 		
 		//shuffle
 		List<City> cityList = Arrays.asList(cities);

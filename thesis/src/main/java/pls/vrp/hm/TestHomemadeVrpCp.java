@@ -40,9 +40,9 @@ public class TestHomemadeVrpCp {
 		frame.pack();
 		frame.setVisible(true);
 		
-		final int maxIter = 35;
+		final int maxIter = 40;
 		final int maxSearches = 1600000;
-		final int maxEscalation = 35;
+		final int maxEscalation = 37;
 		final int maxDiscrepancies = 5;
 //		int numToRelax = 7;
 //		int numFailures = 0;

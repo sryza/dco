@@ -17,7 +17,8 @@ public class VrpPlsSolution implements PlsSolution {
 	private int curIter;
 	private int curEscalation;
 	
-	private int traceId;
+	private int solId;
+	private int parentSolId;
 	
 	private VrpSolution sol;
 	
@@ -25,13 +26,14 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies, 
-			int traceId) {
+			int solId, int parentSolId) {
 		this.sol = sol;
 		this.maxIter = maxIter;
 		this.maxEscalation = maxEscalation;
 		this.maxDiscrepancies = maxDiscrepancies;
-		this.traceId = traceId;
+		this.solId = solId;
 		this.relaxationRandomness = relaxationRandomness;
+		this.parentSolId = parentSolId;
 	}
 	
 	public int getCurEscalation() {
@@ -74,14 +76,26 @@ public class VrpPlsSolution implements PlsSolution {
 		this.sol = sol;
 	}
 	
-	public int getTraceId() {
-		return traceId;
+	@Override
+	public int getSolutionId() {
+		return solId;
+	}
+	
+	@Override
+	public int getParentSolutionId() {
+		return parentSolId;
+	}
+	
+	@Override
+	public void setParentSolutionId(int id) {
+		this.parentSolId = id;
 	}
 	
 	@Override
 	public void writeToStream(DataOutputStream dos) throws IOException {
 		dos.writeDouble(sol.getToursCost());
-		dos.writeInt(traceId);
+		dos.writeInt(solId);
+		dos.writeInt(parentSolId);
 		dos.writeInt(sol.getNumVehicles());
 		for (List<Integer> route : sol.getRoutes()) {
 			dos.writeInt(route.size());
@@ -103,7 +117,8 @@ public class VrpPlsSolution implements PlsSolution {
 	@Override
 	public VrpPlsSolution buildFromStream(DataInputStream dis) throws IOException {
 		double toursCost = dis.readDouble();
-		traceId = dis.readInt();
+		solId = dis.readInt();
+		parentSolId = dis.readInt();
 		int numVehicles = dis.readInt();
 		List<List<Integer>> routes = new ArrayList<List<Integer>>(numVehicles);
 		for (int i = 0; i < numVehicles; i++) {
@@ -133,7 +148,7 @@ public class VrpPlsSolution implements PlsSolution {
 			+ sol.getProblem().getNumCities() * 4 //cust ids
 			+ sol.getProblem().getNumCities() * 4 * 6 //attrs
 			+ 4 * 4 //other problem attrs
-			+ 4 * 6; //curIter, maxIter, etc.
+			+ 4 * 8; //curIter, maxIter, etc.
 	}
 
 	@Override

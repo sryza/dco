@@ -105,7 +105,16 @@ public class TspSaSolution implements PlsSolution {
 	}
 
 	@Override
-	public int getTraceId() {
+	public int getSolutionId() {
 		return -1;
+	}
+	
+	@Override
+	public int getParentSolutionId() {
+		return -1;
+	}
+	
+	@Override
+	public void setParentSolutionId(int id) {
 	}
 }
