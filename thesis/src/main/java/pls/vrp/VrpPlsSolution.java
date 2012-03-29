@@ -31,6 +31,7 @@ public class VrpPlsSolution implements PlsSolution {
 		this.maxEscalation = maxEscalation;
 		this.maxDiscrepancies = maxDiscrepancies;
 		this.traceId = traceId;
+		this.relaxationRandomness = relaxationRandomness;
 	}
 	
 	public int getCurEscalation() {

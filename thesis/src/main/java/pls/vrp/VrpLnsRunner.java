@@ -41,6 +41,7 @@ public class VrpLnsRunner implements PlsRunner {
 					if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
 						sol = newSol;
 						solAndStuff.setSolution(sol);
+						i = 0;
 					}
 					solAndStuff.setCurEscalation(n);
 					solAndStuff.setCurIteration(i);
