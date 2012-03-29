@@ -46,3 +46,9 @@ Aggregate Stats Across All Vassals
 ----------------------------------
 thesis/scripts/aggrstats.py [test id]
 currently computes the total number of nodes evaluated
+
+
+Running and reading Hadoop results
+-----------------------------------
+hadoop jar tspls.jar pls.vrp.VrpHadoopMain 3 2 true
+hadoop jar tspls.jar pls.SolsOutputFileReader /users/sryza/testdir/1332479280027/ pls.vrp.VrpPlsSolution
