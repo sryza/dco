@@ -50,7 +50,7 @@ public class VrpLnsRunner implements PlsRunner {
 			solAndStuff.setCurEscalation(1);
 			solAndStuff.setCurIteration(0);
 		}
-
+		
 		return new PlsSolution[] {solAndStuff};
 	}
 }

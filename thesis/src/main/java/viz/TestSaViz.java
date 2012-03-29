@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import pls.TspLsCityReader;
 import pls.VizSaRunner;
 import pls.tsp.TspLsCity;
+import pls.tsp.TspUtils;
 
 public class TestSaViz {
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -20,10 +21,12 @@ public class TestSaViz {
 //		};
 		
 		final double START_TEMP = 5.0;
+//		final double START_TEMP = 0.0;
 		final double ALPHA = .9995;
 		
-		File file = new File("../tsptests/eil51.258");
+		File file = new File("../tsptests/eil101.258");
 		TspLsCity[] cities = TspLsCityReader.read(file, Integer.MAX_VALUE).toArray(new TspLsCity[0]);		
+		TspUtils.WRAP_NUM_NODES = cities.length;
 		
 		TspPanel panel = new TspPanel();
 		panel.setScale(cities);

@@ -26,6 +26,10 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 	
 	private static final int TIME = 30000;
 	
+	public abstract Class<PlsSolution> getSolutionClass();
+	
+	public abstract Class<PlsRunner> getRunnerClass();
+	
 	@Override
 	public void map(BytesWritable key, BytesWritable value, OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
 		throws IOException {
@@ -68,8 +72,12 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			return;
 		}
 //		TspSaRunner runner = new TspSaRunner(rand, stats);
-		
+			
+//		PlsSolution[] solutions = run(runner, sol, rand);
 		PlsSolution[] solutions = runner.run(sol, TIME, rand);
+		for (PlsSolution newSol : solutions) {
+			newSol.setParentSolutionId(sol.getSolutionId());
+		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
 		
@@ -93,7 +101,48 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		LOG.info("Total time: " + (endTime-startTime) + " ms");
 	}
 	
-	public abstract Class<PlsSolution> getSolutionClass();
-	
-	public abstract Class<PlsRunner> getRunnerClass();
+	public PlsSolution[] run(PlsRunner runner, PlsSolution initSol, Random rand) {
+		final int numThreads = Runtime.getRuntime().availableProcessors();
+		RunnerThread[] threads = new RunnerThread[numThreads];
+		for (int i = 0; i < numThreads; i++) {
+			threads[i] = new RunnerThread(runner, initSol, TIME, rand);
+			threads[i].start();
+		}
+		PlsSolution[] bestSols = null;
+		for (int i = 0; i < numThreads; i++) {
+			try {
+				threads[i].join();
+				PlsSolution[] sols = threads[i].getResults();
+				if (bestSols == null || sols[0].getCost() < bestSols[0].getCost()) {
+					bestSols = sols;
+				}
+			} catch (InterruptedException ex) {
+				LOG.error("Interrupted while joining, excluding thread's result");
+			}
+		}
+		
+		return bestSols;
+	}
+		
+	private class RunnerThread extends Thread {
+		private PlsSolution[] ret;
+		private PlsRunner runner;
+		private PlsSolution initSol;
+		private int timeMs;
+		private Random rand;
+		
+		public RunnerThread(PlsRunner runner, PlsSolution initSol, int timeMs, Random rand) {
+			this.runner = runner;
+			this.initSol = initSol;
+			rand = new Random(rand.nextLong());
+		}
+		
+		public void run() {
+			ret = runner.run(initSol, timeMs, rand);
+		}
+		
+		public PlsSolution[] getResults() {
+			return ret;
+		}
+	}
 }

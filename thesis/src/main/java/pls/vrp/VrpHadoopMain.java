@@ -45,7 +45,7 @@ public class VrpHadoopMain {
 			if (sol.getToursCost() < bestStartCost) {
 				bestStartCost = sol.getToursCost();
 			}
-			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i));
+			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i, -1));
 		}
 		
 		PlsMaster master = new PlsMaster(runLocal);

@@ -16,5 +16,9 @@ public interface PlsSolution {
 	
 	public double getCost();
 	
-	public int getTraceId();
+	public int getSolutionId();
+	
+	public int getParentSolutionId();
+	
+	public void setParentSolutionId(int id);
 }
