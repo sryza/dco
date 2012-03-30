@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -13,8 +15,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
-
-import pls.tsp.TspSaSolution;
 
 public class SolsOutputFileReader {
 	
@@ -28,9 +28,9 @@ public class SolsOutputFileReader {
 		
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
-		
 		FileStatus[] statuses = fs.listStatus(path);
 		System.out.println("number of subfiles: " + statuses.length);
+		Arrays.sort(statuses, new RunFolderComparator());
 		for (FileStatus fileStatus : statuses) {
 			Path subpath = fileStatus.getPath();
 			subpath = new Path(subpath, "part-00000");
@@ -40,7 +40,6 @@ public class SolsOutputFileReader {
 				LOG.info("sol cost=" + sol.getCost() + ", id=" + sol.getSolutionId() + ", parent id=" + sol.getParentSolutionId());
 			}
 			System.out.println();
-
 		}
 	}
 	
@@ -63,5 +62,17 @@ public class SolsOutputFileReader {
 			sols.add(sol);
 		}
 		return sols;
+	}
+	
+	private static class RunFolderComparator implements Comparator<FileStatus> {
+		@Override
+		public int compare(FileStatus fs1, FileStatus fs2) {
+			return getRunNumber(fs1) - getRunNumber(fs2);
+		}
+		
+		private int getRunNumber(FileStatus fs) {
+			String name = fs.getPath().getName();
+			return Integer.parseInt(name);
+		}
 	}
 }

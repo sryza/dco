@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import pls.SaSolution;
 import pls.PlsSolution;
 
 public class TspSaSolution implements PlsSolution {
@@ -116,5 +115,14 @@ public class TspSaSolution implements PlsSolution {
 	
 	@Override
 	public void setParentSolutionId(int id) {
+	}
+	
+	@Override
+	public void setSolutionId(int id) {
+	}
+	
+	@Override
+	public int getRoundTime() {
+		return -1;
 	}
 }

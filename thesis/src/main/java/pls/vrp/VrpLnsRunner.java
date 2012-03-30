@@ -14,11 +14,8 @@ public class VrpLnsRunner implements PlsRunner {
 	private static final Logger LOG = Logger.getLogger(VrpLnsRunner.class);
 	
 	@Override
-	public PlsSolution[] run(PlsSolution plsSol, long timeMs, Random rand) {
+	public PlsSolution[] run(PlsSolution plsSol, long timeToFinish, Random rand) {
 		VrpPlsSolution solAndStuff = (VrpPlsSolution)plsSol;
-		
-		long startTime = System.currentTimeMillis();
-		long endTime = startTime + timeMs;
 		
 		VrpSolution sol = solAndStuff.getSolution();
 		VrpProblem problem = sol.getProblem();
@@ -28,7 +25,7 @@ public class VrpLnsRunner implements PlsRunner {
 		while (true) {
 			for (int n = solAndStuff.getCurEscalation(); n <= solAndStuff.getMaxEscalation(); n++) { 
 				for (int i = solAndStuff.getCurIteration(); i < solAndStuff.getMaxIterations(); i++) {
-					if (System.currentTimeMillis() >= endTime) {
+					if (System.currentTimeMillis() >= timeToFinish) {
 						break outer;
 					}
 					

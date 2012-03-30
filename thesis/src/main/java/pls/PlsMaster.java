@@ -50,6 +50,7 @@ public class PlsMaster {
 		File f = new File("../tsptests/eil101.258");
 		double temp = 5.0;
 		double scaler = .95;
+		int timeMs = 60 * 1000;
 		
 		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
 		Greedy greedy = new Greedy();
@@ -102,7 +103,7 @@ public class PlsMaster {
 		DataOutputStream dos = new DataOutputStream(baos);
 
 		//int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
-		int k = startSolutions.size()-1;
+		int k = Math.max(1, startSolutions.size()-1);
 		LOG.info("k=" + k);
 		
 		dos.writeInt(k);

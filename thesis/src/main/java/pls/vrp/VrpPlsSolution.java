@@ -19,6 +19,7 @@ public class VrpPlsSolution implements PlsSolution {
 	
 	private int solId;
 	private int parentSolId;
+	private int roundTime;
 	
 	private VrpSolution sol;
 	
@@ -26,14 +27,16 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies, 
-			int solId, int parentSolId) {
+			int solId, int parentSolId, int roundTime) {
 		this.sol = sol;
 		this.maxIter = maxIter;
 		this.maxEscalation = maxEscalation;
 		this.maxDiscrepancies = maxDiscrepancies;
-		this.solId = solId;
 		this.relaxationRandomness = relaxationRandomness;
+
+		this.solId = solId;
 		this.parentSolId = parentSolId;
+		this.roundTime = roundTime;
 	}
 	
 	public int getCurEscalation() {
@@ -82,6 +85,11 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	@Override
+	public void setSolutionId(int id) {
+		this.solId = id;
+	}
+	
+	@Override
 	public int getParentSolutionId() {
 		return parentSolId;
 	}
@@ -94,6 +102,7 @@ public class VrpPlsSolution implements PlsSolution {
 	@Override
 	public void writeToStream(DataOutputStream dos) throws IOException {
 		dos.writeDouble(sol.getToursCost());
+		dos.writeInt(roundTime);
 		dos.writeInt(solId);
 		dos.writeInt(parentSolId);
 		dos.writeInt(sol.getNumVehicles());
@@ -117,6 +126,7 @@ public class VrpPlsSolution implements PlsSolution {
 	@Override
 	public VrpPlsSolution buildFromStream(DataInputStream dis) throws IOException {
 		double toursCost = dis.readDouble();
+		roundTime = dis.readInt();
 		solId = dis.readInt();
 		parentSolId = dis.readInt();
 		int numVehicles = dis.readInt();
@@ -148,7 +158,7 @@ public class VrpPlsSolution implements PlsSolution {
 			+ sol.getProblem().getNumCities() * 4 //cust ids
 			+ sol.getProblem().getNumCities() * 4 * 6 //attrs
 			+ 4 * 4 //other problem attrs
-			+ 4 * 8; //curIter, maxIter, etc.
+			+ 4 * 9; //curIter, maxIter, etc.
 	}
 
 	@Override
@@ -195,4 +205,8 @@ public class VrpPlsSolution implements PlsSolution {
 		}
 	}
 
+	@Override
+	public int getRoundTime() {
+		return roundTime;
+	}
 }

@@ -163,9 +163,9 @@ public class VrpSearcher {
 				continue;
 			}
 			
-			stats.reportAboutToInsert();
+//			stats.reportAboutToInsert();
 			InsertionEffects changes = inserter.insert(insertAfter, custToInsert, custsInsertionPoints);
-			stats.reportFinishedInsertion();
+//			stats.reportFinishedInsertion();
 
 			//TODO: if any custs have no insertion points after this, give up
 			if (changes.consistent && curCost + costOfInsertion + boundRemaining.getBound() < bestCost) {

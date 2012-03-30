@@ -45,9 +45,12 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			return;
 		}
 		
-		Class<PlsSolution> solutionClass= getSolutionClass();
+		long timeToFinish = PlsUtil.getEndTimeFromKey(key);
+		
+		Class<PlsSolution> solutionClass = getSolutionClass();
 		Class<PlsRunner> plsRunnerClass = getRunnerClass();
 		
+		//read start solution
 		byte[] input = value.getBytes();
 		ByteArrayInputStream bais = new ByteArrayInputStream(input);
 		DataInputStream dis = new DataInputStream(bais);
@@ -74,9 +77,12 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 //		TspSaRunner runner = new TspSaRunner(rand, stats);
 			
 //		PlsSolution[] solutions = run(runner, sol, rand);
-		PlsSolution[] solutions = runner.run(sol, TIME, rand);
+		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
 		for (PlsSolution newSol : solutions) {
 			newSol.setParentSolutionId(sol.getSolutionId());
+		}
+		for (PlsSolution newSol : solutions) {
+			newSol.setSolutionId(SolutionIdGenerator.generateId());
 		}
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
@@ -123,7 +129,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		
 		return bestSols;
 	}
-		
+	
 	private class RunnerThread extends Thread {
 		private PlsSolution[] ret;
 		private PlsRunner runner;

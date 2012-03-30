@@ -14,6 +14,8 @@ import pls.PlsSolution;
 public class VrpHadoopMain {
 	private static final Logger LOG = Logger.getLogger(VrpHadoopMain.class);
 	
+	private static final int DEFAULT_ROUND_TIME = 60 * 1000;
+	
 	public static void main(String[] args) throws IOException {
 		int numTasks = Integer.parseInt(args[0]);
 		int numRuns = Integer.parseInt(args[1]);
@@ -21,6 +23,7 @@ public class VrpHadoopMain {
 		if (args.length > 2) {
 			runLocal = Boolean.parseBoolean(args[2]);
 		}
+		int roundTime = DEFAULT_ROUND_TIME;
 		
 		File inputFile = new File("../vrptests/rc110_1.txt");
 		final int maxDiscrepancies = 5;
@@ -45,7 +48,7 @@ public class VrpHadoopMain {
 			if (sol.getToursCost() < bestStartCost) {
 				bestStartCost = sol.getToursCost();
 			}
-			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i, -1));
+			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i, -1, roundTime));
 		}
 		
 		PlsMaster master = new PlsMaster(runLocal);
