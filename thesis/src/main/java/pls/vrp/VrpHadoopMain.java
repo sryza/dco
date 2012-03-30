@@ -19,6 +19,7 @@ public class VrpHadoopMain {
 	public static void main(String[] args) throws IOException {
 		//required args
 		int numTasks = Integer.parseInt(args[0]);
+		int k = Math.max(1, numTasks-1);
 		int numRuns = Integer.parseInt(args[1]);
 		//optional args
 		boolean runLocal = false;
@@ -28,10 +29,13 @@ public class VrpHadoopMain {
 			roundTime = Integer.parseInt(args[2]);
 		}
 		if (args.length > 3) {
-			if (args[3].matches("(true|false)")) {
-				runLocal = Boolean.parseBoolean(args[3]);
+			k = Integer.parseInt(args[3]);
+		}
+		if (args.length > 4) {
+			if (args[4].matches("(true|false)")) {
+				runLocal = Boolean.parseBoolean(args[4]);
 			} else {
-				inputFile = new File(args[3]);
+				inputFile = new File(args[4]);
 			}
 		}
 		
@@ -63,6 +67,9 @@ public class VrpHadoopMain {
 		PlsMaster master = new PlsMaster(runLocal);
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
-		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime);
+		long startTime = System.currentTimeMillis();
+		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime, k);
+		long endTime = System.currentTimeMillis();
+		LOG.info("Total time: " + (endTime - startTime));
 	}
 }

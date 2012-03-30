@@ -74,7 +74,7 @@ public class PlsMaster {
 	}
 	
 	public void run(int numRuns, List<PlsSolution> startSolutions, double bestCost, String dir, Class mapperClass,
-			Class reducerClass, int roundTime) throws IOException {
+			Class reducerClass, int roundTime, int k) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		
@@ -104,7 +104,6 @@ public class PlsMaster {
 		DataOutputStream dos = new DataOutputStream(baos);
 
 		//int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
-		int k = Math.max(1, startSolutions.size()-1);
 		LOG.info("k=" + k);
 		
 		dos.writeInt(k);
