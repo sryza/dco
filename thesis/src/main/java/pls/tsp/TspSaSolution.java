@@ -120,9 +120,4 @@ public class TspSaSolution implements PlsSolution {
 	@Override
 	public void setSolutionId(int id) {
 	}
-	
-	@Override
-	public int getRoundTime() {
-		return -1;
-	}
 }

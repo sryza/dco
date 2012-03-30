@@ -17,15 +17,24 @@ public class VrpHadoopMain {
 	private static final int DEFAULT_ROUND_TIME = 60 * 1000;
 	
 	public static void main(String[] args) throws IOException {
+		//required args
 		int numTasks = Integer.parseInt(args[0]);
 		int numRuns = Integer.parseInt(args[1]);
+		//optional args
 		boolean runLocal = false;
-		if (args.length > 2) {
-			runLocal = Boolean.parseBoolean(args[2]);
-		}
 		int roundTime = DEFAULT_ROUND_TIME;
-		
 		File inputFile = new File("../vrptests/rc110_1.txt");
+		if (args.length > 2) {
+			roundTime = Integer.parseInt(args[2]);
+		}
+		if (args.length > 3) {
+			if (args[3].matches("(true|false)")) {
+				runLocal = Boolean.parseBoolean(args[3]);
+			} else {
+				inputFile = new File(args[3]);
+			}
+		}
+		
 		final int maxDiscrepancies = 5;
 		final int relaxationRandomness = 15;
 		final int maxIter = 35;
@@ -48,12 +57,12 @@ public class VrpHadoopMain {
 			if (sol.getToursCost() < bestStartCost) {
 				bestStartCost = sol.getToursCost();
 			}
-			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i, -1, roundTime));
+			initSols.add(new VrpPlsSolution(sol, maxIter, maxEscalation, relaxationRandomness, maxDiscrepancies, i, -1));
 		}
 		
 		PlsMaster master = new PlsMaster(runLocal);
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
-		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class);
+		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime);
 	}
 }

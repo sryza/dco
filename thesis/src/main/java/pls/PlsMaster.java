@@ -74,7 +74,7 @@ public class PlsMaster {
 	}
 	
 	public void run(int numRuns, List<PlsSolution> startSolutions, double bestCost, String dir, Class mapperClass,
-			Class reducerClass) throws IOException {
+			Class reducerClass, int roundTime) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		
@@ -90,13 +90,14 @@ public class PlsMaster {
 		
 		Path initFilePath = new Path(initDirPath, "part-00000");
 		
+		long firstFinishTime = System.currentTimeMillis() + roundTime;
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
 		for (PlsSolution sol : startSolutions) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			sol.writeToStream(new DataOutputStream(baos));
 			BytesWritable solWritable = new BytesWritable(baos.toByteArray());
-			writer.append(PlsUtil.SOLS_KEY, solWritable);
+			writer.append(PlsUtil.getMapSolKey(firstFinishTime), solWritable);
 		}
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -108,6 +109,7 @@ public class PlsMaster {
 		
 		dos.writeInt(k);
 		dos.writeDouble(bestCost);
+		dos.writeInt(roundTime);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();

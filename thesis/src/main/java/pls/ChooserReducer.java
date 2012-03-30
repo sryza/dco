@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	
 	private int k = -1;
 	private double bestCostAlways = -1;
+	private int roundTime = -1;
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -58,7 +60,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			DataInputStream dis = new DataInputStream(bais);
 			k = dis.readInt();
 			bestCostAlways = dis.readDouble();
-			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways);
+			roundTime = dis.readInt();
+			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways + ", roundTime=" + roundTime);
 			return;
 		} else if (k == -1) {
 			LOG.info("Received solutions before metadata, aborting");
@@ -131,10 +134,12 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			}
 		}
 		
+		long nextRoundFinishTime = System.currentTimeMillis() + roundTime;
+		
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			LOG.info("output bytes hashCode: " + outSol.hashCode());
-			output.collect(PlsUtil.SOLS_KEY, outSol);
+			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), outSol);
 		}
 
 		//write out the metadata key
@@ -142,6 +147,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		DataOutputStream dos = new DataOutputStream(baos);
 		dos.writeInt(k);
 		dos.writeDouble(bestCostAlways);
+		dos.writeInt(roundTime);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		output.collect(PlsUtil.METADATA_KEY, metadata);
 	}

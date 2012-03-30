@@ -23,6 +23,4 @@ public interface PlsSolution {
 	public int getParentSolutionId();
 	
 	public void setParentSolutionId(int id);
-
-	public int getRoundTime();
 }
