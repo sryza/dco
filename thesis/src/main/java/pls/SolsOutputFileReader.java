@@ -53,8 +53,6 @@ public class SolsOutputFileReader {
 			if (key.equals(PlsUtil.METADATA_KEY)) {
 				//TODO: read best solution so that we can note that it's not among reported if it's not
 				continue;
-			} else if (!key.equals(PlsUtil.SOLS_KEY)) {
-				LOG.warn("Found unexpected key " + new String(key.getBytes()));
 			}
 			
 			PlsSolution sol = (PlsSolution)Class.forName(solutionClass).newInstance();

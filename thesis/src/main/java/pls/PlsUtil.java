@@ -12,8 +12,8 @@ public class PlsUtil {
 		ByteBuffer buff = ByteBuffer.allocate(12);
 		buff.putChar('s');
 		buff.putChar('o');
-		buff.putChar('l');
-		buff.putChar('s');
+		//buff.putChar('l');
+		//buff.putChar('s');
 		buff.putLong(endTime);
 		return new BytesWritable(buff.array());
 	}
