@@ -133,7 +133,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		public RunnerThread(PlsRunner runner, PlsSolution initSol, long timeToFinish, Random rand) {
 			this.runner = runner;
 			this.initSol = initSol;
-			rand = new Random(rand.nextLong());
+			this.rand = new Random(rand.nextLong());
 			this.timeToFinish = timeToFinish;
 		}
 		
