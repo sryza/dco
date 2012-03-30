@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,15 +23,23 @@ public class SolsOutputFileReader {
 	
 	public static void main(String[] args) throws IOException, InstantiationException, 
 		IllegalAccessException, ClassNotFoundException {
-		Path path = new Path(args[0]);
-		String solutionClass = args[1];
-//		Path path = new Path("/users/sryza/testdir/1331512645039/");
 		
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
+		
+		String solutionClass = args[0];
+		Path path;
+		if (args.length > 1) {
+			path = new Path(args[1]);
+		} else {
+			path = getLatestRunFolderPath(new Path("/users/sryza/testdir/"), fs);
+		}
+		
+//		Path path = new Path("/users/sryza/testdir/1331512645039/");
+		
 		FileStatus[] statuses = fs.listStatus(path);
 		System.out.println("number of subfiles: " + statuses.length);
-		Arrays.sort(statuses, new RunFolderComparator());
+		Arrays.sort(statuses, new NumberFolderComparator());
 		for (FileStatus fileStatus : statuses) {
 			Path subpath = fileStatus.getPath();
 			subpath = new Path(subpath, "part-00000");
@@ -62,7 +71,13 @@ public class SolsOutputFileReader {
 		return sols;
 	}
 	
-	private static class RunFolderComparator implements Comparator<FileStatus> {
+	private static Path getLatestRunFolderPath(Path testDir, FileSystem fs) throws IOException {
+		FileStatus[] statuses = fs.listStatus(testDir);
+		FileStatus latest = Collections.max(Arrays.asList(statuses));
+		return latest.getPath();
+	}
+	
+	private static class NumberFolderComparator implements Comparator<FileStatus> {
 		@Override
 		public int compare(FileStatus fs1, FileStatus fs2) {
 			return getRunNumber(fs1) - getRunNumber(fs2);
