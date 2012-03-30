@@ -2,14 +2,11 @@ package pls.vrp.hm;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
 
 import pls.vrp.LnsRelaxer;
-import pls.vrp.VrpCp;
 import pls.vrp.VrpGreedyInitializer;
 import pls.vrp.VrpProblem;
 import pls.vrp.VrpReader;
