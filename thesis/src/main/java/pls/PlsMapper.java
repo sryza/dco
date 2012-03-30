@@ -9,22 +9,15 @@ import java.net.InetAddress;
 import java.util.Random;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
-import pls.tsp.TspSaRunner;
-import pls.tsp.TspSaSolution;
-
 public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
 	private static final Logger LOG = Logger.getLogger(PlsMapper.class);
-	
-	private static final int TIME = 60000;
 	
 	public abstract Class<PlsSolution> getSolutionClass();
 	
@@ -76,8 +69,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		}
 //		TspSaRunner runner = new TspSaRunner(rand, stats);
 			
-//		PlsSolution[] solutions = run(runner, sol, rand);
-		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
+		PlsSolution[] solutions = run(runner, sol, timeToFinish, rand);
+//		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
 		for (PlsSolution newSol : solutions) {
 			newSol.setParentSolutionId(sol.getSolutionId());
 		}
@@ -107,11 +100,11 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		LOG.info("Total time: " + (endTime-startTime) + " ms");
 	}
 	
-	public PlsSolution[] run(PlsRunner runner, PlsSolution initSol, Random rand) {
+	public PlsSolution[] run(PlsRunner runner, PlsSolution initSol, long timeToFinish, Random rand) {
 		final int numThreads = Runtime.getRuntime().availableProcessors();
 		RunnerThread[] threads = new RunnerThread[numThreads];
 		for (int i = 0; i < numThreads; i++) {
-			threads[i] = new RunnerThread(runner, initSol, TIME, rand);
+			threads[i] = new RunnerThread(runner, initSol, timeToFinish, rand);
 			threads[i].start();
 		}
 		PlsSolution[] bestSols = null;
@@ -134,17 +127,18 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		private PlsSolution[] ret;
 		private PlsRunner runner;
 		private PlsSolution initSol;
-		private int timeMs;
+		private long timeToFinish;
 		private Random rand;
 		
-		public RunnerThread(PlsRunner runner, PlsSolution initSol, int timeMs, Random rand) {
+		public RunnerThread(PlsRunner runner, PlsSolution initSol, long timeToFinish, Random rand) {
 			this.runner = runner;
 			this.initSol = initSol;
 			rand = new Random(rand.nextLong());
+			this.timeToFinish = timeToFinish;
 		}
 		
 		public void run() {
-			ret = runner.run(initSol, timeMs, rand);
+			ret = runner.run(initSol, timeToFinish, rand);
 		}
 		
 		public PlsSolution[] getResults() {
