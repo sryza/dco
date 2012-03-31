@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -30,9 +29,13 @@ public class SolsOutputFileReader {
 		String solutionClass = args[0];
 		Path path;
 		if (args.length > 1) {
-			path = new Path(args[1]);
+			if (args[1].startsWith("-")) {
+				path = getLatestRunFolderPath(new Path("/users/sryza/testdir/"), fs, -Integer.parseInt(args[1]));
+			} else {
+				path = new Path(args[1]);
+			}
 		} else {
-			path = getLatestRunFolderPath(new Path("/users/sryza/testdir/"), fs);
+			path = getLatestRunFolderPath(new Path("/users/sryza/testdir/"), fs, 0);
 		}
 		
 //		Path path = new Path("/users/sryza/testdir/1331512645039/");
@@ -71,10 +74,10 @@ public class SolsOutputFileReader {
 		return sols;
 	}
 	
-	private static Path getLatestRunFolderPath(Path testDir, FileSystem fs) throws IOException {
+	private static Path getLatestRunFolderPath(Path testDir, FileSystem fs, int howManyBack) throws IOException {
 		FileStatus[] statuses = fs.listStatus(testDir);
-		FileStatus latest = Collections.max(Arrays.asList(statuses));
-		return latest.getPath();
+		Arrays.sort(statuses, new NumberFolderComparator());
+		return statuses[statuses.length-1-howManyBack].getPath();
 	}
 	
 	private static class NumberFolderComparator implements Comparator<FileStatus> {
