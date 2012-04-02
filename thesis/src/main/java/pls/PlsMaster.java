@@ -145,7 +145,9 @@ public class PlsMaster {
 		
 		conf.setMapperClass(mapperClass);
 		conf.setReducerClass(reducerClass);
-
+		
+		conf.setSpeculativeExecution(false);
+		
 		conf.setInputFormat(SequenceFileInputFormat.class);
 		conf.setOutputFormat(SequenceFileOutputFormat.class);
 		
