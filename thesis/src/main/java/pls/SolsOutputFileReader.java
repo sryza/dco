@@ -83,12 +83,12 @@ public class SolsOutputFileReader {
 	private static class NumberFolderComparator implements Comparator<FileStatus> {
 		@Override
 		public int compare(FileStatus fs1, FileStatus fs2) {
-			return getRunNumber(fs1) - getRunNumber(fs2);
+			return (int)(getRunNumber(fs1) - getRunNumber(fs2));
 		}
 		
-		private int getRunNumber(FileStatus fs) {
+		private long getRunNumber(FileStatus fs) {
 			String name = fs.getPath().getName();
-			return Integer.parseInt(name);
+			return Long.parseLong(name);
 		}
 	}
 }
