@@ -49,24 +49,15 @@ public class LordJobManager {
 			nextVassalQueue.add(proxy);
 		}
 	}
-	
-	public List<BnbNode> askForWork(int vassalId) {
-		long startTime = System.currentTimeMillis();
-		List<BnbNode> work = askForWorkBody(vassalId);
-		if (work != null && work.size() > 0) {
-			long endTime = System.currentTimeMillis();
-			stats.workStolen((int)(endTime - startTime));
-		}
-		return work;
-	}
-	
+		
 	/**
 	 * 
 	 * @param vassalId
 	 * 		The id of the vassal that's asking for work.
 	 * @return
 	 */
-	public List<BnbNode> askForWorkBody(int vassalId) {
+	public List<BnbNode> askForWork(int vassalId) {
+		long startTime = System.currentTimeMillis();
 		hasWorkMap.remove(vassalId);
 		
 		if (failed) {
@@ -87,7 +78,7 @@ public class LordJobManager {
 		//store the number of times we fail to reach a particular proxy so we don't
 		//continue doing this forever if one is down
 		Map<VassalProxy, Integer> failedAttempts = new HashMap<VassalProxy, Integer>();
-		
+		int totalFailedAttempts = 0;
 		while (true) {
 			//check every time because it could've filled up since we started
 			if (hasWorkMap.size() == 0) {
@@ -115,6 +106,8 @@ public class LordJobManager {
 						//TODO: synchronize this?
 //						LOG.info("stole work from " + proxy.getVassalIdCache() + " for " + vassalId + ". first node's depth is " + stolenWork.get(0).getDepth()); 
 						hasWorkMap.put(vassalId, true); //TODO: defer this until after we've sent our response?
+						long finishTime = System.currentTimeMillis();
+						stats.reportWorkStolen((int)(finishTime-startTime), totalFailedAttempts);
 						return stolenWork;
 					} else {
 //						LOG.warn("vassal " + proxy.getVassalIdCache() + " that allegedly had work actually doesn't. request from " + vassalId);
@@ -125,6 +118,7 @@ public class LordJobManager {
 //						} else {
 //							failedAttempts.put(proxy, 1);
 //						}
+						totalFailedAttempts++;
 					}
 				} catch (IOException ex) {
 					LOG.error("problem stealing work from vassal " + proxy.getVassalIdCache(), ex);
@@ -133,6 +127,7 @@ public class LordJobManager {
 					} else {
 						failedAttempts.put(proxy, 1);
 					}
+					totalFailedAttempts++;
 				}
 			}
 //			else {
