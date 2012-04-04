@@ -63,6 +63,10 @@ public class LordRunner implements LordPublic {
 		}
 	}
 	
+	public LordJobStats getStats(int jobId) {
+		return jobMap.get(jobId).getStats();
+	}
+	
 	@Override
 	public void registerVassal(String hostname, int port, int id) {
 		VassalProxy proxy = new VassalProxy(hostname, port, id);

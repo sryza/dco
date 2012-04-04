@@ -1,7 +1,6 @@
 package bnb.stats;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class LordJobStats {
 	
@@ -23,7 +22,6 @@ public class LordJobStats {
 	 * 		the number of clients who were reached and had no work to donate
 	 */
 	public void reportWorkStolen(int timeTaken, int numFailedAttempts) {
-		long time = System.currentTimeMillis();
 		workThefts.add(new WorkTheft(timeTaken, System.currentTimeMillis(), numFailedAttempts));
 	}
 	
@@ -43,7 +41,7 @@ public class LordJobStats {
 		finishTime = System.currentTimeMillis();
 	}
 	
-	public String makeReport() {
+	public String makeReportSummary() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Total time: " + (finishTime - startTime) + "\n");
 		sb.append("Initialization time: " + (finishedInitialTime - startTime) + "\n");
@@ -51,6 +49,40 @@ public class LordJobStats {
 		sb.append("# Work Stealing Threads: " + workThefts.getLists().size() + "\n");
 		sb.append("Total work stolen time: " + sumWorkStolenTime() + "\n");
 		sb.append("Times work stolen: " + sumTimesWorkStolen() + "\n");
+		return sb.toString();
+	}
+	
+	public String makeReport1() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		sb.append("\"totalTime\":" + (finishTime - startTime));
+		sb.append(",\n");
+		sb.append("\"initTime\": " + (finishedInitialTime - startTime));
+		sb.append(",\n");
+		sb.append("\"finish time\": " + finishTime);
+		sb.append(",\n");
+		sb.append("\"numWokStealingThreads\": " + workThefts.getLists().size());
+		sb.append(",\n");
+		sb.append("\"totalWorkStealingTime\": " + sumWorkStolenTime());
+		sb.append(",\n");
+		sb.append("\"numWorkThefts\": " + sumTimesWorkStolen());
+		sb.append(",\n");
+		sb.append("\"numFailedAttempts\":[");
+		for (List<WorkTheft> list : workThefts.getLists()) {
+			for (WorkTheft theft : list) {
+				sb.append(theft.numFailedAttempts+",");
+			}
+		}
+		sb.append("]");
+		sb.append(",\n");
+		sb.append("\"stealTimes\":[");
+		for (List<WorkTheft> list : workThefts.getLists()) {
+			for (WorkTheft theft : list) {
+				sb.append(theft.endTime+",");
+			}
+		}
+		sb.append("]");
+		sb.append("}");
 		return sb.toString();
 	}
 	

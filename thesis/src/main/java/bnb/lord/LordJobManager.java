@@ -146,7 +146,7 @@ public class LordJobManager {
 				stats.finished();
 				LOG.info("Computation completed!");
 				LOG.info("Best cost: " + minCost);
-				LOG.info("Stats: \n" + stats.makeReport());
+				LOG.info("Stats: \n" + stats.makeReportSummary());
 			}
 		}
 	}
@@ -157,6 +157,10 @@ public class LordJobManager {
 	
 	public int getJobID() {
 		return jobid;
+	}
+	
+	public LordJobStats getStats() {
+		return stats;
 	}
 	
 	//TODO: need this synchronization?

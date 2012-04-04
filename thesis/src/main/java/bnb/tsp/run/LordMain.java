@@ -3,6 +3,7 @@ package bnb.tsp.run;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import bnb.lord.LordRunner;
 import bnb.lord.VassalProxy;
 import bnb.rpc.Ports;
+import bnb.stats.LordJobStats;
 import bnb.tsp.City;
 import bnb.tsp.TspNode;
 import bnb.tsp.TspProblem;
@@ -72,6 +74,14 @@ public class LordMain {
 		} else {
 			lord.runJobWhenEnoughVassals(root, problem, upperBound, numVassalsToWaitFor);
 		}
+		
+		//report stats
+		LordJobStats stats = lord.getStats(0);
+		String report = stats.makeReport1();
+		File statsFile = new File("logs/lord.log");
+		FileWriter fos = new FileWriter(statsFile);
+		fos.write(report);
+		fos.close();
 	}
 	
 	private static List<String> readLines(File f) throws IOException {
