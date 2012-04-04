@@ -112,7 +112,10 @@ public class VassalJobManager implements Runnable {
 			LOG.info("about to ask lord for work");
 			List<BnbNode> work;
 			try {
+				long startTime = System.currentTimeMillis();
 				work = lordProxy.askForWork(this, minCost);
+				long endTime = System.currentTimeMillis();
+				stats.reportWorkStolen((int)(endTime-startTime));
 			} catch (IOException ex) {
 				LOG.error("Couldn't steal work", ex);
 				return false;

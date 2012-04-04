@@ -17,6 +17,8 @@ public class VassalJobStats {
 	
 	private ThreadLocalList<Long> toggleWorkingTimes;
 	
+	private ThreadLocalCount totalStealTime;
+	
 	private int numEvaluated;
 	
 	private long doneTime;
@@ -27,6 +29,7 @@ public class VassalJobStats {
 		nextNodeLats = new ThreadLocalList<Long>();
 		nextNodeStart = new ThreadLocal<Long>();
 		toggleWorkingTimes = new ThreadLocalList<Long>();
+		totalStealTime = new ThreadLocalCount();
 	}
 	
 	public void reportNextNodeStart() {
@@ -39,6 +42,17 @@ public class VassalJobStats {
 	
 	public void reportAskForWorkStart() {
 		askForWorkStart.set(System.currentTimeMillis());
+	}
+	
+	/**
+	 * TODO: maybe report depth of node stolen
+	 */
+	public void reportAskForWorkEnd() {
+		askForWorkLats.add(System.currentTimeMillis()-askForWorkStart.get());
+	}
+
+	public void reportWorkStolen(int timeTaken) {
+		totalStealTime.add(timeTaken);
 	}
 	
 	public void reportWorking() {
@@ -56,14 +70,7 @@ public class VassalJobStats {
 	public void reportNumEvaluated(int numEvaluated) {
 		this.numEvaluated = numEvaluated;
 	}
-	
-	/**
-	 * TODO: maybe report depth of node stolen
-	 */
-	public void reportAskForWorkEnd() {
-		askForWorkLats.add(System.currentTimeMillis()-askForWorkStart.get());
-	}
-	
+		
 	/**
 	 * In a JSON format.
 	 */
@@ -90,6 +97,10 @@ public class VassalJobStats {
 		List<List<Long>> toggleWorkingLists = toggleWorkingTimes.getLists();
 		
 		sb.append("\"toggleWorkingLists\": " + toggleWorkingLists);
+		
+		sb.append(",\n");
+		
+		sb.append("\"totalStealTime\": " + totalStealTime.getCount());
 		
 		sb.append(",\n");
 		

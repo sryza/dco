@@ -50,13 +50,23 @@ public class LordJobManager {
 		}
 	}
 	
+	public List<BnbNode> askForWork(int vassalId) {
+		long startTime = System.currentTimeMillis();
+		List<BnbNode> work = askForWorkBody(vassalId);
+		if (work != null && work.size() > 0) {
+			long endTime = System.currentTimeMillis();
+			stats.workStolen((int)(endTime - startTime));
+		}
+		return work;
+	}
+	
 	/**
 	 * 
 	 * @param vassalId
 	 * 		The id of the vassal that's asking for work.
 	 * @return
 	 */
-	public List<BnbNode> askForWork(int vassalId) {
+	public List<BnbNode> askForWorkBody(int vassalId) {
 		hasWorkMap.remove(vassalId);
 		
 		if (failed) {

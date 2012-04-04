@@ -34,9 +34,7 @@ public class TaskRunner implements Runnable {
 						working = false;
 					}
 					
-					stats.reportAskForWorkStart();
 					boolean succeeded = stealWork();
-					stats.reportAskForWorkEnd();
 					if (jobManager.isCompleted()) {
 						break;
 					}

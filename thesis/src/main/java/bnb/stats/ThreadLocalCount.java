@@ -7,6 +7,16 @@ public class ThreadLocalCount {
 	private List<Count> allCounts = new LinkedList<Count>(); 
 	private ThreadLocal<Count> localCount = new ThreadLocal<Count>();
 	
+	public void add(int amount) {
+		if (localCount.get() == null) {
+			localCount.set(new Count());
+			synchronized(allCounts) {
+				allCounts.add(localCount.get());
+			}
+		}
+		localCount.get().add(amount);
+	}
+	
 	public void increment() {
 		if (localCount.get() == null) {
 			localCount.set(new Count());
@@ -30,6 +40,10 @@ public class ThreadLocalCount {
 		
 		public void inc() {
 			count++;
+		}
+		
+		public void add(int amount) {
+			count += amount;
 		}
 		
 		public int get() {
