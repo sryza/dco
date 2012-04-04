@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -25,6 +26,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.log4j.Logger;
 
+import pls.stats.PlsJobStats;
 import pls.tsp.Greedy;
 import pls.tsp.TspLsCity;
 import pls.tsp.TspSaSolution;
@@ -113,6 +115,7 @@ public class PlsMaster {
 		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();
 		
+		PlsJobStats stats = new PlsJobStats();
 		//run the waves
 		for (int i = 0; i < numRuns; i++) {
 			Path inputPath = new Path(dirPath, i + "/");
@@ -122,7 +125,9 @@ public class PlsMaster {
 			runHadoopJob(inputPath, outputPath, startSolutions.size(), mapperClass, reducerClass);
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
+			stats.reportRoundTime((int)(end-start));
 		}
+		writeStatsFile(dirPath, stats, fs);
 	}
 
 	/**
@@ -158,5 +163,13 @@ public class PlsMaster {
 		FileOutputFormat.setOutputPath(conf, outputPath);
 		
 		JobClient.runJob(conf);
+	}
+	
+	private void writeStatsFile(Path dir, PlsJobStats stats, FileSystem fs) throws IOException {
+		Path statsPath = new Path(dir, "jobstats.stats");
+		FSDataOutputStream os = fs.create(statsPath);
+		String report = stats.makeReport();
+		os.writeUTF(report);
+		os.close();
 	}
 }

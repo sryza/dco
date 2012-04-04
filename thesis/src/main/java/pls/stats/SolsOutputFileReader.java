@@ -1,11 +1,10 @@
-package pls;
+package pls.stats;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -16,9 +15,14 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.log4j.Logger;
 
+import pls.PlsSolution;
+import pls.PlsUtil;
+
 public class SolsOutputFileReader {
 	
 	private static final Logger LOG = Logger.getLogger(SolsOutputFileReader.class);
+	
+	private FileSystem fileSystem;
 	
 	public static void main(String[] args) throws IOException, InstantiationException, 
 		IllegalAccessException, ClassNotFoundException {
@@ -43,11 +47,12 @@ public class SolsOutputFileReader {
 		FileStatus[] statuses = fs.listStatus(path);
 		System.out.println("number of subfiles: " + statuses.length);
 		Arrays.sort(statuses, new NumberFolderComparator());
+		SolsOutputFileReader reader = new SolsOutputFileReader(fs);
 		for (FileStatus fileStatus : statuses) {
 			Path subpath = fileStatus.getPath();
 			subpath = new Path(subpath, "part-00000");
 			System.out.println("Sols for " + subpath.toString());
-			List<PlsSolution> solutions = getFileSolutions(subpath, fs, conf, solutionClass);
+			List<PlsSolution> solutions = reader.getFileSolutions(subpath, conf, solutionClass);
 			for (PlsSolution sol : solutions) {
 				LOG.info("sol cost=" + sol.getCost() + ", id=" + sol.getSolutionId() + ", parent id=" + sol.getParentSolutionId());
 			}
@@ -55,9 +60,13 @@ public class SolsOutputFileReader {
 		}
 	}
 	
-	public static List<PlsSolution> getFileSolutions(Path path, FileSystem fs, Configuration conf, String solutionClass)
+	public SolsOutputFileReader(FileSystem fs) {
+		this.fileSystem = fs;
+	}
+	
+	public List<PlsSolution> getFileSolutions(Path path, Configuration conf, String solutionClass)
 		throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-		SequenceFile.Reader reader = new SequenceFile.Reader(fs, path, conf);
+		SequenceFile.Reader reader = new SequenceFile.Reader(fileSystem, path, conf);
 		BytesWritable key = new BytesWritable();
 		BytesWritable value = new BytesWritable();
 		List<PlsSolution> sols = new ArrayList<PlsSolution>();
@@ -78,17 +87,5 @@ public class SolsOutputFileReader {
 		FileStatus[] statuses = fs.listStatus(testDir);
 		Arrays.sort(statuses, new NumberFolderComparator());
 		return statuses[statuses.length-1-howManyBack].getPath();
-	}
-	
-	private static class NumberFolderComparator implements Comparator<FileStatus> {
-		@Override
-		public int compare(FileStatus fs1, FileStatus fs2) {
-			return getRunNumber(fs1) - getRunNumber(fs2);
-		}
-		
-		private int getRunNumber(FileStatus fs) {
-			String name = fs.getPath().getName();
-			return Integer.parseInt(name);
-		}
 	}
 }
