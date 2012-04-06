@@ -1,4 +1,4 @@
-package pls;
+package pls.map;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +14,10 @@ import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
+
+import pls.PlsSolution;
+import pls.PlsUtil;
+import pls.SolutionIdGenerator;
 
 public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
@@ -69,8 +73,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		}
 //		TspSaRunner runner = new TspSaRunner(rand, stats);
 			
-		PlsSolution[] solutions = run(runner, sol, timeToFinish, rand);
-//		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
+//		PlsSolution[] solutions = run(runner, sol, timeToFinish, rand);
+		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
 		for (PlsSolution newSol : solutions) {
 			newSol.setParentSolutionId(sol.getSolutionId());
 		}

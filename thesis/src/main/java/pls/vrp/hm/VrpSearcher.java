@@ -82,17 +82,17 @@ public class VrpSearcher {
 		return new VrpCpSearchNode(new HashSet<Integer>(unrouted), custsInsertionPoints, boundRemaining, curCost, routeStarts);
 	}
 	
-	public VrpSolution solve(VrpSolution partialSol, double bestCost, int discrepancies, VrpCpStats stats) {
+	public VrpSolution solve(VrpSolution partialSol, double bestCost, int discrepancies, VrpCpStats stats, boolean best) {
 		VrpCpSearchNode root = initialize(partialSol);
 		return search(root.unrouted, root.custsInsertionPoints, root.boundRemaining, bestCost, root.curCost, root.routeStarts,
-				discrepancies, stats);
+				discrepancies, stats, best);
 	}
 	
 	//TODO: we can include the sum of min insertion costs in our bound
 	
 	private VrpSolution search(Set<Integer> remainingToInsert, CustInsertionPoints[] custsInsertionPoints, 
 			BoundRemaining boundRemaining, double bestCost, double curCost, List<RouteNode> routeStarts, int discrepancies,
-			VrpCpStats stats) {
+			VrpCpStats stats, boolean best) {
 		
 		int[] demands = problem.getDemands();
 		
@@ -118,7 +118,7 @@ public class VrpSearcher {
 				LOG.error("costs inconsistent! " + sol.getToursCost() + " != " + curCost);
 				return null;
 			} else if (Math.abs(curCost - bestCost) > .001) {
-				LOG.info("found solution with cost " + curCost);
+				stats.reportNewBestSolution(curCost);
 				return sol;
 			} else {
 				return null;
@@ -170,10 +170,13 @@ public class VrpSearcher {
 			//TODO: if any custs have no insertion points after this, give up
 			if (changes.consistent && curCost + costOfInsertion + boundRemaining.getBound() < bestCost) {
 				VrpSolution sol = search(remainingToInsert, custsInsertionPoints, boundRemaining, bestCost, 
-						curCost + costOfInsertion, routeStarts, discrepancies, stats);
+						curCost + costOfInsertion, routeStarts, discrepancies, stats, best);
 				if (sol != null && (bestSol == null || sol.getToursCost() < bestSol.getToursCost())) {
 					bestSol = sol;
 					bestCost = sol.getToursCost(); // to bound other children
+				}
+				if (sol != null && !best) {
+					return sol;
 				}
 				discrepancies--; //only count as discrepancy if we explore below
 			}

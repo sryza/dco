@@ -1,7 +1,7 @@
 package pls.vrp;
 
-import pls.ChooserReducer;
 import pls.LnsSolutionData;
+import pls.reduce.ChooserReducer;
 
 public class VrpReducer extends ChooserReducer {
 

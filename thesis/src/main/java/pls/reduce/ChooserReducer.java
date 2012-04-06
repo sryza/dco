@@ -1,4 +1,4 @@
-package pls;
+package pls.reduce;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,6 +23,8 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
+import pls.PlsUtil;
+import pls.SolutionData;
 import pls.tsp.TspSaSolution;
 
 public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {

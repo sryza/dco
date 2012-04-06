@@ -16,8 +16,9 @@ import viz.VrpPanel;
 public class TestHomemadeVrpCp {
 	public static void main(String[] args) throws IOException {
 		final int numCities = 1000;
-		
-		File f = new File("../vrptests/rc110_1.txt");
+
+		File f = new File("../vrptests/r210_1.txt");
+//		File f = new File("../vrptests/rc110_1.txt");
 //		File f = new File("../vrptests/r1.txt");
 		VrpProblem problem = VrpReader.readSolomon(f, numCities);
 		//seems like more for the first two and less for the last works
@@ -65,7 +66,7 @@ public class TestHomemadeVrpCp {
 					VrpSearcher solver = new VrpSearcher(problem);
 					VrpCpStats stats = new VrpCpStats();
 					long solveStartTime = System.currentTimeMillis();
-					VrpSolution newSol = solver.solve(partialSol, dist, maxDiscrepancies, stats);
+					VrpSolution newSol = solver.solve(partialSol, dist, maxDiscrepancies, stats, true);
 					long solveEndTime = System.currentTimeMillis();
 					System.out.println("# nodes evaluated: " + stats.getNumNodesEvaluated());
 					System.out.println("max insert time: " + stats.getMaxInsertTime());

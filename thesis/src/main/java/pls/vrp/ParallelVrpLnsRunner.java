@@ -9,15 +9,17 @@ import pls.map.PlsRunner;
 import pls.vrp.hm.VrpCpStats;
 import pls.vrp.hm.VrpSearcher;
 
-public class VrpLnsRunner implements PlsRunner {
+public class ParallelVrpLnsRunner implements PlsRunner {
 	
 	private static final Logger LOG = Logger.getLogger(VrpLnsRunner.class);
+	
+	private VrpSolution sol;
 	
 	@Override
 	public PlsSolution[] run(PlsSolution plsSol, long timeToFinish, Random rand) {
 		VrpPlsSolution solAndStuff = (VrpPlsSolution)plsSol;
 		
-		VrpSolution sol = solAndStuff.getSolution();
+		sol = solAndStuff.getSolution();
 		VrpProblem problem = sol.getProblem();
 		LnsRelaxer relaxer = new LnsRelaxer(solAndStuff.getRelaxationRandomness(), problem.getMaxDistance(), rand);
 		

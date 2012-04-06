@@ -21,14 +21,22 @@ public class VrpGreedyInitializer {
 		this.urgencyWeight = urgencyWeight;
 	}
 	
+	public VrpSolution nearestNeighborHeuristic(VrpProblem problem) {
+		return nearestNeighborHeuristic(problem, new ArrayList<List<Integer>>());
+	}
+	
 	/**
 	 * Nearest neighbor heuristic from Solomon paper.
 	 */
-	public VrpSolution nearestNeighborHeuristic(VrpProblem problem) {
-		List<List<Integer>> routes = new ArrayList<List<Integer>>();
+	public VrpSolution nearestNeighborHeuristic(VrpProblem problem, List<List<Integer>> routes) {
 		Set<Integer> remainingNodes = new HashSet<Integer>();
 		for (int i = 0; i < problem.getNumCities(); i++) {
 			remainingNodes.add(i);
+		}
+		for (List<Integer> route : routes) {
+			for (Integer node : route) {
+				remainingNodes.remove(node);
+			}
 		}
 		
 		List<Integer> curRoute = new ArrayList<Integer>();

@@ -1,6 +1,6 @@
 package pls.vrp;
 
-import pls.PlsMapper;
+import pls.map.PlsMapper;
 
 public class VrpMapper extends PlsMapper {
 

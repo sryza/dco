@@ -6,9 +6,9 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 
-import pls.PlsRunner;
 import pls.PlsSolution;
 import pls.SaStats;
+import pls.map.PlsRunner;
 
 public class TspSaRunner implements PlsRunner {
 

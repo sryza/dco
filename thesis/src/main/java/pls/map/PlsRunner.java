@@ -1,6 +1,8 @@
-package pls;
+package pls.map;
 
 import java.util.Random;
+
+import pls.PlsSolution;
 
 public interface PlsRunner {
 	/**
