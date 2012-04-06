@@ -62,6 +62,15 @@ public class BestSolsExtractor {
 		if (roundTimes.size() != bestSolCosts.size()) {
 			LOG.info("Sizes don't match! " + roundTimes.size() + " != " + bestSolCosts.size());
 		}
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("{");
+		sb.append("\"bestSolCosts\":" + bestSolCosts);
+		sb.append(",\n");
+		sb.append("\"roundFinishTimes\":" + roundFinishTimes);
+		sb.append("}");
+		
+		System.out.println(sb.toString());
 	}
 	
 	private static List<Integer> readRoundTimes(Path baseJobDir, FileSystem fs) throws IOException {
