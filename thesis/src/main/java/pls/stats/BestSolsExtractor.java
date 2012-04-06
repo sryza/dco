@@ -1,16 +1,13 @@
 package pls.stats;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import pls.PlsSolution;
 
@@ -51,35 +48,40 @@ public class BestSolsExtractor {
 		}
 		
 		//read run completion times
-		List<Integer> roundTimes = readRoundTimes(baseJobDir, fs);
-		List<Integer> roundFinishTimes = new ArrayList<Integer>();
-		roundFinishTimes.add(0);
-		for (Integer roundTime : roundTimes) {
-			int nextFinishTime = roundFinishTimes.get(roundFinishTimes.size()-1) + roundTime;
-			roundFinishTimes.add(nextFinishTime);
-		}
+//		List<Integer> roundTimes = readRoundTimes(baseJobDir, fs);
+//		List<Integer> roundFinishTimes = new ArrayList<Integer>();
+//		roundFinishTimes.add(0);
+//		for (Integer roundTime : roundTimes) {
+//			int nextFinishTime = roundFinishTimes.get(roundFinishTimes.size()-1) + roundTime;
+//			roundFinishTimes.add(nextFinishTime);
+//		}
+//		
+//		if (roundTimes.size() != bestSolCosts.size()) {
+//			LOG.info("Sizes don't match! " + roundTimes.size() + " != " + bestSolCosts.size());
+//		}
 		
-		if (roundTimes.size() != bestSolCosts.size()) {
-			LOG.info("Sizes don't match! " + roundTimes.size() + " != " + bestSolCosts.size());
-		}
+		Path jobStatsPath = new Path(baseJobDir, "jobstats.stats");
+		FSDataInputStream is = fs.open(jobStatsPath);
+		String jobStats = is.readUTF();
+		is.close();
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("{");
 		sb.append("\"bestSolCosts\":" + bestSolCosts);
 		sb.append(",\n");
-		sb.append("\"roundFinishTimes\":" + roundFinishTimes);
+		sb.append("\"jobStats\":" + jobStats);
 		sb.append("}");
 		
 		System.out.println(sb.toString());
 	}
 	
-	private static List<Integer> readRoundTimes(Path baseJobDir, FileSystem fs) throws IOException {
-		Path jobStatsPath = new Path(baseJobDir, "jobstats.stats");
-		FSDataInputStream is = fs.open(jobStatsPath);
-		String data = is.readUTF();
-		ObjectMapper mapper = new ObjectMapper();
-		Map<Object, Object> dataMap = mapper.readValue(data, Map.class);
-		List<Integer> roundTimes = (List<Integer>)dataMap.get("roundTimes");
-		return roundTimes;
-	}
+//	private static List<Integer> readRoundTimes(Path baseJobDir, FileSystem fs) throws IOException {
+//		Path jobStatsPath = new Path(baseJobDir, "jobstats.stats");
+//		FSDataInputStream is = fs.open(jobStatsPath);
+//		String data = is.readUTF();
+//		ObjectMapper mapper = new ObjectMapper();
+//		Map<Object, Object> dataMap = mapper.readValue(data, Map.class);
+//		List<Integer> roundTimes = (List<Integer>)dataMap.get("roundTimes");
+//		return roundTimes;
+//	}
 }
