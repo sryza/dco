@@ -116,6 +116,8 @@ public class PlsMaster {
 		writer.close();
 		
 		PlsJobStats stats = new PlsJobStats();
+		stats.setK(k);
+		stats.setLsRunTime(roundTime);
 		//run the waves
 		for (int i = 0; i < numRuns; i++) {
 			Path inputPath = new Path(dirPath, i + "/");
