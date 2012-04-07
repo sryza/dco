@@ -22,6 +22,10 @@ public class BestSolsExtractor {
 	public static void main(String[] args) throws Exception {
 		String solutionClassName = args[0];
 		Path baseDir = new Path("/users/sryza/testdir");
+		int howManyBack = 0;
+		if (args.length > 1) {
+			howManyBack = -Integer.parseInt(args[1]);
+		}
 		
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
@@ -29,7 +33,7 @@ public class BestSolsExtractor {
 		JobSolsFilesGatherer gatherer = new JobSolsFilesGatherer(fs);
 		SolsOutputFileReader reader = new SolsOutputFileReader(fs);
 		
-		Path baseJobDir = gatherer.getLatestRunFolderPath(baseDir, 0);
+		Path baseJobDir = gatherer.getLatestRunFolderPath(baseDir, howManyBack);
 		List<Path> files = gatherer.gather(baseJobDir);
 
 		//read best solutions for each run
