@@ -12,7 +12,7 @@ public class NumberFolderComparator implements Comparator<FileStatus> {
 	
 	private long getRunNumber(FileStatus fs) {
 		String name = fs.getPath().getName();
-		if (name.matches("\\s+")) {
+		if (name.matches("\\d+")) {
 			return Long.parseLong(name);
 		} else {
 			return Long.MAX_VALUE;
