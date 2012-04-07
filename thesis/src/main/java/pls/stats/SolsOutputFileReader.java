@@ -42,14 +42,11 @@ public class SolsOutputFileReader {
 			path = getLatestRunFolderPath(new Path("/users/sryza/testdir/"), fs, 0);
 		}
 		
-//		Path path = new Path("/users/sryza/testdir/1331512645039/");
+		JobSolsFilesGatherer gatherer = new JobSolsFilesGatherer(fs);
 		
-		FileStatus[] statuses = fs.listStatus(path);
-		System.out.println("number of subfiles: " + statuses.length);
-		Arrays.sort(statuses, new NumberFolderComparator());
 		SolsOutputFileReader reader = new SolsOutputFileReader(fs);
-		for (FileStatus fileStatus : statuses) {
-			Path subpath = fileStatus.getPath();
+		List<Path> files = gatherer.gather(path);
+		for (Path subpath : files) {
 			subpath = new Path(subpath, "part-00000");
 			System.out.println("Sols for " + subpath.toString());
 			List<PlsSolution> solutions = reader.getFileSolutions(subpath, conf, solutionClass);

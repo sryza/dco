@@ -7,6 +7,8 @@ public class PlsJobStats {
 	private List<Integer> roundTimes;
 	private int k;
 	private int lsRunTime;
+	private int numRounds;
+	private int numMappers;
 	
 	public PlsJobStats() {
 		roundTimes = new ArrayList<Integer>();
@@ -18,6 +20,14 @@ public class PlsJobStats {
 	
 	public void setLsRunTime(int time) {
 		this.lsRunTime = time;
+	}
+	
+	public void setNumRounds(int numRounds) {
+		this.numRounds = numRounds;
+	}
+	
+	public void setNumMappers(int numMappers) {
+		this.numMappers = numMappers;
 	}
 	
 	public void reportRoundTime(int time) {
@@ -32,6 +42,10 @@ public class PlsJobStats {
 		sb.append("\"populationK\":" + k);
 		sb.append(",\n");
 		sb.append("\"lsRunTime\":" + lsRunTime);
+		sb.append(",\n");
+		sb.append("\"numRounds\":" + numRounds);
+		sb.append(",\n");
+		sb.append("\"numMappers\":" + numMappers);
 		sb.append("}");
 		return sb.toString();
 	}
