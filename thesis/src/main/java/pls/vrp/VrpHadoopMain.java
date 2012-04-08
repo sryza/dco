@@ -67,7 +67,7 @@ public class VrpHadoopMain {
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
 		long startTime = System.currentTimeMillis();
-		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime, k);
+		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime, k, inputFile.getName());
 		long endTime = System.currentTimeMillis();
 		LOG.info("Total time: " + (endTime - startTime));
 	}
