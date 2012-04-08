@@ -9,6 +9,7 @@ public class PlsJobStats {
 	private int lsRunTime;
 	private int numRounds;
 	private int numMappers;
+	private String problemName;
 	
 	public PlsJobStats() {
 		roundTimes = new ArrayList<Integer>();
@@ -30,6 +31,10 @@ public class PlsJobStats {
 		this.numMappers = numMappers;
 	}
 	
+	public void setProblemName(String problemName) {
+		this.problemName = problemName;
+	}
+	
 	public void reportRoundTime(int time) {
 		roundTimes.add(time);
 	}
@@ -46,6 +51,8 @@ public class PlsJobStats {
 		sb.append("\"numRounds\":" + numRounds);
 		sb.append(",\n");
 		sb.append("\"numMappers\":" + numMappers);
+		sb.append(",\n");
+		sb.append("\"problemName\":\"" + problemName + "\"");
 		sb.append("}");
 		return sb.toString();
 	}

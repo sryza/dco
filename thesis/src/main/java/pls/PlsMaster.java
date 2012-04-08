@@ -76,7 +76,7 @@ public class PlsMaster {
 	}
 	
 	public void run(int numRuns, List<PlsSolution> startSolutions, double bestCost, String dir, Class mapperClass,
-			Class reducerClass, int roundTime, int k) throws IOException {
+			Class reducerClass, int roundTime, int k, String problemName) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		
@@ -120,6 +120,7 @@ public class PlsMaster {
 		stats.setLsRunTime(roundTime);
 		stats.setNumMappers(startSolutions.size());
 		stats.setNumRounds(numRuns);
+		stats.setProblemName(problemName);
 		//run the waves
 		for (int i = 0; i < numRuns; i++) {
 			Path inputPath = new Path(dirPath, i + "/");
