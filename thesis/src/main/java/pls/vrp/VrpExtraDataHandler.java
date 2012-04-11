@@ -24,6 +24,8 @@ public class VrpExtraDataHandler {
 				helperDataRoutes.add(routes.get(routesIndex));
 				routesIndex = (routesIndex + 1) % routes.size();
 			}
+			VrpSolvingExtraData helperData = new VrpSolvingExtraData(helperDataRoutes);
+			results.add(helperData);
 		}
 		
 		return results;
