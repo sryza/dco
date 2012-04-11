@@ -4,6 +4,7 @@ import static pls.tsp.TspUtils.wrap;
 
 import java.util.Random;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
 import pls.PlsSolution;
@@ -118,6 +119,18 @@ public class TspSaRunner implements PlsRunner {
 
 //		System.out.println ("hit max iterations");
 		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public Writable getExtraData() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setHelperData(Writable helpData) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

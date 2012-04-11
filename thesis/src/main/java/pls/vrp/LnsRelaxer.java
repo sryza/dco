@@ -57,10 +57,15 @@ public class LnsRelaxer {
 			removedCities.add(cityId);
 		}
 		//build the new solution
-		HashSet<Integer> removedCitiesSet = new HashSet<Integer>(removedCities);
-		List<List<Integer>> oldRoutes = sol.getRoutes();
-		List<List<Integer>> newRoutes = new ArrayList<List<Integer>>(oldRoutes.size());
-		for (List<Integer> oldRoute : oldRoutes) {
+		List<List<Integer>> newRoutes = buildRoutesWithoutCusts(sol.getRoutes(), removedCities);
+				
+		return new VrpSolution(newRoutes, removedCities, problem);
+	}
+	
+	public List<List<Integer>> buildRoutesWithoutCusts(List<List<Integer>> routes, List<Integer> toRemove) {
+		HashSet<Integer> removedCitiesSet = new HashSet<Integer>(toRemove);
+		List<List<Integer>> newRoutes = new ArrayList<List<Integer>>(routes.size());
+		for (List<Integer> oldRoute : routes) {
 			List<Integer> newRoute = new ArrayList<Integer>();
 			newRoutes.add(newRoute);
 			for (Integer cityId : oldRoute) {
@@ -70,7 +75,7 @@ public class LnsRelaxer {
 			}
 		}
 		
-		return new VrpSolution(newRoutes, removedCities, problem);
+		return newRoutes;
 	}
 	
 	/**

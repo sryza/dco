@@ -5,17 +5,21 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Writable;
+
+import pls.vrp.VrpSolvingExtraData;
 
 public class LnsSolutionData extends SolutionData {
 	private double cost;
-	private BytesWritable bytes;
+	private BytesWritable solBytes;
+	private VrpSolvingExtraData extraData;
 	
 	public LnsSolutionData(){
 	}
 	
 	public LnsSolutionData(int cost, BytesWritable bytes) {
 		this.cost = cost;
-		this.bytes = bytes;
+		this.solBytes = bytes;
 	}
 	
 	@Override
@@ -27,19 +31,28 @@ public class LnsSolutionData extends SolutionData {
 	public void init(BytesWritable bytes) throws IOException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
 		DataInputStream dis = new DataInputStream(bais);
+		
+		extraData = new VrpSolvingExtraData();
+		extraData.readFields(dis);
+		
 		cost = dis.readDouble();
 		byte[] bytesArr = new byte[bytes.getBytes().length];
 		System.arraycopy(bytes.getBytes(), 0, bytesArr, 0, bytesArr.length);
-		this.bytes = new BytesWritable(bytesArr);
+		this.solBytes = new BytesWritable(bytesArr);
 	}
 	
 	@Override
 	public BytesWritable getBestSolutionBytes() {
-		return bytes;
+		return solBytes;
 	}
 	
 	@Override
 	public BytesWritable getEndSolutionBytes() {
-		return bytes;
+		return solBytes;
+	}
+
+	@Override
+	public Writable getExtraData() {
+		return extraData;
 	}
 }

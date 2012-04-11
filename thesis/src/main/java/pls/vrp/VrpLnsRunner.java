@@ -1,7 +1,11 @@
 package pls.vrp;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
 import pls.PlsSolution;
@@ -13,6 +17,9 @@ public class VrpLnsRunner implements PlsRunner {
 	
 	private static final Logger LOG = Logger.getLogger(VrpLnsRunner.class);
 	
+	private VrpSolvingExtraData extraData = new VrpSolvingExtraData();
+	private VrpSolvingExtraData helperData;
+	
 	@Override
 	public PlsSolution[] run(PlsSolution plsSol, long timeToFinish, Random rand) {
 		VrpPlsSolution solAndStuff = (VrpPlsSolution)plsSol;
@@ -20,6 +27,22 @@ public class VrpLnsRunner implements PlsRunner {
 		VrpSolution sol = solAndStuff.getSolution();
 		VrpProblem problem = sol.getProblem();
 		LnsRelaxer relaxer = new LnsRelaxer(solAndStuff.getRelaxationRandomness(), problem.getMaxDistance(), rand);
+		VrpSearcher solver = new VrpSearcher(problem);
+
+		//if we've been sent neighborhoods to check, check them first
+		if (helperData != null) {
+			List<List<Integer>> neighborhoods = helperData.getNeighborhoods();
+			for (List<Integer> neighborhood : neighborhoods) {
+				VrpCpStats stats = new VrpCpStats();
+				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), problem);
+				VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats, true);
+				if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
+					extraData.addNeighborhood(partialSol);
+					sol = newSol;
+					solAndStuff.setSolution(sol);
+				}
+			}
+		}
 		
 		outer:
 		while (true) {
@@ -29,13 +52,12 @@ public class VrpLnsRunner implements PlsRunner {
 						break outer;
 					}
 					
-					VrpSearcher solver = new VrpSearcher(problem);
 					VrpCpStats stats = new VrpCpStats();
-					
 					VrpSolution partialSol = relaxer.relaxShaw(sol, n, -1);
 					
 					VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats, true);
 					if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
+						extraData.addNeighborhood(partialSol);
 						sol = newSol;
 						solAndStuff.setSolution(sol);
 						i = 0;
@@ -50,5 +72,15 @@ public class VrpLnsRunner implements PlsRunner {
 		}
 		
 		return new PlsSolution[] {solAndStuff};
+	}
+
+	@Override
+	public Writable getExtraData() {
+		return extraData;
+	}
+
+	@Override
+	public void setHelperData(Writable helperData) {
+		helperData = (VrpSolvingExtraData)helperData;
 	}
 }

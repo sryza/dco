@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Writable;
 
 
 public class SaSolutionData extends SolutionData {
@@ -57,5 +58,11 @@ public class SaSolutionData extends SolutionData {
 		BytesWritable val = new BytesWritable();
 		val.set(solutionBytes.getBytes(), endSolOffset, endSolLen);
 		return val;
+	}
+
+	@Override
+	public Writable getExtraData() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

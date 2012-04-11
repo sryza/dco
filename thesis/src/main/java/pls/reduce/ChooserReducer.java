@@ -2,20 +2,15 @@ package pls.reduce;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
 import java.io.DataInputStream;
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -25,7 +20,7 @@ import org.apache.log4j.Logger;
 
 import pls.PlsUtil;
 import pls.SolutionData;
-import pls.tsp.TspSaSolution;
+import pls.vrp.VrpExtraDataHandler;
 
 public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
@@ -99,8 +94,20 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		LOG.info("Received " + solsThisRound.size() + " solution(s)");
 		
-		//prepare inputs to next round
+		//handle extra datas
+		ArrayList<Writable> extraDatas = new ArrayList<Writable>();
+		for (SolutionData solData : solsThisRound) {
+			if (solData != bestSolThisRound && solData.getExtraData() != null) {
+				extraDatas.add(solData.getExtraData());
+			}
+		}
+		List<Writable> helperDatas = null;
+		if (extraDatas.size() == solsThisRound.size()) {
+			VrpExtraDataHandler handler = new VrpExtraDataHandler();
+			helperDatas = handler.makeNextRoundHelperDataFromExtraData(extraDatas, solsThisRound.size());
+		}
 		
+		//prepare inputs to next round
 		LOG.info("Best cost this round: " + bestCostThisRound);
 		//TODO: do the temperatures
 		List<BytesWritable> outSols = new ArrayList<BytesWritable>(solsThisRound.size());
@@ -115,7 +122,6 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				val = solData.getEndSolutionBytes();
 				LOG.info("Writing out sol with cost " + solData.getBestCost());
 				outSols.add(val);
-				//output.collect(PlsUtil.SOLS_KEY, val);
 			}
 			
 			//then write out the rest of the bestSolutionAlways as many times as the difference
@@ -141,7 +147,11 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			LOG.info("output bytes hashCode: " + outSol.hashCode());
-			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), outSol);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			baos.write(outSol.getBytes());
+			DataOutputStream dos = new DataOutputStream(baos);
+			extraDatas.remove(helperDatas.size()-1).write(dos);
+			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), new BytesWritable(baos.toByteArray()));
 		}
 
 		//write out the metadata key
