@@ -101,11 +101,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				extraDatas.add(solData.getExtraData());
 			}
 		}
-		List<Writable> helperDatas = null;
-		if (extraDatas.size() == solsThisRound.size()) {
-			VrpExtraDataHandler handler = new VrpExtraDataHandler();
-			helperDatas = handler.makeNextRoundHelperDataFromExtraData(extraDatas, solsThisRound.size());
-		}
+		VrpExtraDataHandler handler = new VrpExtraDataHandler();
+		List<Writable> helperDatas = handler.makeNextRoundHelperDataFromExtraData(extraDatas, solsThisRound.size());
 		
 		//prepare inputs to next round
 		LOG.info("Best cost this round: " + bestCostThisRound);
@@ -150,7 +147,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			baos.write(outSol.getBytes());
 			DataOutputStream dos = new DataOutputStream(baos);
-			extraDatas.remove(helperDatas.size()-1).write(dos);
+			helperDatas.remove(helperDatas.size()-1).write(dos);
 			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), new BytesWritable(baos.toByteArray()));
 		}
 
