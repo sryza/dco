@@ -14,4 +14,8 @@ public class VrpMapper extends PlsMapper {
 		return VrpLnsRunner.class;
 	}
 
+	@Override
+	public Class getHelperDataClass() {
+		return VrpSolvingExtraData.class;
+	}
 }

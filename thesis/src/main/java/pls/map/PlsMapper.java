@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.util.Random;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -26,6 +27,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 	public abstract Class<PlsSolution> getSolutionClass();
 	
 	public abstract Class<PlsRunner> getRunnerClass();
+	
+	public abstract Class<Writable> getHelperDataClass();
 	
 	@Override
 	public void map(BytesWritable key, BytesWritable value, OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
@@ -71,9 +74,19 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			LOG.error("Problem building PlsRunner. abortin...", ex);
 			return;
 		}
-//		TspSaRunner runner = new TspSaRunner(rand, stats);
-			
-//		PlsSolution[] solutions = run(runner, sol, timeToFinish, rand);
+
+		//read helper data if there is any
+		if (dis.available() > 0) {
+			try {
+				Writable helperData = getHelperDataClass().newInstance();
+				helperData.readFields(dis);
+				runner.setHelperData(helperData);
+			} catch (Exception ex) {
+				LOG.error("Trouble reading helper data, aborting...", ex);
+				return;
+			}
+		}
+		
 		PlsSolution[] solutions = runner.run(sol, timeToFinish, rand);
 		for (PlsSolution newSol : solutions) {
 			newSol.setParentSolutionId(sol.getSolutionId());
@@ -96,6 +109,10 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		}
 		
 		for (int i = 0; i < solutions.length; i++) {
+			Writable extraData = runner.getExtraData();
+			if (extraData != null) {
+				extraData.write(dos);
+			}
 			solutions[i].writeToStream(dos);
 		}
 		output.collect(PlsUtil.SOLS_KEY, new BytesWritable(baos.toByteArray()));
