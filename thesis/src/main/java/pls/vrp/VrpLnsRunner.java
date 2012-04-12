@@ -24,6 +24,8 @@ public class VrpLnsRunner implements PlsRunner {
 	public PlsSolution[] run(PlsSolution plsSol, long timeToFinish, Random rand) {
 		VrpPlsSolution solAndStuff = (VrpPlsSolution)plsSol;
 		
+		long startTime = System.currentTimeMillis();
+		
 		VrpSolution sol = solAndStuff.getSolution();
 		VrpProblem problem = sol.getProblem();
 		LnsRelaxer relaxer = new LnsRelaxer(solAndStuff.getRelaxationRandomness(), problem.getMaxDistance(), rand);
@@ -31,7 +33,10 @@ public class VrpLnsRunner implements PlsRunner {
 
 		//if we've been sent neighborhoods to check, check them first
 		if (helperData != null) {
+			LOG.info("Has helper neighborhoods!");
 			List<List<Integer>> neighborhoods = helperData.getNeighborhoods();
+			int numSuccessful = 0;
+			long helperStartTime = System.currentTimeMillis();
 			for (List<Integer> neighborhood : neighborhoods) {
 				VrpCpStats stats = new VrpCpStats();
 				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), problem);
@@ -40,8 +45,12 @@ public class VrpLnsRunner implements PlsRunner {
 					extraData.addNeighborhood(partialSol);
 					sol = newSol;
 					solAndStuff.setSolution(sol);
+					numSuccessful++;
 				}
 			}
+			long helperFinishTime = System.currentTimeMillis();
+			LOG.info("Helper neighborhoods: " + numSuccessful + " successful / " + neighborhoods.size() + 
+					". Took " + (helperFinishTime - helperStartTime) + " ms");
 		}
 		
 		outer:
@@ -70,6 +79,9 @@ public class VrpLnsRunner implements PlsRunner {
 			solAndStuff.setCurEscalation(1);
 			solAndStuff.setCurIteration(0);
 		}
+		
+		long endTime = System.currentTimeMillis();
+		LOG.info("VrpLnsRunner took " + (endTime - startTime) + " ms");
 		
 		return new PlsSolution[] {solAndStuff};
 	}
