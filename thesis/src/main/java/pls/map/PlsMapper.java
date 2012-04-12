@@ -53,7 +53,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		
 		//read start solution
 		LOG.info("value.getBytes().length: " + value.getBytes().length);
-		ByteArrayInputStream bais = new ByteArrayInputStream(value.getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(value.getBytes(), 0, value.getLength());
 		DataInputStream dis = new DataInputStream(bais);
 		PlsSolution sol;
 		try {

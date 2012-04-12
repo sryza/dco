@@ -30,7 +30,7 @@ public class LnsSolutionData extends SolutionData {
 
 	@Override
 	public void init(BytesWritable bytes) throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes());
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes(), 0, bytes.getLength());
 		DataInputStream dis = new DataInputStream(bais);
 		
 		extraData = new VrpSolvingExtraData();

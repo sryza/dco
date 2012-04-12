@@ -54,7 +54,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		if (key.equals(PlsUtil.METADATA_KEY)) {
 			//first value is info regarding the problem and best solution
 			BytesWritable auxInfo = values.next();
-			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes());
+			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes(), 0, auxInfo.getLength());
 			DataInputStream dis = new DataInputStream(bais);
 			k = dis.readInt();
 			bestCostAlways = dis.readDouble();
@@ -146,8 +146,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			dos.write(outSol.getBytes());
-			LOG.info("outSol.getBytes().length: " + outSol.getBytes().length);
+			dos.write(outSol.getBytes(), 0, outSol.getLength());
+			LOG.info("outSol.getLength(): " + outSol.getLength());
 			Writable helperData = helperDatas.remove(helperDatas.size()-1);
 			LOG.info("About to write helper data with " + ((VrpSolvingExtraData)helperData).getNeighborhoods());
 			helperData.write(dos);
