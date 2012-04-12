@@ -39,7 +39,7 @@ public class VrpLnsRunner implements PlsRunner {
 			long helperStartTime = System.currentTimeMillis();
 			for (List<Integer> neighborhood : neighborhoods) {
 				VrpCpStats stats = new VrpCpStats();
-				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), problem);
+				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), neighborhood, problem);
 				VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats, true);
 				if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
 					extraData.addNeighborhood(partialSol);
@@ -93,6 +93,6 @@ public class VrpLnsRunner implements PlsRunner {
 
 	@Override
 	public void setHelperData(Writable helperData) {
-		helperData = (VrpSolvingExtraData)helperData;
+		this.helperData = (VrpSolvingExtraData)helperData;
 	}
 }

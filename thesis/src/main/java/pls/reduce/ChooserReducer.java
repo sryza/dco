@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import pls.PlsUtil;
 import pls.SolutionData;
 import pls.vrp.VrpExtraDataHandler;
+import pls.vrp.VrpSolvingExtraData;
 
 public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
@@ -143,14 +144,17 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		//write out sols
 		for (BytesWritable outSol : outSols) {
-			LOG.info("output bytes hashCode: " + outSol.hashCode());
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			dos.write(outSol.getBytes());
+			LOG.info("outSol.getBytes().length: " + outSol.getBytes().length);
 			Writable helperData = helperDatas.remove(helperDatas.size()-1);
+			LOG.info("About to write helper data with " + ((VrpSolvingExtraData)helperData).getNeighborhoods());
 			helperData.write(dos);
-			dos.flush();
-			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), new BytesWritable(baos.toByteArray()));
+			BytesWritable outData = new BytesWritable(baos.toByteArray());
+			LOG.info("output bytes hashCode: " + outData.hashCode());
+			LOG.info("outData.getBytes().length: " + outData.getBytes().length);
+			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), outData);
 		}
 
 		//write out the metadata key

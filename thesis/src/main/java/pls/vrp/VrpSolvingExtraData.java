@@ -8,8 +8,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
 
 public class VrpSolvingExtraData implements Writable {
+	
+	private static final Logger LOG = Logger.getLogger(VrpSolvingExtraData.class);
 	
 	private static final int MAX_NEIGHBORHOODS = 50;
 	
@@ -37,6 +40,7 @@ public class VrpSolvingExtraData implements Writable {
 	@Override
 	public void readFields(DataInput input) throws IOException {
 		int numNeighborhoods = input.readInt();
+		LOG.info("About to read " + numNeighborhoods + " of helper data.");
 		neighborhoods = new ArrayList<List<Integer>>(numNeighborhoods);
 		for (int i = 0; i < numNeighborhoods; i++) {
 			int numCusts = input.readInt();
@@ -57,5 +61,11 @@ public class VrpSolvingExtraData implements Writable {
 				output.writeInt(cust);
 			}
 		}
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		VrpSolvingExtraData other = (VrpSolvingExtraData)o;
+		return other.neighborhoods.equals(neighborhoods);
 	}
 }

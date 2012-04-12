@@ -200,4 +200,14 @@ public class VrpPlsSolution implements PlsSolution {
 			dos.writeInt(problem.getYCoors()[i]);
 		}
 	}
+	
+	
+	public boolean equals(Object o) {
+		VrpPlsSolution other = (VrpPlsSolution)o;
+		VrpSolution otherSol = other.getSolution();
+		if (!otherSol.getRoutes().equals(sol.getRoutes())) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
 
 public class VrpExtraDataHandler {
+	private static final Logger LOG = Logger.getLogger(VrpExtraDataHandler.class);
+	
 	public List<Writable> makeNextRoundHelperDataFromExtraData(List<Writable> extraDatas, int numToMake) {
 		//make a big ol' list of all the routes
 		List<List<Integer>> routes = new ArrayList<List<Integer>>();
@@ -13,6 +16,7 @@ public class VrpExtraDataHandler {
 			VrpSolvingExtraData vrpExtraData = (VrpSolvingExtraData)extraData;
 			routes.addAll(vrpExtraData.getNeighborhoods());
 		}
+		LOG.info("Received " + routes.size() + " routes for helper data");
 		
 		int numRoutesPerHelperData = Math.min(routes.size(), 50);
 		

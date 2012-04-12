@@ -35,6 +35,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		throws IOException {
 		
 		LOG.info("Received map input with key \"" + new String(key.getBytes()) + "\"");
+		LOG.info("Value hash = " + value.hashCode());
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -51,8 +52,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		Class<PlsRunner> plsRunnerClass = getRunnerClass();
 		
 		//read start solution
-		byte[] input = value.getBytes();
-		ByteArrayInputStream bais = new ByteArrayInputStream(input);
+		LOG.info("value.getBytes().length: " + value.getBytes().length);
+		ByteArrayInputStream bais = new ByteArrayInputStream(value.getBytes());
 		DataInputStream dis = new DataInputStream(bais);
 		PlsSolution sol;
 		try {
@@ -77,6 +78,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 
 		//read helper data if there is any
 		if (dis.available() > 0) {
+			LOG.info("bytes available after reading solution: " + dis.available());
 			try {
 				Writable helperData = getHelperDataClass().newInstance();
 				helperData.readFields(dis);
