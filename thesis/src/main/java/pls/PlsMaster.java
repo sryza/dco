@@ -111,6 +111,7 @@ public class PlsMaster {
 		dos.writeInt(k);
 		dos.writeDouble(bestCost);
 		dos.writeInt(roundTime);
+		dos.writeBoolean(false);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		writer.append(PlsUtil.METADATA_KEY, metadata);
 		writer.close();

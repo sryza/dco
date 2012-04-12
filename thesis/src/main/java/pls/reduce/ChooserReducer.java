@@ -30,6 +30,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	private int k = -1;
 	private double bestCostAlways = -1;
 	private int roundTime = -1;
+	private boolean useBestForAll;
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -59,7 +60,9 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			k = dis.readInt();
 			bestCostAlways = dis.readDouble();
 			roundTime = dis.readInt();
-			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways + ", roundTime=" + roundTime);
+			useBestForAll = dis.readBoolean();
+			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways + ", roundTime=" + roundTime + 
+					", useBestForAll=" + useBestForAll);
 			return;
 		} else if (k == -1) {
 			LOG.info("Received solutions before metadata, aborting");
@@ -70,7 +73,6 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		Class<SolutionData> solDataClass = getSolutionDataClass();
 		
-		double bestCostThisRound = Integer.MAX_VALUE;
 		SolutionData bestSolThisRound = null;
 		ArrayList<SolutionData> solsThisRound = new ArrayList<SolutionData>();
 		//find the best solution
@@ -79,8 +81,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				BytesWritable bytes = values.next();
 				SolutionData solData = solDataClass.newInstance();
 				solData.init(bytes);
-				if (solData.getBestCost() < bestCostThisRound) {
-					bestCostThisRound = solData.getBestCost();
+				if (solData.getBestCost() < bestSolThisRound.getBestCost()) {
 					bestSolThisRound = solData;
 				}
 				solsThisRound.add(solData);
@@ -106,40 +107,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		List<Writable> helperDatas = handler.makeNextRoundHelperDataFromExtraData(extraDatas, solsThisRound.size());
 		
 		//prepare inputs to next round
-		LOG.info("Best cost this round: " + bestCostThisRound);
-		//TODO: do the temperatures
-		List<BytesWritable> outSols = new ArrayList<BytesWritable>(solsThisRound.size());
-		if (bestCostThisRound < bestCostAlways) {
-			bestCostAlways = bestCostThisRound; //for passing on
-			int nMappers = solsThisRound.size();
-			//choose best k solutions
-			List<SolutionData> bestSols = chooseKBest(solsThisRound, k);
-			BytesWritable val;
-			//first write out the k best
-			for (SolutionData solData : bestSols) {
-				val = solData.getEndSolutionBytes();
-				LOG.info("Writing out sol with cost " + solData.getBestCost());
-				outSols.add(val);
-			}
-			
-			//then write out the rest of the bestSolutionAlways as many times as the difference
-			int nBest = nMappers - k;
-			val = bestSolThisRound.getBestSolutionBytes();
-			for (int i = 0; i < nBest; i++) {
-				LOG.info("Writing out best sol with cost " + bestSolThisRound.getBestCost());
-				outSols.add(val);
-				//output.collect(PlsUtil.SOLS_KEY, val);
-			}
-		} else { //just continue with what we've got
-			LOG.info("No best cost improvement, still " + bestCostAlways);
-			for (SolutionData solution : solsThisRound) {
-				//TODO: should we need to copy here?
-				BytesWritable val = solution.getEndSolutionBytes();
-				outSols.add(val);
-				//output.collect(PlsUtil.SOLS_KEY, val);
-			}
-		}
-		
+		LOG.info("Best cost this round: " + bestSolThisRound.getBestCost());
+		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, false);
 		long nextRoundFinishTime = System.currentTimeMillis() + roundTime;
 		
 		//write out sols
@@ -163,8 +132,51 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		dos.writeInt(k);
 		dos.writeDouble(bestCostAlways);
 		dos.writeInt(roundTime);
+		dos.writeBoolean(useBestForAll);
 		BytesWritable metadata = new BytesWritable(baos.toByteArray());
 		output.collect(PlsUtil.METADATA_KEY, metadata);
+	}
+	
+	private List<BytesWritable> chooseNextRoundSols(List<SolutionData> solsThisRound, SolutionData bestSolThisRound,
+			boolean useBestForAll) {
+		List<BytesWritable> outSols = new ArrayList<BytesWritable>(solsThisRound.size());
+		if (bestSolThisRound.getBestCost() < bestCostAlways) {
+			bestCostAlways = bestSolThisRound.getBestCost(); //for passing on
+			int nMappers = solsThisRound.size();
+			//choose best k solutions
+			List<SolutionData> bestSols = chooseKBest(solsThisRound, k);
+			BytesWritable val;
+			//first write out the k best
+			for (SolutionData solData : bestSols) {
+				val = solData.getEndSolutionBytes();
+				LOG.info("Writing out sol with cost " + solData.getBestCost());
+				outSols.add(val);
+			}
+			
+			//then write out the best solution(s)
+			int nBest = nMappers - k;
+			for (int i = 0; i < nBest; i++) {
+				LOG.info("Writing out best sol with cost " + bestSolThisRound.getBestCost());
+				if (useBestForAll) {
+					val = bestSolThisRound.getBestSolutionBytes();
+				} else {
+					//last is the best, so if not visible, we want to include it the most times
+					int index = bestSols.size() - 1 - i % bestSols.size();
+					val = bestSols.get(index).getBestSolutionBytes();
+				}
+
+				outSols.add(val);
+			}
+		} else { //just continue with what we've got
+			LOG.info("No best cost improvement, still " + bestCostAlways);
+			for (SolutionData solution : solsThisRound) {
+				//TODO: should we need to copy here?
+				BytesWritable val = solution.getEndSolutionBytes();
+				outSols.add(val);
+			}
+		}
+		
+		return outSols;
 	}
 	
 	/**
