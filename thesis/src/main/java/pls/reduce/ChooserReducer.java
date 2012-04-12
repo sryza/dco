@@ -145,9 +145,11 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		for (BytesWritable outSol : outSols) {
 			LOG.info("output bytes hashCode: " + outSol.hashCode());
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			baos.write(outSol.getBytes());
 			DataOutputStream dos = new DataOutputStream(baos);
-			helperDatas.remove(helperDatas.size()-1).write(dos);
+			dos.write(outSol.getBytes());
+			Writable helperData = helperDatas.remove(helperDatas.size()-1);
+			helperData.write(dos);
+			dos.flush();
 			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), new BytesWritable(baos.toByteArray()));
 		}
 

@@ -3,6 +3,7 @@ package pls;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
@@ -35,9 +36,10 @@ public class LnsSolutionData extends SolutionData {
 		extraData = new VrpSolvingExtraData();
 		extraData.readFields(dis);
 		
-		cost = dis.readDouble();
-		byte[] bytesArr = new byte[bytes.getBytes().length];
-		System.arraycopy(bytes.getBytes(), 0, bytesArr, 0, bytesArr.length);
+		//read the rest as the solution
+		byte[] bytesArr = new byte[dis.available()];
+		dis.readFully(bytesArr);
+		cost = ByteBuffer.wrap(bytesArr).getDouble();
 		this.solBytes = new BytesWritable(bytesArr);
 	}
 	
