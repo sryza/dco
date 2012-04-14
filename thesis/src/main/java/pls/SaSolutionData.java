@@ -65,4 +65,10 @@ public class SaSolutionData extends SolutionData {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public PlsMetadata getMetadata() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

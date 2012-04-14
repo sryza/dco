@@ -1,8 +1,6 @@
 package pls.reduce;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
+import pls.PlsMetadata;
 import pls.PlsUtil;
 import pls.SolutionData;
 import pls.vrp.VrpExtraDataHandler;
@@ -26,11 +25,6 @@ import pls.vrp.VrpSolvingExtraData;
 public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
 	private static final Logger LOG = Logger.getLogger(ChooserReducer.class);
-	
-	private int k = -1;
-	private double bestCostAlways = -1;
-	private int roundTime = -1;
-	private boolean useBestForAll;
 	
 	/**
 	 * The reduce inputs can take two forms:
@@ -51,25 +45,6 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	public void reduce(BytesWritable key, Iterator<BytesWritable> values,
 			OutputCollector<BytesWritable, BytesWritable> output, Reporter reporter)
 			throws IOException {
-		
-		if (key.equals(PlsUtil.METADATA_KEY)) {
-			//first value is info regarding the problem and best solution
-			BytesWritable auxInfo = values.next();
-			ByteArrayInputStream bais = new ByteArrayInputStream(auxInfo.getBytes(), 0, auxInfo.getLength());
-			DataInputStream dis = new DataInputStream(bais);
-			k = dis.readInt();
-			bestCostAlways = dis.readDouble();
-			roundTime = dis.readInt();
-			useBestForAll = dis.readBoolean();
-			LOG.info("Received metadata: k=" + k + ", bestCostAlways=" + bestCostAlways + ", roundTime=" + roundTime + 
-					", useBestForAll=" + useBestForAll);
-			return;
-		} else if (k == -1) {
-			LOG.info("Received solutions before metadata, aborting");
-			return;
-			//log something here
-			//output some sort of error code
-		}
 		
 		Class<SolutionData> solDataClass = getSolutionDataClass();
 		
@@ -96,6 +71,8 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		LOG.info("Received " + solsThisRound.size() + " solution(s)");
 		
+		PlsMetadata metadata = solsThisRound.get(0).getMetadata();
+		
 		//handle extra datas
 		ArrayList<Writable> extraDatas = new ArrayList<Writable>();
 		for (SolutionData solData : solsThisRound) {
@@ -108,43 +85,31 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		
 		//prepare inputs to next round
 		LOG.info("Best cost this round: " + bestSolThisRound.getBestCost());
-		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, false);
-		long nextRoundFinishTime = System.currentTimeMillis() + roundTime;
+		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, metadata);
+		long nextRoundFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
 			dos.write(outSol.getBytes(), 0, outSol.getLength());
-			LOG.info("outSol.getLength(): " + outSol.getLength());
+			metadata.write(dos);
 			Writable helperData = helperDatas.remove(helperDatas.size()-1);
 			LOG.info("About to write helper data with " + ((VrpSolvingExtraData)helperData).getNeighborhoods());
 			helperData.write(dos);
 			BytesWritable outData = new BytesWritable(baos.toByteArray());
-			LOG.info("output bytes hashCode: " + outData.hashCode());
-			LOG.info("outData.getBytes().length: " + outData.getBytes().length);
 			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), outData);
 		}
-
-		//write out the metadata key
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(baos);
-		dos.writeInt(k);
-		dos.writeDouble(bestCostAlways);
-		dos.writeInt(roundTime);
-		dos.writeBoolean(useBestForAll);
-		BytesWritable metadata = new BytesWritable(baos.toByteArray());
-		output.collect(PlsUtil.METADATA_KEY, metadata);
 	}
 	
-	private List<BytesWritable> chooseNextRoundSols(List<SolutionData> solsThisRound, SolutionData bestSolThisRound,
-			boolean useBestForAll) {
+	private List<BytesWritable> chooseNextRoundSols(List<SolutionData> solsThisRound, SolutionData bestSolThisRound, 
+			PlsMetadata metadata) {
 		List<BytesWritable> outSols = new ArrayList<BytesWritable>(solsThisRound.size());
-		if (bestSolThisRound.getBestCost() < bestCostAlways) {
-			bestCostAlways = bestSolThisRound.getBestCost(); //for passing on
+		if (bestSolThisRound.getBestCost() < metadata.getBestCostAlways()) {
+			metadata.setBestCostAlways(bestSolThisRound.getBestCost()); //for passing on
 			int nMappers = solsThisRound.size();
 			//choose best k solutions
-			List<SolutionData> bestSols = chooseKBest(solsThisRound, k);
+			List<SolutionData> bestSols = chooseKBest(solsThisRound, metadata.getK());
 			BytesWritable val;
 			//first write out the k best
 			for (SolutionData solData : bestSols) {
@@ -154,10 +119,10 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			}
 			
 			//then write out the best solution(s)
-			int nBest = nMappers - k;
+			int nBest = nMappers - metadata.getK();
 			for (int i = 0; i < nBest; i++) {
 				LOG.info("Writing out best sol with cost " + bestSolThisRound.getBestCost());
-				if (useBestForAll) {
+				if (metadata.getUseBestForAll()) {
 					val = bestSolThisRound.getBestSolutionBytes();
 				} else {
 					//last is the best, so if not visible, we want to include it the most times
@@ -168,7 +133,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				outSols.add(val);
 			}
 		} else { //just continue with what we've got
-			LOG.info("No best cost improvement, still " + bestCostAlways);
+			LOG.info("No best cost improvement, still " + metadata.getBestCostAlways());
 			for (SolutionData solution : solsThisRound) {
 				//TODO: should we need to copy here?
 				BytesWritable val = solution.getEndSolutionBytes();
@@ -183,6 +148,10 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	 * Returns in order of highest cost first.
 	 */
 	protected ArrayList<SolutionData> chooseKBest(List<SolutionData> solDatas, int k) {
+		if (k == 0) {
+			return new ArrayList<SolutionData>();
+		}
+		
 		PriorityQueue<SolutionData> maxHeap = new PriorityQueue<SolutionData>();
 		for (SolutionData solData : solDatas) {
 			if (maxHeap.size() < k || solData.getBestCost() < maxHeap.peek().getBestCost()) {

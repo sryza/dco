@@ -14,8 +14,7 @@ public class VrpSolvingExtraData implements Writable {
 	
 	private static final Logger LOG = Logger.getLogger(VrpSolvingExtraData.class);
 	
-	private static final int MAX_NEIGHBORHOODS = 50;
-	
+	private int maxNeighborhoods = 50;
 	private List<List<Integer>> neighborhoods;
 
 	public VrpSolvingExtraData() {
@@ -26,10 +25,16 @@ public class VrpSolvingExtraData implements Writable {
 		this.neighborhoods = neighborhoods;
 	}
 	
+	public void setMaxNeighborhoods(int maxNeighbs) {
+		maxNeighborhoods = maxNeighbs;
+	}
+	
 	public void addNeighborhood(VrpSolution partialSolution) {
-		neighborhoods.add(partialSolution.getUninsertedNodes());
-		if (neighborhoods.size() > MAX_NEIGHBORHOODS) {
-			neighborhoods.remove(0);
+		if (maxNeighborhoods > 0) {
+			neighborhoods.add(partialSolution.getUninsertedNodes());
+			if (neighborhoods.size() > maxNeighborhoods) {
+				neighborhoods.remove(0);
+			}
 		}
 	}
 	

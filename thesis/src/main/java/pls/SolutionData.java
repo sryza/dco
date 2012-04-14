@@ -17,6 +17,8 @@ public abstract class SolutionData implements Comparable<SolutionData> {
 
 	public abstract Writable getExtraData();
 	
+	public abstract PlsMetadata getMetadata();
+	
 	public int compareTo(SolutionData other) {
 		//right because this returns positive if other is smaller,
 		//which ensures the max heap that we want

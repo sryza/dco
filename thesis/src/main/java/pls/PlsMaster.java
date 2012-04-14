@@ -46,37 +46,8 @@ public class PlsMaster {
 		this.runLocal = runLocal;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		int numTasks = Integer.parseInt(args[0]);
-		int numRuns = Integer.parseInt(args[1]);
-		File f = new File("../tsptests/eil101.258");
-		double temp = 5.0;
-		double scaler = .95;
-		int timeMs = 60 * 1000;
-		
-		ArrayList<TspLsCity> citiesList = TspLsCityReader.read(f, Integer.MAX_VALUE);
-		Greedy greedy = new Greedy();
-		
-		List<PlsSolution> startSolutions = new ArrayList<PlsSolution>(numTasks);
-		double bestStartCost = Integer.MAX_VALUE;
-		for (int i = 0; i < numTasks; i++) {
-			if (i > 0) {
-				Collections.shuffle(citiesList);
-			}
-			TspLsCity[] cities = greedy.computeGreedy(citiesList);
-			TspSaSolution solution = new TspSaSolution(cities, TspUtils.tourDist(cities), temp, scaler);
-			bestStartCost = Math.min(bestStartCost, solution.getCost());
-			startSolutions.add(solution);
-		}
-		
-		PlsMaster master = new PlsMaster();
-		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
-		LOG.info("results going to " + dir);
-//		master.run(numRuns, startSolutions, bestStartCost, dir, );
-	}
-	
-	public void run(int numRuns, List<PlsSolution> startSolutions, double bestCost, String dir, Class mapperClass,
-			Class reducerClass, int roundTime, int k, String problemName) throws IOException {
+	public void run(int numRuns, List<PlsSolution> startSolutions, String dir, Class mapperClass,
+			Class reducerClass, PlsMetadata metadata, String problemName) throws IOException {
 		//write out start solutions to HDFS
 		Configuration conf = new Configuration();
 		
@@ -92,12 +63,14 @@ public class PlsMaster {
 		
 		Path initFilePath = new Path(initDirPath, "part-00000");
 		
-		long firstFinishTime = System.currentTimeMillis() + roundTime;
+		long firstFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		//write out solutions
 		SequenceFile.Writer writer = new SequenceFile.Writer(fs, conf, initFilePath, BytesWritable.class, BytesWritable.class);
 		for (PlsSolution sol : startSolutions) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			sol.writeToStream(new DataOutputStream(baos));
+			DataOutputStream dos = new DataOutputStream(baos);
+			sol.writeToStream(dos);
+			metadata.write(dos);
 			BytesWritable solWritable = new BytesWritable(baos.toByteArray());
 			writer.append(PlsUtil.getMapSolKey(firstFinishTime), solWritable);
 		}
@@ -106,19 +79,11 @@ public class PlsMaster {
 		DataOutputStream dos = new DataOutputStream(baos);
 
 		//int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
-		LOG.info("k=" + k);
-		
-		dos.writeInt(k);
-		dos.writeDouble(bestCost);
-		dos.writeInt(roundTime);
-		dos.writeBoolean(false);
-		BytesWritable metadata = new BytesWritable(baos.toByteArray());
-		writer.append(PlsUtil.METADATA_KEY, metadata);
-		writer.close();
+		LOG.info("k=" + metadata.getK());
 		
 		PlsJobStats stats = new PlsJobStats();
-		stats.setK(k);
-		stats.setLsRunTime(roundTime);
+		stats.setK(metadata.getK());
+		stats.setLsRunTime(metadata.getRoundTime());
 		stats.setNumMappers(startSolutions.size());
 		stats.setNumRounds(numRuns);
 		stats.setProblemName(problemName);

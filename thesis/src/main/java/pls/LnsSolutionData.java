@@ -14,13 +14,9 @@ public class LnsSolutionData extends SolutionData {
 	private double cost;
 	private BytesWritable solBytes;
 	private VrpSolvingExtraData extraData;
+	private PlsMetadata metadata;
 	
 	public LnsSolutionData(){
-	}
-	
-	public LnsSolutionData(int cost, BytesWritable bytes) {
-		this.cost = cost;
-		this.solBytes = bytes;
 	}
 	
 	@Override
@@ -35,6 +31,9 @@ public class LnsSolutionData extends SolutionData {
 		
 		extraData = new VrpSolvingExtraData();
 		extraData.readFields(dis);
+		
+		metadata = new PlsMetadata();
+		metadata.readFields(dis);
 		
 		//read the rest as the solution
 		byte[] bytesArr = new byte[dis.available()];
@@ -56,5 +55,10 @@ public class LnsSolutionData extends SolutionData {
 	@Override
 	public Writable getExtraData() {
 		return extraData;
+	}
+
+	@Override
+	public PlsMetadata getMetadata() {
+		return metadata;
 	}
 }
