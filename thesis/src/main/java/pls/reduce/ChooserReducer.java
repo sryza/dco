@@ -81,7 +81,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				BytesWritable bytes = values.next();
 				SolutionData solData = solDataClass.newInstance();
 				solData.init(bytes);
-				if (solData.getBestCost() < bestSolThisRound.getBestCost()) {
+				if (bestSolThisRound == null || solData.getBestCost() < bestSolThisRound.getBestCost()) {
 					bestSolThisRound = solData;
 				}
 				solsThisRound.add(solData);
