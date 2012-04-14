@@ -1,8 +1,12 @@
 package gc;
 
-public class GcSolution {
+public class GcSolution implements Comparable<GcSolution> {
 	private int[] nodeColors;
 	private int cost;
+	
+	public GcSolution(int[] nodeColors) {
+		this.nodeColors = nodeColors;
+	}
 	
 	public GcSolution(int[] nodeColors, int cost) {
 		this.nodeColors = nodeColors;
@@ -31,10 +35,14 @@ public class GcSolution {
 				}
 			}
 		}
-		return total / 2;
+		return cost = total / 2;
 	}
 	
 	public int calcCost(GcProblem problem) {
 		return calcCost(problem.getNodeNeighbors());
+	}
+	
+	public int compareTo(GcSolution other) {
+		return this.cost - other.cost;
 	}
 }
