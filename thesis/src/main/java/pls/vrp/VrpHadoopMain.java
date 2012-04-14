@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import pls.PlsMaster;
+import pls.PlsMetadata;
 import pls.PlsSolution;
 
 public class VrpHadoopMain {
@@ -20,10 +21,12 @@ public class VrpHadoopMain {
 		int numTasks = Integer.parseInt(args[0]);
 		int k = Math.max(1, numTasks-1);
 		int numRuns = Integer.parseInt(args[1]);
+		int helperNeighbors = 0;
 		//optional args
 		boolean runLocal = false;
 		int roundTime = DEFAULT_ROUND_TIME;
 		File inputFile = new File("../vrptests/rc110_1.txt");
+		boolean useBestForAll = true;
 		if (args.length > 2) {
 			roundTime = Integer.parseInt(args[2]);
 		}
@@ -37,7 +40,13 @@ public class VrpHadoopMain {
 				inputFile = new File(args[4]);
 			}
 		}
-		
+		if (args.length > 5) {
+			helperNeighbors = Integer.parseInt(args[5]);
+		}
+		if (args.length > 6) {
+			useBestForAll = Boolean.parseBoolean(args[6]);
+		}
+				
 		final int maxDiscrepancies = 5;
 		final int relaxationRandomness = 15;
 		final int maxIter = 35;
@@ -67,7 +76,10 @@ public class VrpHadoopMain {
 		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
 		LOG.info("results going to " + dir);
 		long startTime = System.currentTimeMillis();
-		master.run(numRuns, initSols, bestStartCost, dir, VrpMapper.class, VrpReducer.class, roundTime, k, inputFile.getName());
+		
+		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, helperNeighbors, -1);
+
+		master.run(numRuns, initSols, dir, VrpMapper.class, VrpReducer.class, metadata, inputFile.getName());
 		long endTime = System.currentTimeMillis();
 		LOG.info("Total time: " + (endTime - startTime));
 	}

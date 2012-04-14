@@ -16,9 +16,11 @@ import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.log4j.Logger;
 
+import pls.PlsMetadata;
 import pls.PlsSolution;
 import pls.PlsUtil;
 import pls.SolutionIdGenerator;
+import pls.vrp.VrpSolvingExtraData;
 
 public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
@@ -38,14 +40,6 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		LOG.info("Value hash = " + value.hashCode());
 		
 		long startTime = System.currentTimeMillis();
-		
-		//pass metadata on through
-		if (key.equals(PlsUtil.METADATA_KEY)) {
-			output.collect(key, value);
-			LOG.info("Passing on metadata");
-			return;
-		}
-		
 		long timeToFinish = PlsUtil.getEndTimeFromKey(key);
 		
 		Class<PlsSolution> solutionClass = getSolutionClass();
@@ -75,6 +69,10 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			LOG.error("Problem building PlsRunner. abortin...", ex);
 			return;
 		}
+		
+		//read metadata
+		PlsMetadata metadata = new PlsMetadata();
+		metadata.readFields(dis);
 
 		//read helper data if there is any
 		if (dis.available() > 0) {
@@ -83,6 +81,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 				Writable helperData = getHelperDataClass().newInstance();
 				helperData.readFields(dis);
 				runner.setHelperData(helperData);
+				((VrpSolvingExtraData)helperData).setMaxNeighborhoods(metadata.getExtraDataNumNeighbors());
 			} catch (Exception ex) {
 				LOG.error("Trouble reading helper data, aborting...", ex);
 				return;
