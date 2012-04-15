@@ -115,6 +115,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 			if (extraData != null) {
 				extraData.write(dos);
 			}
+			metadata.write(dos);
 			solutions[i].writeToStream(dos);
 		}
 		output.collect(PlsUtil.SOLS_KEY, new BytesWritable(baos.toByteArray()));
