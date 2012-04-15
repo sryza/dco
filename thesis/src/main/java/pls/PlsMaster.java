@@ -71,9 +71,11 @@ public class PlsMaster {
 			DataOutputStream dos = new DataOutputStream(baos);
 			sol.writeToStream(dos);
 			metadata.write(dos);
+			dos.close();
 			BytesWritable solWritable = new BytesWritable(baos.toByteArray());
 			writer.append(PlsUtil.getMapSolKey(firstFinishTime), solWritable);
 		}
+		writer.close();
 		//write out metadata
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(baos);
