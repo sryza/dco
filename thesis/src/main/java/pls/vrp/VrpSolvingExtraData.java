@@ -16,7 +16,8 @@ public class VrpSolvingExtraData implements Writable {
 	
 	private int maxNeighborhoods = 50;
 	private List<List<Integer>> neighborhoods;
-
+	private boolean addFirstNeighborhoods;
+	
 	public VrpSolvingExtraData() {
 		neighborhoods = new LinkedList<List<Integer>>();
 	}
@@ -25,12 +26,16 @@ public class VrpSolvingExtraData implements Writable {
 		this.neighborhoods = neighborhoods;
 	}
 	
+	public void setAddFirstNeighborhoods(boolean addFirstNeighborhoods) {
+		this.addFirstNeighborhoods = addFirstNeighborhoods;
+	}
+	
 	public void setMaxNeighborhoods(int maxNeighbs) {
 		maxNeighborhoods = maxNeighbs;
 	}
 	
 	public void addNeighborhood(VrpSolution partialSolution) {
-		if (maxNeighborhoods > 0) {
+		if (maxNeighborhoods > 0 && (!addFirstNeighborhoods || neighborhoods.size() < maxNeighborhoods)) {
 			neighborhoods.add(partialSolution.getUninsertedNodes());
 			if (neighborhoods.size() > maxNeighborhoods) {
 				neighborhoods.remove(0);

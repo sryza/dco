@@ -13,18 +13,20 @@ public class PlsMetadata implements Writable {
 	private boolean useBestForAll;
 	private int extraDataNumNeighbs;
 	private int helperDataNumNeighbs;
+	private boolean addFirstNeighbs;
 	
 	public PlsMetadata() {
 	}
 	
 	public PlsMetadata(int k, double bestCostAlways, int roundTime, boolean useBestForAll, int extraDataNumNeighbs,
-			int helperDataNumNeighbs) {
+			int helperDataNumNeighbs, boolean addFirstNeighbs) {
 		this.k = k;
 		this.bestCostAlways = bestCostAlways;
 		this.roundTime = roundTime;
 		this.useBestForAll = useBestForAll;
 		this.extraDataNumNeighbs = extraDataNumNeighbs;
 		this.helperDataNumNeighbs = helperDataNumNeighbs;
+		this.addFirstNeighbs = addFirstNeighbs;
 	}
 	
 	@Override
@@ -35,6 +37,7 @@ public class PlsMetadata implements Writable {
 		useBestForAll = input.readBoolean();
 		extraDataNumNeighbs = input.readInt();
 		helperDataNumNeighbs = input.readInt();
+		addFirstNeighbs = input.readBoolean();
 	}
 	
 	@Override
@@ -45,6 +48,7 @@ public class PlsMetadata implements Writable {
 		output.writeBoolean(useBestForAll);
 		output.writeInt(extraDataNumNeighbs);
 		output.writeInt(helperDataNumNeighbs);
+		output.writeBoolean(addFirstNeighbs);
 	}
 	
 	public int getK() {
@@ -65,6 +69,10 @@ public class PlsMetadata implements Writable {
 	
 	public boolean getUseBestForAll() {
 		return useBestForAll;
+	}
+	
+	public boolean getAddFirstNeighborhoods() {
+		return addFirstNeighbs;
 	}
 	
 	public int getExtraDataNumNeighbors() {

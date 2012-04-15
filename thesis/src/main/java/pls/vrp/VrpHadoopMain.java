@@ -27,6 +27,7 @@ public class VrpHadoopMain {
 		int roundTime = DEFAULT_ROUND_TIME;
 		File inputFile = new File("../vrptests/rc110_1.txt");
 		boolean useBestForAll = true;
+		boolean addFirstNeighbors = false;
 		if (args.length > 2) {
 			roundTime = Integer.parseInt(args[2]);
 		}
@@ -44,7 +45,10 @@ public class VrpHadoopMain {
 			helperNeighbors = Integer.parseInt(args[5]);
 		}
 		if (args.length > 6) {
-			useBestForAll = Boolean.parseBoolean(args[6]);
+			addFirstNeighbors = Boolean.parseBoolean(args[6]);
+		}
+		if (args.length > 7) {
+			useBestForAll = Boolean.parseBoolean(args[7]);
 		}
 				
 		final int maxDiscrepancies = 5;
@@ -77,7 +81,7 @@ public class VrpHadoopMain {
 		LOG.info("results going to " + dir);
 		long startTime = System.currentTimeMillis();
 		
-		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, helperNeighbors, -1);
+		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, helperNeighbors, -1, addFirstNeighbors);
 
 		master.run(numRuns, initSols, dir, VrpMapper.class, VrpReducer.class, metadata, inputFile.getName());
 		long endTime = System.currentTimeMillis();
