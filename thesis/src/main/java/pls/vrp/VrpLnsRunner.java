@@ -1,7 +1,5 @@
 package pls.vrp;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -37,6 +35,7 @@ public class VrpLnsRunner implements PlsRunner {
 			List<List<Integer>> neighborhoods = helperData.getNeighborhoods();
 			int numSuccessful = 0;
 			long helperStartTime = System.currentTimeMillis();
+			double beforeSolCost = sol.getToursCost();
 			for (List<Integer> neighborhood : neighborhoods) {
 				VrpCpStats stats = new VrpCpStats();
 				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), neighborhood, problem);
@@ -48,11 +47,15 @@ public class VrpLnsRunner implements PlsRunner {
 					numSuccessful++;
 				}
 			}
+			extraData.setHelperStats(numSuccessful, neighborhoods.size(), beforeSolCost - sol.getToursCost());
 			long helperFinishTime = System.currentTimeMillis();
 			LOG.info("Helper neighborhoods: " + numSuccessful + " successful / " + neighborhoods.size() + 
 					". Took " + (helperFinishTime - helperStartTime) + " ms");
 		}
 		
+		int numTries = 0;
+		int numSuccesses = 0;
+		double beforeBestCost = sol.getToursCost();
 		outer:
 		while (true) {
 			for (int n = solAndStuff.getCurEscalation(); n <= solAndStuff.getMaxEscalation(); n++) { 
@@ -70,6 +73,7 @@ public class VrpLnsRunner implements PlsRunner {
 						sol = newSol;
 						solAndStuff.setSolution(sol);
 						i = 0;
+						numSuccesses++;
 					}
 					solAndStuff.setCurEscalation(n);
 					solAndStuff.setCurIteration(i);
@@ -78,7 +82,10 @@ public class VrpLnsRunner implements PlsRunner {
 			//LOG.info("Starting new search");
 			solAndStuff.setCurEscalation(1);
 			solAndStuff.setCurIteration(0);
+			numTries++;
 		}
+		
+		extraData.setRegularStats(numSuccesses, numTries, beforeBestCost - sol.getToursCost());
 		
 		long endTime = System.currentTimeMillis();
 		LOG.info("VrpLnsRunner took " + (endTime - startTime) + " ms");

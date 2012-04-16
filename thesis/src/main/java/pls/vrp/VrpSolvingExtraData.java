@@ -18,6 +18,13 @@ public class VrpSolvingExtraData implements Writable {
 	private List<List<Integer>> neighborhoods;
 	private boolean addFirstNeighborhoods;
 	
+	private int numHelperSuccessful;
+	private int numHelperTried;
+	private int numRegularSuccessful;
+	private int numRegularTried;
+	private double regularImprovement;
+	private double helperImprovement;
+	
 	public VrpSolvingExtraData() {
 		neighborhoods = new LinkedList<List<Integer>>();
 	}
@@ -43,6 +50,43 @@ public class VrpSolvingExtraData implements Writable {
 		}
 	}
 	
+	public void setHelperStats(int numHelperSuccessful, int numHelperTried, double improvement) {
+		this.numHelperSuccessful = numHelperSuccessful;
+		this.numHelperTried = numHelperTried;
+		this.helperImprovement = improvement;
+	}
+	
+	public void setRegularStats(int numRegularSuccessful, int numRegularTried, double improvement) {
+		this.numRegularSuccessful = numRegularSuccessful;
+		this.numRegularTried = numRegularTried;
+		this.regularImprovement = improvement;
+	}
+	
+	public int getNumRegularSuccessful() {
+		return numRegularSuccessful;
+	}
+	
+	public int getNumRegularTried() {
+		return numRegularTried;
+	}
+	
+	public double getRegularImprovement() {
+		return regularImprovement;
+	}
+	
+	
+	public double getHelperImprovement() {
+		return helperImprovement;
+	}
+	
+	public int getNumHelperTried() {
+		return numHelperTried;
+	}
+	
+	public int getNumHelperSuccessful() {
+		return numHelperSuccessful;
+	}
+	
 	public List<List<Integer>> getNeighborhoods() {
 		return neighborhoods;
 	}
@@ -60,6 +104,13 @@ public class VrpSolvingExtraData implements Writable {
 				neighborhood.add(input.readInt());
 			}
 		}
+		numHelperSuccessful = input.readInt();
+		numHelperTried = input.readInt();
+		numRegularSuccessful = input.readInt();
+		numRegularTried = input.readInt();
+		regularImprovement = input.readDouble();
+		helperImprovement = input.readDouble();
+
 	}
 
 	@Override
@@ -71,6 +122,13 @@ public class VrpSolvingExtraData implements Writable {
 				output.writeInt(cust);
 			}
 		}
+		
+		output.writeInt(numHelperSuccessful);
+		output.writeInt(numHelperTried);
+		output.writeInt(numRegularSuccessful);
+		output.writeInt(numRegularTried);
+		output.writeDouble(regularImprovement);
+		output.writeDouble(helperImprovement);
 	}
 	
 	@Override
