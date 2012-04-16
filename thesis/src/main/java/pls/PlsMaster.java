@@ -69,7 +69,7 @@ public class PlsMaster {
 		for (PlsSolution sol : startSolutions) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			sol.writeToStream(dos);
+			sol.write(dos);
 			metadata.write(dos);
 			dos.close();
 			BytesWritable solWritable = new BytesWritable(baos.toByteArray());

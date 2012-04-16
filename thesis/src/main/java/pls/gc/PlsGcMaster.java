@@ -25,10 +25,6 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.log4j.Logger;
 
-import pls.PlsSolution;
-import pls.PlsUtil;
-import pls.stats.PlsJobStats;
-
 public class PlsGcMaster {
 	private static final Logger LOG = Logger.getLogger(PlsGcMaster.class);
 	
@@ -36,10 +32,21 @@ public class PlsGcMaster {
 		int popSize = 10;
 		int roundTime = 60000;
 		int lsTime = 2000;
+		boolean runLocal = false;
 		File inputFile = new File("../gctests/dsjc250.5.col");
 		int k = 28;
 		int numMappers = Integer.parseInt(args[0]);
 		int numRounds = Integer.parseInt(args[1]);
+		if (args.length > 2) {
+			if (args[2].matches("(true|false)")) {
+				runLocal = Boolean.parseBoolean(args[2]);
+			} else {
+				inputFile = new File(args[2]);
+			}
+		}
+		if (args.length > 3) {
+			k = Integer.parseInt(args[3]);
+		}
 		
 		Random rand = new Random();
 		GcProblem problem = GcReader.read(inputFile);
@@ -55,11 +62,11 @@ public class PlsGcMaster {
 		
 		GcJobStats stats = new GcJobStats(numMappers, popSize, k, inputFile.getName(), params);
 		PlsGcMaster master = new PlsGcMaster();
-		master.run(numRounds, numMappers, population, dir, params, problem, stats);
+		master.run(numRounds, numMappers, population, dir, params, problem, k, stats, runLocal);
 	}
 	
-	public void run(int numRounds, int numMappers, GcSolution[] population, String dir, GcPlsParams params, GcProblem problem,
-			GcJobStats stats) throws IOException {
+	public void run(int numRounds, int numMappers, GcSolution[] population, String dir, GcPlsParams params, GcProblem problem, int k,
+			GcJobStats stats, boolean runLocal) throws IOException {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
 		Path dirPath = new Path(dir);
@@ -80,7 +87,7 @@ public class PlsGcMaster {
 		for (int i = 0; i < numMappers; i++) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			DataOutputStream dos = new DataOutputStream(baos);
-			new GcPlsProblem(problem).write(dos);
+			new GcPlsProblem(problem, k).write(dos);
 			params.write(dos);
 			for (int j = 0; j < numSolsPerMapper; j++) {
 				GcPlsSolution plsSol = new GcPlsSolution(population[solIndex]);
@@ -89,13 +96,14 @@ public class PlsGcMaster {
 			}
 			writer.append(PlsGcUtils.KEY, new BytesWritable(baos.toByteArray()));
 		}
+		writer.close();
 		
 		for (int i = 0; i < numRounds; i++) {
 			Path inputPath = new Path(dirPath, i + "/");
 			Path outputPath = new Path(dirPath, (i+1) + "/");
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
-			runHadoopJob(inputPath, outputPath, numMappers, false);
+			runHadoopJob(inputPath, outputPath, numMappers, runLocal);
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
 			stats.reportRoundTime((int)(end-start));
@@ -118,7 +126,7 @@ public class PlsGcMaster {
 		conf.setMapOutputKeyClass(BytesWritable.class);
 		conf.setMapOutputValueClass(BytesWritable.class);
 
-		conf.setJar("tspls.jar");
+		conf.setJar("gc.jar");
 
 		conf.setMapperClass(GcMapper.class);
 		conf.setReducerClass(GcReducer.class);

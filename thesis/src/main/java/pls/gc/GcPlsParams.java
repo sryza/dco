@@ -36,6 +36,7 @@ public class GcPlsParams implements Writable {
 		alpha = input.readDouble();
 		finishByTime = input.readLong();
 		startWithLs = input.readBoolean();
+		lsTime = input.readInt();
 	}
 
 	@Override
@@ -46,6 +47,7 @@ public class GcPlsParams implements Writable {
 		output.writeDouble(alpha);
 		output.writeLong(finishByTime);
 		output.writeBoolean(startWithLs);
+		output.writeInt(lsTime);
 	}
 	
 	public int getPopulationSize() {

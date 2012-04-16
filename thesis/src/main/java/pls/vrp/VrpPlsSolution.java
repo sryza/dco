@@ -1,6 +1,8 @@
 package pls.vrp;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -98,7 +100,7 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	@Override
-	public void writeToStream(DataOutputStream dos) throws IOException {
+	public void write(DataOutput dos) throws IOException {
 		dos.writeDouble(sol.getToursCost());
 		dos.writeInt(solId);
 		dos.writeInt(parentSolId);
@@ -121,7 +123,7 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	@Override
-	public VrpPlsSolution buildFromStream(DataInputStream dis) throws IOException {
+	public void readFields(DataInput dis) throws IOException {
 		double toursCost = dis.readDouble();
 		solId = dis.readInt();
 		parentSolId = dis.readInt();
@@ -143,7 +145,6 @@ public class VrpPlsSolution implements PlsSolution {
 		curEscalation = dis.readInt();
 		relaxationRandomness = dis.readInt();
 		maxDiscrepancies = dis.readInt();
-		return this;
 	}
 
 	@Override
@@ -162,7 +163,7 @@ public class VrpPlsSolution implements PlsSolution {
 		return sol.getToursCost();
 	}
 	
-	private VrpProblem buildProblemFromStream(DataInputStream dis) throws IOException {
+	private VrpProblem buildProblemFromStream(DataInput dis) throws IOException {
 		int numCities = dis.readInt();
 		int depotX = dis.readInt();
 		int depotY = dis.readInt();
@@ -186,7 +187,7 @@ public class VrpPlsSolution implements PlsSolution {
 				depotX, depotY, vehicleCapacity);
 	}
 	
-	public void writeProblemToStream(VrpProblem problem, DataOutputStream dos) throws IOException {
+	public void writeProblemToStream(VrpProblem problem, DataOutput dos) throws IOException {
 		dos.writeInt(problem.getDemands().length);
 		dos.writeInt(problem.getDepotX());
 		dos.writeInt(problem.getDepotY());

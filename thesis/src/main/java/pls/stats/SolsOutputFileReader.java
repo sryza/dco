@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import pls.PlsSolution;
 import pls.PlsUtil;
+import pls.WritableSolution;
 
 public class SolsOutputFileReader {
 	
@@ -49,9 +50,9 @@ public class SolsOutputFileReader {
 		for (Path subpath : files) {
 			subpath = new Path(subpath, "part-00000");
 			System.out.println("Sols for " + subpath.toString());
-			List<PlsSolution> solutions = reader.getFileSolutions(subpath, conf, solutionClass);
-			for (PlsSolution sol : solutions) {
-				LOG.info("sol cost=" + sol.getCost() + ", id=" + sol.getSolutionId() + ", parent id=" + sol.getParentSolutionId());
+			List<WritableSolution> solutions = reader.getFileSolutions(subpath, conf, solutionClass);
+			for (WritableSolution sol : solutions) {
+				LOG.info("sol cost=" + sol.getCost());
 			}
 			System.out.println();
 		}
@@ -61,23 +62,37 @@ public class SolsOutputFileReader {
 		this.fileSystem = fs;
 	}
 	
-	public List<PlsSolution> getFileSolutions(Path path, Configuration conf, String solutionClass)
+	public List<WritableSolution> getFileSolutions(Path path, Configuration conf, String solutionClass)
 		throws IOException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		SequenceFile.Reader reader = new SequenceFile.Reader(fileSystem, path, conf);
 		BytesWritable key = new BytesWritable();
 		BytesWritable value = new BytesWritable();
-		List<PlsSolution> sols = new ArrayList<PlsSolution>();
+		List<WritableSolution> sols = new ArrayList<WritableSolution>();
 		while (reader.next(key, value)) {
 			if (key.equals(PlsUtil.METADATA_KEY)) {
 				//TODO: read best solution so that we can note that it's not among reported if it's not
 				continue;
 			}
 			
-			PlsSolution sol = (PlsSolution)Class.forName(solutionClass).newInstance();
-			sol.buildFromStream(new DataInputStream(new ByteArrayInputStream(value.getBytes())));
+			WritableSolution sol = (WritableSolution)Class.forName(solutionClass).newInstance();
+			sol.readFields(new DataInputStream(new ByteArrayInputStream(value.getBytes())));
 			sols.add(sol);
 		}
 		return sols;
+	}
+	
+	public List<BytesWritable> getSolutionBytes(Path path, Configuration conf) throws IOException {
+		SequenceFile.Reader reader = new SequenceFile.Reader(fileSystem, path, conf);
+		BytesWritable key = new BytesWritable();
+		BytesWritable value = new BytesWritable();
+		List<BytesWritable> datas = new ArrayList<BytesWritable>();
+		while (reader.next(key, value)) {
+			datas.add(value);
+			
+			key = new BytesWritable();
+			value = new BytesWritable();
+		}
+		return datas;
 	}
 	
 	private static Path getLatestRunFolderPath(Path testDir, FileSystem fs, int howManyBack) throws IOException {

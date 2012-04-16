@@ -1,7 +1,8 @@
 package pls.tsp;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -60,7 +61,7 @@ public class TspSaSolution implements PlsSolution {
 	}
 	
 	@Override
-	public TspSaSolution buildFromStream(DataInputStream dis) throws IOException {
+	public void readFields(DataInput dis) throws IOException {
 		cost = dis.readInt();
 		temp = dis.readDouble();
 		scaler = dis.readDouble();
@@ -72,11 +73,10 @@ public class TspSaSolution implements PlsSolution {
 			int y = dis.readInt();
 			tour[i] = new TspLsCity(id, x, y);
 		}
-		return this;
 	}
 	
 	@Override
-	public void writeToStream(DataOutputStream dos) throws IOException {
+	public void write(DataOutput dos) throws IOException {
 		dos.writeInt(cost);
 		dos.writeDouble(temp);
 		dos.writeDouble(scaler);
@@ -96,7 +96,7 @@ public class TspSaSolution implements PlsSolution {
 		ByteArrayOutputStream bais = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bais);
 		try {
-			writeToStream(dos);
+			write(dos);
 		} catch (IOException ex) {
 			LOG.info("Failure to serialize solution to bytes, this shouldn't happen");
 		}

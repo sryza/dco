@@ -33,6 +33,7 @@ public class GcMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 		GcPlsProblem plsProblem = new GcPlsProblem();
 		plsProblem.readFields(dis);
 		GcProblem problem = plsProblem.getProblem();
+		LOG.info("Received problem with " + problem.getNodeNeighbors().length + " nodes, k=" + plsProblem.getK());
 		GcPlsParams params = new GcPlsParams();
 		params.readFields(dis);
 		
@@ -40,10 +41,13 @@ public class GcMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 		Random rand = new Random();
 		GcTabuSearchRunner lsRunner = new GcTabuSearchRunner(params.getA(), params.getAlpha(), rand);
 		
+		LOG.info("LS Time=" + params.getLsTime());
+
 		for (int i = 0; i < params.getPopulationSize(); i++) {
 			GcPlsSolution sol = new GcPlsSolution(problem);
 			sol.readFields(dis);
 			sols[i] = sol.getSolution();
+			LOG.info("Received sol with " + sols[i].getNodeColors().length + " nodes");
 			if (params.getStartWithLs()) {
 				sols[i] = lsRunner.run(problem, sols[i], plsProblem.getK(), params.getLsTime());
 			}

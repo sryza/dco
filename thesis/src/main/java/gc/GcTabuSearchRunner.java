@@ -55,7 +55,6 @@ public class GcTabuSearchRunner {
 			
 			iter++;
 		}
-		LOG.info("iters: " + iter);
 		return new GcSolution(bestSol, bestSolCost);
 	}
 	

@@ -52,7 +52,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 		PlsSolution sol;
 		try {
 			sol = solutionClass.newInstance();
-			sol.buildFromStream(dis);
+			sol.readFields(dis);
 		} catch (Exception ex) {
 			LOG.error("Failed to read initial solution, aborting", ex);
 			return;
@@ -116,7 +116,7 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 				extraData.write(dos);
 			}
 			metadata.write(dos);
-			solutions[i].writeToStream(dos);
+			solutions[i].write(dos);
 		}
 		output.collect(PlsUtil.SOLS_KEY, new BytesWritable(baos.toByteArray()));
 		

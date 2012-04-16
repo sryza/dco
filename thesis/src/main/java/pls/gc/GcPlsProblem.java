@@ -16,8 +16,9 @@ public class GcPlsProblem implements Writable {
 	public GcPlsProblem() {
 	}
 	
-	public GcPlsProblem(GcProblem problem) {
+	public GcPlsProblem(GcProblem problem, int k) {
 		this.problem = problem;
+		this.k = k;
 	}
 	
 	@Override

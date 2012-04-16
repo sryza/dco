@@ -9,7 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
-import pls.PlsSolution;
+import pls.WritableSolution;
 
 
 /**
@@ -26,6 +26,9 @@ public class BestSolsExtractor {
 		if (args.length > 1) {
 			howManyBack = -Integer.parseInt(args[1]);
 		}
+		if (args.length > 2) {
+			baseDir = new Path(args[2]);
+		}
 		
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
@@ -37,12 +40,12 @@ public class BestSolsExtractor {
 		List<Path> files = gatherer.gather(baseJobDir);
 
 		//read best solutions for each run
-		List<PlsSolution> bestSols = new ArrayList<PlsSolution>();
+		List<WritableSolution> bestSols = new ArrayList<WritableSolution>();
 		List<Double> bestSolCosts = new ArrayList<Double>();
 		for (Path file : files) {
-			List<PlsSolution> sols = reader.getFileSolutions(file, conf, solutionClassName);
-			PlsSolution bestSol = null;
-			for (PlsSolution sol : sols) {
+			List<WritableSolution> sols = reader.getFileSolutions(file, conf, solutionClassName);
+			WritableSolution bestSol = null;
+			for (WritableSolution sol : sols) {
 				if (bestSol == null || sol.getCost() < bestSol.getCost()) {
 					bestSol = sol;
 				}
