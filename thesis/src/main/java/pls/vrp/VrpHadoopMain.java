@@ -27,7 +27,7 @@ public class VrpHadoopMain {
 		int roundTime = DEFAULT_ROUND_TIME;
 		File inputFile = new File("../vrptests/rc110_1.txt");
 		boolean useBestForAll = true;
-		boolean addFirstNeighbors = false;
+		boolean addFirstNeighbors = true;
 		if (args.length > 2) {
 			roundTime = Integer.parseInt(args[2]);
 		}
