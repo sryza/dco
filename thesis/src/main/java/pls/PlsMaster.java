@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -37,6 +38,11 @@ public class PlsMaster {
 	private static final Logger LOG = Logger.getLogger(PlsMaster.class);
 	
 	private boolean runLocal;
+	
+	//for collecting stats
+	private BlockingQueue<Path> completedJobPathsQueue;
+	//for telling the stats thread we're done
+	private static final Path DONE_PATH = new Path("");
 	
 	public PlsMaster() {
 		
@@ -96,10 +102,13 @@ public class PlsMaster {
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
 			runHadoopJob(inputPath, outputPath, startSolutions.size(), mapperClass, reducerClass);
+			completedJobPathsQueue.put(outputPath);
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
 			stats.reportRoundTime((int)(end-start));
 		}
+		completedJobPathsQueue.put(DONE_PATH);
+		
 		writeStatsFile(dirPath, stats, fs);
 	}
 
@@ -144,5 +153,22 @@ public class PlsMaster {
 		String report = stats.makeReport();
 		os.writeUTF(report);
 		os.close();
+	}
+	
+	private class StatsThread extends Thread {
+		public StatsThread(PlsJobStats stats) {
+			
+		}
+		
+		public void run() {
+			Path path;
+			try {
+				while ((path = completedJobPathsQueue.take()) != DONE_PATH) {
+					
+				}
+			} catch (InterruptedException ex) {
+				LOG.error("Interrupted", ex);
+			}
+		}
 	}
 }

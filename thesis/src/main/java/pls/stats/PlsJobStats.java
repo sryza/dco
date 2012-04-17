@@ -3,36 +3,20 @@ package pls.stats;
 import java.util.ArrayList;
 import java.util.List;
 
+import pls.PlsMetadata;
+
 public class PlsJobStats {
 	private List<Integer> roundTimes;
-	private int k;
-	private int lsRunTime;
-	private int numRounds;
-	private int numMappers;
 	private String problemName;
+	private PlsMetadata metadata;
+	private int numMappers;
+	private int numRounds;
 	
-	public PlsJobStats() {
+	public PlsJobStats(PlsMetadata metadata, String problemName, int numMappers, int numRounds) {
 		roundTimes = new ArrayList<Integer>();
-	}
-	
-	public void setK(int k) {
-		this.k = k;
-	}
-	
-	public void setLsRunTime(int time) {
-		this.lsRunTime = time;
-	}
-	
-	public void setNumRounds(int numRounds) {
-		this.numRounds = numRounds;
-	}
-	
-	public void setNumMappers(int numMappers) {
+		this.metadata = metadata;
 		this.numMappers = numMappers;
-	}
-	
-	public void setProblemName(String problemName) {
-		this.problemName = problemName;
+		this.numRounds = numRounds;
 	}
 	
 	public void reportRoundTime(int time) {
@@ -44,9 +28,13 @@ public class PlsJobStats {
 		sb.append("{");
 		sb.append("\"roundLengths\":" + roundTimes);
 		sb.append(",\n");
-		sb.append("\"populationK\":" + k);
+		sb.append("\"populationK\":" + metadata.getK());
 		sb.append(",\n");
-		sb.append("\"lsRunTime\":" + lsRunTime);
+		sb.append("\"lsRunTime\":" + metadata.getRoundTime());
+		sb.append(",\n");
+		sb.append("\"addFirstNeighborhoods\":" + metadata.getAddFirstNeighborhoods());
+		sb.append(",\n");
+		sb.append("\"numHelperNeighborhoods\":" + metadata.getHelperDataNumNeighbors());
 		sb.append(",\n");
 		sb.append("\"numRounds\":" + numRounds);
 		sb.append(",\n");
