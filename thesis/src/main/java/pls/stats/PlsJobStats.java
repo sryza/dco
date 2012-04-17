@@ -39,7 +39,9 @@ public class PlsJobStats {
 	}
 	
 	public void reportBestExtraData(LnsExtraData extraData) {
-		bestExtraDatas.add(extraData);
+		if (extraData != null) {
+			bestExtraDatas.add(extraData);
+		}
 	}
 	
 	public String makeReport() {
