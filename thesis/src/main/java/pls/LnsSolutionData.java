@@ -8,12 +8,12 @@ import java.nio.ByteBuffer;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
 
-import pls.vrp.VrpSolvingExtraData;
+import pls.vrp.LnsExtraData;
 
 public class LnsSolutionData extends SolutionData {
 	private double cost;
 	private BytesWritable solBytes;
-	private VrpSolvingExtraData extraData;
+	private LnsExtraData extraData;
 	private PlsMetadata metadata;
 	
 	public LnsSolutionData(){
@@ -29,7 +29,7 @@ public class LnsSolutionData extends SolutionData {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes(), 0, bytes.getLength());
 		DataInputStream dis = new DataInputStream(bais);
 		
-		extraData = new VrpSolvingExtraData();
+		extraData = new LnsExtraData();
 		extraData.readFields(dis);
 		
 		metadata = new PlsMetadata();

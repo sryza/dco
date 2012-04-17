@@ -20,7 +20,7 @@ import pls.PlsMetadata;
 import pls.PlsSolution;
 import pls.PlsUtil;
 import pls.SolutionIdGenerator;
-import pls.vrp.VrpSolvingExtraData;
+import pls.vrp.LnsExtraData;
 
 public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 
@@ -81,8 +81,8 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 				Writable helperData = getHelperDataClass().newInstance();
 				helperData.readFields(dis);
 				runner.setHelperData(helperData);
-				((VrpSolvingExtraData)helperData).setMaxNeighborhoods(metadata.getExtraDataNumNeighbors());
-				((VrpSolvingExtraData)helperData).setAddFirstNeighborhoods(metadata.getAddFirstNeighborhoods());
+				((LnsExtraData)helperData).setMaxNeighborhoods(metadata.getExtraDataNumNeighbors());
+				((LnsExtraData)helperData).setAddFirstNeighborhoods(metadata.getAddFirstNeighborhoods());
 			} catch (Exception ex) {
 				LOG.error("Trouble reading helper data, aborting...", ex);
 				return;

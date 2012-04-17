@@ -13,7 +13,7 @@ public class VrpExtraDataHandler {
 		//make a big ol' list of all the routes
 		List<List<Integer>> routes = new ArrayList<List<Integer>>();
 		for (Writable extraData : extraDatas) {
-			VrpSolvingExtraData vrpExtraData = (VrpSolvingExtraData)extraData;
+			LnsExtraData vrpExtraData = (LnsExtraData)extraData;
 			routes.addAll(vrpExtraData.getNeighborhoods());
 		}
 		LOG.info("Received " + routes.size() + " routes for helper data");
@@ -28,7 +28,7 @@ public class VrpExtraDataHandler {
 				helperDataRoutes.add(routes.get(routesIndex));
 				routesIndex = (routesIndex + 1) % routes.size();
 			}
-			VrpSolvingExtraData helperData = new VrpSolvingExtraData(helperDataRoutes);
+			LnsExtraData helperData = new LnsExtraData(helperDataRoutes);
 			results.add(helperData);
 		}
 		

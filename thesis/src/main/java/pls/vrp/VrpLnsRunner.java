@@ -15,8 +15,8 @@ public class VrpLnsRunner implements PlsRunner {
 	
 	private static final Logger LOG = Logger.getLogger(VrpLnsRunner.class);
 	
-	private VrpSolvingExtraData extraData = new VrpSolvingExtraData();
-	private VrpSolvingExtraData helperData;
+	private LnsExtraData extraData = new LnsExtraData();
+	private LnsExtraData helperData;
 	
 	@Override
 	public PlsSolution[] run(PlsSolution plsSol, long timeToFinish, Random rand) {
@@ -47,15 +47,17 @@ public class VrpLnsRunner implements PlsRunner {
 					numSuccessful++;
 				}
 			}
-			extraData.setHelperStats(numSuccessful, neighborhoods.size(), beforeSolCost - sol.getToursCost());
 			long helperFinishTime = System.currentTimeMillis();
+			int helperTime = (int)(helperFinishTime - helperStartTime);
+			extraData.setHelperStats(numSuccessful, neighborhoods.size(), beforeSolCost - sol.getToursCost(), helperTime);
 			LOG.info("Helper neighborhoods: " + numSuccessful + " successful / " + neighborhoods.size() + 
-					". Took " + (helperFinishTime - helperStartTime) + " ms");
+					". Took " + helperTime + " ms");
 		}
 		
 		int numTries = 0;
 		int numSuccesses = 0;
 		double beforeBestCost = sol.getToursCost();
+		long regStartTime = System.currentTimeMillis();
 		outer:
 		while (true) {
 			for (int n = solAndStuff.getCurEscalation(); n <= solAndStuff.getMaxEscalation(); n++) { 
@@ -84,8 +86,9 @@ public class VrpLnsRunner implements PlsRunner {
 			solAndStuff.setCurIteration(0);
 			numTries++;
 		}
-		
-		extraData.setRegularStats(numSuccesses, numTries, beforeBestCost - sol.getToursCost());
+		long regEndTime = System.currentTimeMillis();
+		int regTime = (int)(regEndTime - regStartTime);
+		extraData.setRegularStats(numSuccesses, numTries, beforeBestCost - sol.getToursCost(), regTime);
 		
 		long endTime = System.currentTimeMillis();
 		LOG.info("VrpLnsRunner took " + (endTime - startTime) + " ms");
@@ -100,6 +103,6 @@ public class VrpLnsRunner implements PlsRunner {
 
 	@Override
 	public void setHelperData(Writable helperData) {
-		this.helperData = (VrpSolvingExtraData)helperData;
+		this.helperData = (LnsExtraData)helperData;
 	}
 }

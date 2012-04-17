@@ -10,9 +10,9 @@ import java.util.List;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
-public class VrpSolvingExtraData implements Writable {
+public class LnsExtraData implements Writable {
 	
-	private static final Logger LOG = Logger.getLogger(VrpSolvingExtraData.class);
+	private static final Logger LOG = Logger.getLogger(LnsExtraData.class);
 	
 	private int maxNeighborhoods = 50;
 	private List<List<Integer>> neighborhoods;
@@ -25,11 +25,14 @@ public class VrpSolvingExtraData implements Writable {
 	private double regularImprovement;
 	private double helperImprovement;
 	
-	public VrpSolvingExtraData() {
+	private int helperTime;
+	private int regularTime;
+	
+	public LnsExtraData() {
 		neighborhoods = new LinkedList<List<Integer>>();
 	}
 	
-	public VrpSolvingExtraData(List<List<Integer>> neighborhoods) {
+	public LnsExtraData(List<List<Integer>> neighborhoods) {
 		this.neighborhoods = neighborhoods;
 	}
 	
@@ -50,16 +53,26 @@ public class VrpSolvingExtraData implements Writable {
 		}
 	}
 	
-	public void setHelperStats(int numHelperSuccessful, int numHelperTried, double improvement) {
+	public int getHelperTime() {
+		return helperTime;
+	}
+	
+	public int getRegularTime() {
+		return regularTime;
+	}
+	
+	public void setHelperStats(int numHelperSuccessful, int numHelperTried, double improvement, int time) {
 		this.numHelperSuccessful = numHelperSuccessful;
 		this.numHelperTried = numHelperTried;
 		this.helperImprovement = improvement;
+		this.helperTime = time;
 	}
 	
-	public void setRegularStats(int numRegularSuccessful, int numRegularTried, double improvement) {
+	public void setRegularStats(int numRegularSuccessful, int numRegularTried, double improvement, int time) {
 		this.numRegularSuccessful = numRegularSuccessful;
 		this.numRegularTried = numRegularTried;
 		this.regularImprovement = improvement;
+		this.regularTime = time;
 	}
 	
 	public int getNumRegularSuccessful() {
@@ -110,7 +123,8 @@ public class VrpSolvingExtraData implements Writable {
 		numRegularTried = input.readInt();
 		regularImprovement = input.readDouble();
 		helperImprovement = input.readDouble();
-
+		helperTime = input.readInt();
+		regularTime = input.readInt();
 	}
 
 	@Override
@@ -129,11 +143,13 @@ public class VrpSolvingExtraData implements Writable {
 		output.writeInt(numRegularTried);
 		output.writeDouble(regularImprovement);
 		output.writeDouble(helperImprovement);
+		output.writeInt(helperTime);
+		output.writeInt(regularTime);
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-		VrpSolvingExtraData other = (VrpSolvingExtraData)o;
+		LnsExtraData other = (LnsExtraData)o;
 		return other.neighborhoods.equals(neighborhoods);
 	}
 }

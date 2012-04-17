@@ -15,12 +15,12 @@ public class PlsMetadata implements Writable {
 	private int helperDataNumNeighbs;
 	private boolean addFirstNeighbs;
 	
-	private int bestSolRegularNumSuccessful;
-	private int bestSolRegularNumTries;
-	private int bestSolHelperNumSuccessful;
-	private int bestSolHelperNumTries;
-	private double regularImprovement;
-	private double helperImprovement;
+//	private int bestSolRegularNumSuccessful;
+//	private int bestSolRegularNumTries;
+//	private int bestSolHelperNumSuccessful;
+//	private int bestSolHelperNumTries;
+//	private double regularImprovement;
+//	private double helperImprovement;
 	
 	public PlsMetadata() {
 	}
@@ -45,12 +45,12 @@ public class PlsMetadata implements Writable {
 		extraDataNumNeighbs = input.readInt();
 		helperDataNumNeighbs = input.readInt();
 		addFirstNeighbs = input.readBoolean();
-		bestSolRegularNumSuccessful = input.readInt();
-		bestSolRegularNumTries = input.readInt();
-		bestSolHelperNumSuccessful = input.readInt();
-		bestSolHelperNumTries = input.readInt();
-		regularImprovement = input.readDouble();
-		helperImprovement = input.readDouble();
+//		bestSolRegularNumSuccessful = input.readInt();
+//		bestSolRegularNumTries = input.readInt();
+//		bestSolHelperNumSuccessful = input.readInt();
+//		bestSolHelperNumTries = input.readInt();
+//		regularImprovement = input.readDouble();
+//		helperImprovement = input.readDouble();
 	}
 	
 	@Override
@@ -62,12 +62,12 @@ public class PlsMetadata implements Writable {
 		output.writeInt(extraDataNumNeighbs);
 		output.writeInt(helperDataNumNeighbs);
 		output.writeBoolean(addFirstNeighbs);
-		output.writeInt(bestSolRegularNumSuccessful);
-		output.writeInt(bestSolRegularNumTries);
-		output.writeInt(bestSolHelperNumSuccessful);
-		output.writeInt(bestSolHelperNumTries);
-		output.writeDouble(regularImprovement);
-		output.writeDouble(helperImprovement);
+//		output.writeInt(bestSolRegularNumSuccessful);
+//		output.writeInt(bestSolRegularNumTries);
+//		output.writeInt(bestSolHelperNumSuccessful);
+//		output.writeInt(bestSolHelperNumTries);
+//		output.writeDouble(regularImprovement);
+//		output.writeDouble(helperImprovement);
 	}
 	
 	public int getK() {
@@ -102,37 +102,37 @@ public class PlsMetadata implements Writable {
 		return helperDataNumNeighbs;
 	}
 	
-	public int getRegularNumSuccessful() {
-		return bestSolRegularNumSuccessful;
-	}
-	
-	public int getRegularNumTries() {
-		return bestSolRegularNumTries;
-	}
-	
-	public int getHelperNumSuccessful() {
-		return bestSolHelperNumSuccessful;
-	}
-	
-	public int getHelperNumTries() {
-		return bestSolHelperNumTries;
-	}
-	
-	public double getImprovementRegular() {
-		return regularImprovement;
-	}
-	
-	public double getImprovementHelper() {
-		return helperImprovement;
-	}
-	
-	public void setImprovementStats(int regSuccessful, int regNumTries, int helpSuccessful, int helpNumTries, 
-			double regImprovement, double helpImprovement) {
-		this.bestSolRegularNumSuccessful = regSuccessful;
-		this.bestSolRegularNumTries = regNumTries;
-		this.bestSolHelperNumSuccessful = helpSuccessful;
-		this.bestSolHelperNumTries = helpNumTries;
-		this.regularImprovement = regImprovement;
-		this.helperImprovement = helpImprovement;
-	}
+//	public int getRegularNumSuccessful() {
+//		return bestSolRegularNumSuccessful;
+//	}
+//	
+//	public int getRegularNumTries() {
+//		return bestSolRegularNumTries;
+//	}
+//	
+//	public int getHelperNumSuccessful() {
+//		return bestSolHelperNumSuccessful;
+//	}
+//	
+//	public int getHelperNumTries() {
+//		return bestSolHelperNumTries;
+//	}
+//	
+//	public double getImprovementRegular() {
+//		return regularImprovement;
+//	}
+//	
+//	public double getImprovementHelper() {
+//		return helperImprovement;
+//	}
+//	
+//	public void setImprovementStats(int regSuccessful, int regNumTries, int helpSuccessful, int helpNumTries, 
+//			double regImprovement, double helpImprovement) {
+//		this.bestSolRegularNumSuccessful = regSuccessful;
+//		this.bestSolRegularNumTries = regNumTries;
+//		this.bestSolHelperNumSuccessful = helpSuccessful;
+//		this.bestSolHelperNumTries = helpNumTries;
+//		this.regularImprovement = regImprovement;
+//		this.helperImprovement = helpImprovement;
+//	}
 }

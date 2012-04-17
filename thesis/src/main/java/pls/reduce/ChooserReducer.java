@@ -20,7 +20,7 @@ import pls.PlsMetadata;
 import pls.PlsUtil;
 import pls.SolutionData;
 import pls.vrp.VrpExtraDataHandler;
-import pls.vrp.VrpSolvingExtraData;
+import pls.vrp.LnsExtraData;
 
 public abstract class ChooserReducer extends MapReduceBase implements Reducer<BytesWritable, BytesWritable, BytesWritable, BytesWritable> {
 	
@@ -88,7 +88,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, metadata);
 		long nextRoundFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		
-		updateMetadata(metadata, (VrpSolvingExtraData)bestSolThisRound.getExtraData());
+//		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData());
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -96,7 +96,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			dos.write(outSol.getBytes(), 0, outSol.getLength());
 			metadata.write(dos);
 			Writable helperData = helperDatas.remove(helperDatas.size()-1);
-			LOG.info("About to write helper data with " + ((VrpSolvingExtraData)helperData).getNeighborhoods());
+			LOG.info("About to write helper data with " + ((LnsExtraData)helperData).getNeighborhoods());
 			helperData.write(dos);
 			BytesWritable outData = new BytesWritable(baos.toByteArray());
 			output.collect(PlsUtil.getMapSolKey(nextRoundFinishTime), outData);
@@ -171,14 +171,14 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		return kbest;
 	}
 	
-	private void updateMetadata(PlsMetadata metadata, VrpSolvingExtraData extraData) {
-		metadata.setImprovementStats(metadata.getRegularNumSuccessful() + extraData.getNumRegularSuccessful(),
-				metadata.getRegularNumTries() + extraData.getNumRegularTried(),
-				metadata.getHelperNumSuccessful() + extraData.getNumHelperSuccessful(),
-				metadata.getHelperNumTries() + extraData.getNumHelperTried(),
-				metadata.getImprovementRegular() + extraData.getRegularImprovement(),
-				metadata.getImprovementHelper() + extraData.getHelperImprovement());
-	}
+//	private void updateMetadata(PlsMetadata metadata, LnsExtraData extraData) {
+//		metadata.setImprovementStats(metadata.getRegularNumSuccessful() + extraData.getNumRegularSuccessful(),
+//				metadata.getRegularNumTries() + extraData.getNumRegularTried(),
+//				metadata.getHelperNumSuccessful() + extraData.getNumHelperSuccessful(),
+//				metadata.getHelperNumTries() + extraData.getNumHelperTried(),
+//				metadata.getImprovementRegular() + extraData.getRegularImprovement(),
+//				metadata.getImprovementHelper() + extraData.getHelperImprovement());
+//	}
 	
 	public abstract Class<SolutionData> getSolutionDataClass();
 }

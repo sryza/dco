@@ -1,6 +1,8 @@
 package pls;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -32,6 +35,7 @@ import pls.tsp.Greedy;
 import pls.tsp.TspLsCity;
 import pls.tsp.TspSaSolution;
 import pls.tsp.TspUtils;
+import pls.vrp.LnsExtraData;
 
 public class PlsMaster {
 
@@ -40,7 +44,7 @@ public class PlsMaster {
 	private boolean runLocal;
 	
 	//for collecting stats
-	private BlockingQueue<Path> completedJobPathsQueue;
+	private BlockingQueue<Path> completedJobPathsQueue = new LinkedBlockingQueue<Path>();
 	//for telling the stats thread we're done
 	private static final Path DONE_PATH = new Path("");
 	
@@ -89,12 +93,12 @@ public class PlsMaster {
 		//int k = Math.max(1, (int)Math.round(startSolutions.size() / 2 + .5));
 		LOG.info("k=" + metadata.getK());
 		
-		PlsJobStats stats = new PlsJobStats();
-		stats.setK(metadata.getK());
-		stats.setLsRunTime(metadata.getRoundTime());
-		stats.setNumMappers(startSolutions.size());
-		stats.setNumRounds(numRuns);
-		stats.setProblemName(problemName);
+		PlsJobStats stats = new PlsJobStats(metadata, problemName, startSolutions.size(), numRuns);
+		StatsThread statsThread = new StatsThread(stats, fs, conf, startSolutions.get(0).getClass());
+		statsThread.start();
+		
+		completedJobPathsQueue.offer(initDirPath);
+		stats.reportRoundTime(0);
 		//run the waves
 		for (int i = 0; i < numRuns; i++) {
 			Path inputPath = new Path(dirPath, i + "/");
@@ -102,12 +106,17 @@ public class PlsMaster {
 			long start = System.currentTimeMillis();
 			LOG.info("About to run job " + i);
 			runHadoopJob(inputPath, outputPath, startSolutions.size(), mapperClass, reducerClass);
-			completedJobPathsQueue.put(outputPath);
+			completedJobPathsQueue.offer(outputPath);
 			long end = System.currentTimeMillis();
 			LOG.info("Took " + (end-start) + " ms");
 			stats.reportRoundTime((int)(end-start));
 		}
-		completedJobPathsQueue.put(DONE_PATH);
+		completedJobPathsQueue.offer(DONE_PATH);
+		try {
+			statsThread.join();
+		} catch (InterruptedException ex) {
+			LOG.error("Error waiting for stats thread to join", ex);
+		}
 		
 		writeStatsFile(dirPath, stats, fs);
 	}
@@ -156,19 +165,70 @@ public class PlsMaster {
 	}
 	
 	private class StatsThread extends Thread {
-		public StatsThread(PlsJobStats stats) {
-			
+		private final PlsJobStats stats;
+		private final FileSystem fs;
+		private final Configuration conf;
+		private final Class solClass;
+		
+		public StatsThread(PlsJobStats stats, FileSystem fs, Configuration conf, Class solClass) {
+			this.stats = stats;
+			this.fs = fs;
+			this.conf = conf;
+			this.solClass = solClass;
 		}
 		
 		public void run() {
 			Path path;
 			try {
 				while ((path = completedJobPathsQueue.take()) != DONE_PATH) {
-					
+					Path outFilePath = new Path(path, "part-00000");
+					SequenceFile.Reader reader = new SequenceFile.Reader(fs, outFilePath, conf);
+					processRoundOutput(reader);
+					reader.close();
 				}
 			} catch (InterruptedException ex) {
 				LOG.error("Interrupted", ex);
+			} catch (IOException ex) {
+				LOG.error("Failed to read output file", ex);
 			}
+		}
+		
+		private void processRoundOutput(SequenceFile.Reader reader) throws IOException {
+			BytesWritable key = new BytesWritable();
+			BytesWritable value = new BytesWritable();
+			PlsMetadata metadata = null;
+			WritableSolution bestSol = null;
+			LnsExtraData bestExtraData = null;
+			while (reader.next(key, value)) {
+				ByteArrayInputStream bais = new ByteArrayInputStream(value.getBytes(), 0, value.getLength());
+				DataInputStream dis = new DataInputStream(bais);
+				WritableSolution sol;
+				try {
+					sol = (WritableSolution)solClass.newInstance();
+				} catch (Exception ex) {
+					LOG.error("Trouble instantiating solution class", ex);
+					continue;
+				}
+				sol.readFields(dis);
+				if (metadata == null) {
+					metadata = new PlsMetadata();
+					metadata.readFields(dis);
+				}
+				LnsExtraData extraData = null;
+				if (dis.available() > 0) {
+					extraData = new LnsExtraData();
+					extraData.readFields(dis);
+				}
+				
+				if (bestSol == null || sol.getCost() < bestSol.getCost()) {
+					bestSol = sol;
+					bestExtraData = extraData;
+				}
+			}
+			
+			stats.reportBestSolCost(bestSol.getCost());
+			stats.reportMetadata(metadata);
+			stats.reportBestExtraData(bestExtraData);
 		}
 	}
 }
