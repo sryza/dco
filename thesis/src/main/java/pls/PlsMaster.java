@@ -46,7 +46,7 @@ public class PlsMaster {
 	//for collecting stats
 	private BlockingQueue<Path> completedJobPathsQueue = new LinkedBlockingQueue<Path>();
 	//for telling the stats thread we're done
-	private static final Path DONE_PATH = new Path("");
+	private static final Path DONE_PATH = new Path("/");
 	
 	public PlsMaster() {
 		
@@ -210,10 +210,9 @@ public class PlsMaster {
 					continue;
 				}
 				sol.readFields(dis);
-				if (metadata == null) {
-					metadata = new PlsMetadata();
-					metadata.readFields(dis);
-				}
+				metadata = new PlsMetadata();
+				metadata.readFields(dis);
+				
 				LnsExtraData extraData = null;
 				if (dis.available() > 0) {
 					extraData = new LnsExtraData();
