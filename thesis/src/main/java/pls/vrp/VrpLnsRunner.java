@@ -79,12 +79,12 @@ public class VrpLnsRunner implements PlsRunner {
 					}
 					solAndStuff.setCurEscalation(n);
 					solAndStuff.setCurIteration(i);
+					numTries++;
 				}
 			}
 			//LOG.info("Starting new search");
 			solAndStuff.setCurEscalation(1);
 			solAndStuff.setCurIteration(0);
-			numTries++;
 		}
 		long regEndTime = System.currentTimeMillis();
 		int regTime = (int)(regEndTime - regStartTime);
