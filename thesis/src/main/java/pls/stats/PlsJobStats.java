@@ -84,64 +84,64 @@ public class PlsJobStats {
 	
 	private List<Integer> compileHelperTimes() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getHelperTime());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getHelperTime());
 		}
 		return list;
 	}
 	
 	private List<Integer> compileRegularTimes() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getRegularTime());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getRegularTime());
 		}
 		return list;
 	}
 	
 	private List<Integer> compileHelperNumSuccessfuls() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getNumHelperSuccessful());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getNumHelperSuccessful());
 		}
 		return list;
 	}
 	
 	private List<Integer> compileRegularNumSuccessfuls() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getNumRegularSuccessful());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getNumRegularSuccessful());
 		}
 		return list;
 	}
 	
 	private List<Integer> compileHelperNumTrieds() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getNumHelperTried());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getNumHelperTries());
 		}
 		return list;
 	}
 	
 	private List<Integer> compileRegularNumTrieds() {
 		List<Integer> list = new ArrayList<Integer>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getNumRegularTried());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getNumRegularTries());
 		}
 		return list;
 	}
 	
 	private List<Double> compileHelperImprovements() {
 		List<Double> list = new ArrayList<Double>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getHelperImprovement());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getHelperImprovement());
 		}
 		return list;
 	}
 	
 	private List<Double> compileRegularImprovements() {
 		List<Double> list = new ArrayList<Double>();
-		for (LnsExtraData extraData : bestExtraDatas) {
-			list.add(extraData.getRegularImprovement());
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getRegularImprovement());
 		}
 		return list;
 	}
@@ -160,6 +160,5 @@ public class PlsJobStats {
 			total += num;
 		}
 		return total;
-
 	}
 }

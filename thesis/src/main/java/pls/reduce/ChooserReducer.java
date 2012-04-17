@@ -88,7 +88,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, metadata);
 		long nextRoundFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		
-//		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData());
+		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData());
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -171,14 +171,15 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		return kbest;
 	}
 	
-//	private void updateMetadata(PlsMetadata metadata, LnsExtraData extraData) {
-//		metadata.setImprovementStats(metadata.getRegularNumSuccessful() + extraData.getNumRegularSuccessful(),
-//				metadata.getRegularNumTries() + extraData.getNumRegularTried(),
-//				metadata.getHelperNumSuccessful() + extraData.getNumHelperSuccessful(),
-//				metadata.getHelperNumTries() + extraData.getNumHelperTried(),
-//				metadata.getImprovementRegular() + extraData.getRegularImprovement(),
-//				metadata.getImprovementHelper() + extraData.getHelperImprovement());
-//	}
+	private void updateMetadata(PlsMetadata metadata, LnsExtraData extraData) {
+		metadata.setImprovementStats(/*metadata.getRegularNumSuccessful() + */extraData.getNumRegularSuccessful(),
+				/*metadata.getRegularNumTries() + */extraData.getNumRegularTried(),
+				/*metadata.getHelperNumSuccessful() + */extraData.getNumHelperSuccessful(),
+				/*metadata.getHelperNumTries() + */extraData.getNumHelperTried(),
+				/*metadata.getImprovementRegular() + */extraData.getRegularImprovement(),
+				/*metadata.getImprovementHelper() + */extraData.getHelperImprovement(),
+				extraData.getRegularTime(), extraData.getHelperTime());
+	}
 	
 	public abstract Class<SolutionData> getSolutionDataClass();
 }
