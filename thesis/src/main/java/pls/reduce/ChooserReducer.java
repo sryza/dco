@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
@@ -74,14 +75,14 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		PlsMetadata metadata = solsThisRound.get(0).getMetadata();
 		
 		//handle extra datas
-		ArrayList<Writable> extraDatas = new ArrayList<Writable>();
+		ArrayList<LnsExtraData> extraDatas = new ArrayList<LnsExtraData>();
 		for (SolutionData solData : solsThisRound) {
 			if (solData != bestSolThisRound && solData.getExtraData() != null) {
-				extraDatas.add(solData.getExtraData());
+				extraDatas.add((LnsExtraData)solData.getExtraData());
 			}
 		}
-		VrpExtraDataHandler handler = new VrpExtraDataHandler();
-		List<Writable> helperDatas = handler.makeNextRoundHelperDataFromExtraData(extraDatas, solsThisRound.size());
+		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), 50);
+		List<LnsExtraData> helperDatas = handler.makeNextRoundHelperDataFromExtraData2(extraDatas, solsThisRound.size());
 		
 		//prepare inputs to next round
 		LOG.info("Best cost this round: " + bestSolThisRound.getBestCost());

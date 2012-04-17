@@ -105,4 +105,8 @@ public class VrpLnsRunner implements PlsRunner {
 	public void setHelperData(Writable helperData) {
 		this.helperData = (LnsExtraData)helperData;
 	}
+	
+//	private List<Integer> findDifferingNodes(VrpSolution sol1, VrpSolution sol2, List<Integer> neighborhood) {
+//		
+//	}
 }
