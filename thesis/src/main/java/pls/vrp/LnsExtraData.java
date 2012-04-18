@@ -45,8 +45,12 @@ public class LnsExtraData implements Writable {
 	}
 	
 	public void addNeighborhood(VrpSolution partialSolution) {
+		addNeighborhood(partialSolution.getUninsertedNodes());
+	}
+	
+	public void addNeighborhood(List<Integer> neighborhood) {
 		if (maxNeighborhoods > 0 && (!addFirstNeighborhoods || neighborhoods.size() < maxNeighborhoods)) {
-			neighborhoods.add(partialSolution.getUninsertedNodes());
+			neighborhoods.add(neighborhood);
 			if (neighborhoods.size() > maxNeighborhoods) {
 				neighborhoods.remove(0);
 			}

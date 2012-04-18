@@ -80,6 +80,8 @@ public class PlsJobStats {
 		sb.append("\"helperImprovements\":" + compileHelperImprovements());
 		sb.append(",\n");
 		sb.append("\"regularImprovements\":" + compileRegularImprovements());
+		sb.append(",\n");
+		sb.append("\"numWorkings\":" + compileNumWorkings());
 		sb.append("}");
 		return sb.toString();
 	}
@@ -144,6 +146,14 @@ public class PlsJobStats {
 		List<Double> list = new ArrayList<Double>();
 		for (PlsMetadata data : plsMetadatas) {
 			list.add(data.getRegularImprovement());
+		}
+		return list;
+	}
+	
+	private List<Integer> compileNumWorkings() {
+		List<Integer> list = new ArrayList<Integer>();
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getNumWorking());
 		}
 		return list;
 	}

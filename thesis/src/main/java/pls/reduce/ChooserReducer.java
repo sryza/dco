@@ -81,7 +81,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				extraDatas.add((LnsExtraData)solData.getExtraData());
 			}
 		}
-		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), 50);
+		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), 200);
 		List<LnsExtraData> helperDatas = handler.makeNextRoundHelperDataFromExtraData2(extraDatas, solsThisRound.size());
 		
 		//prepare inputs to next round
@@ -89,7 +89,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, metadata);
 		long nextRoundFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		
-		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData());
+		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData(), helperDatas);
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -172,14 +172,25 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		return kbest;
 	}
 	
-	private void updateMetadata(PlsMetadata metadata, LnsExtraData extraData) {
-		metadata.setImprovementStats(/*metadata.getRegularNumSuccessful() + */extraData.getNumRegularSuccessful(),
-				/*metadata.getRegularNumTries() + */extraData.getNumRegularTried(),
-				/*metadata.getHelperNumSuccessful() + */extraData.getNumHelperSuccessful(),
-				/*metadata.getHelperNumTries() + */extraData.getNumHelperTried(),
-				/*metadata.getImprovementRegular() + */extraData.getRegularImprovement(),
-				/*metadata.getImprovementHelper() + */extraData.getHelperImprovement(),
-				extraData.getRegularTime(), extraData.getHelperTime());
+	private void updateMetadata(PlsMetadata metadata, LnsExtraData bestExtraData, List<LnsExtraData> otherExtraDatas) {
+		//tally num working
+		int numWorking = 0;
+		for (LnsExtraData extraData : otherExtraDatas) {
+			if (extraData.getRegularTime() > metadata.getRoundTime() / 2) {
+				numWorking++;
+			}
+		}
+		if (bestExtraData.getRegularTime() > metadata.getRoundTime() / 2) {
+			numWorking++;
+		}
+		
+		metadata.setRoundStats(/*metadata.getRegularNumSuccessful() + */bestExtraData.getNumRegularSuccessful(),
+				/*metadata.getRegularNumTries() + */bestExtraData.getNumRegularTried(),
+				/*metadata.getHelperNumSuccessful() + */bestExtraData.getNumHelperSuccessful(),
+				/*metadata.getHelperNumTries() + */bestExtraData.getNumHelperTried(),
+				/*metadata.getImprovementRegular() + */bestExtraData.getRegularImprovement(),
+				/*metadata.getImprovementHelper() + */bestExtraData.getHelperImprovement(),
+				bestExtraData.getRegularTime(), bestExtraData.getHelperTime(), numWorking);
 	}
 	
 	public abstract Class<SolutionData> getSolutionDataClass();

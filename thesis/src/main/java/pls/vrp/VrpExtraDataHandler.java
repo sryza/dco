@@ -28,7 +28,7 @@ public class VrpExtraDataHandler {
 		}
 		LOG.info("Received " + routes.size() + " routes for helper data");
 		
-		int numRoutesPerHelperData = Math.min(routes.size(), 50);
+		int numRoutesPerHelperData = Math.min(routes.size(), 100);
 		
 		List<Writable> results = new ArrayList<Writable>(numToMake);
 		int routesIndex = 0;
