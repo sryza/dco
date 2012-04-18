@@ -2,6 +2,7 @@ package pls.vrp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -106,6 +107,62 @@ public class LnsRelaxer {
 			denom += 1.0;
 		}
 		return 1/denom;
+	}
+	
+	public List<Integer> findDifferingNodes(VrpSolution sol1, VrpSolution sol2, List<Integer> neighborhood) {
+		int[] preds1 = getPredecessors(sol1);
+		int[] preds2 = getPredecessors(sol2);
+		List<Integer> differing = new ArrayList<Integer>(neighborhood.size());
+		for (int i = 0; i < preds1.length; i++) {
+			if (preds1[i] != preds2[i]) {
+				differing.add(i);
+			}
+		}
+		return differing;
+	}
+	
+	public List<Integer> findDifferingNodes2(VrpSolution sol1, VrpSolution sol2, List<Integer> neighborhood) {
+		int[] preds1 = getPredecessors(sol1);
+		int[] succs1 = getSuccessors(sol1);
+		int[] preds2 = getPredecessors(sol2);
+		int[] succs2 = getSuccessors(sol2);
+		List<Integer> differing = new ArrayList<Integer>(neighborhood.size());
+		for (int cust : neighborhood) {
+			if (preds1[cust] != preds2[cust] || succs1[cust] != succs2[cust]) {
+				differing.add(cust);
+			}
+		}
+		return differing;
+	}
+	
+	private int[] getSuccessors(VrpSolution sol) {
+		int[] succs = new int[sol.getProblem().getNumCities()];
+		for (List<Integer> route : sol.getRoutes()) {
+			Iterator<Integer> iter = route.iterator();
+			int prev = iter.next();
+			while (iter.hasNext()) {
+				int cur = iter.next();
+				succs[prev] = cur;
+				prev = cur;
+			}
+			succs[prev] = -1;
+		}
+		return succs;
+	}
+	
+	private int[] getPredecessors(VrpSolution sol) {
+		int[] preds = new int[sol.getProblem().getNumCities()];
+		for (List<Integer> route : sol.getRoutes()) {
+			Iterator<Integer> iter = route.iterator();
+			int prev = iter.next();
+			preds[prev] = -1;
+			while (iter.hasNext()) {
+				int cur = iter.next();
+				preds[cur] = prev;
+				prev = cur;
+			}
+		}
+		return preds;
 	}
 	
 	private class CityRelatedness implements Comparable<CityRelatedness> {

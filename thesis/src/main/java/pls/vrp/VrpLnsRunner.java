@@ -73,7 +73,7 @@ public class VrpLnsRunner implements PlsRunner {
 					
 					VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats, true);
 					if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
-						List<Integer> differing = findDifferingNodes(sol, newSol, partialSol.getUninsertedNodes());
+						List<Integer> differing = relaxer.findDifferingNodes2(sol, newSol, partialSol.getUninsertedNodes());
 						extraData.addNeighborhood(differing);
 						sol = newSol;
 						solAndStuff.setSolution(sol);
@@ -109,30 +109,5 @@ public class VrpLnsRunner implements PlsRunner {
 		this.helperData = (LnsExtraData)helperData;
 	}
 	
-	private List<Integer> findDifferingNodes(VrpSolution sol1, VrpSolution sol2, List<Integer> neighborhood) {
-		int[] preds1 = getPredecessors(sol1);
-		int[] preds2 = getPredecessors(sol2);
-		List<Integer> differing = new ArrayList<Integer>(neighborhood.size());
-		for (int i = 0; i < preds1.length; i++) {
-			if (preds1[i] != preds2[i]) {
-				differing.add(i);
-			}
-		}
-		return differing;
-	}
 	
-	private int[] getPredecessors(VrpSolution sol) {
-		int[] preds = new int[sol.getProblem().getNumCities()];
-		for (List<Integer> route : sol.getRoutes()) {
-			Iterator<Integer> iter = route.iterator();
-			int prev = iter.next();
-			preds[prev] = -1;
-			while (iter.hasNext()) {
-				int cur = iter.next();
-				preds[cur] = prev;
-				prev = cur;
-			}
-		}
-		return preds;
-	}
 }
