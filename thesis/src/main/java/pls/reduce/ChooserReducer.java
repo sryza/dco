@@ -81,7 +81,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				extraDatas.add((LnsExtraData)solData.getExtraData());
 			}
 		}
-		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), 200);
+		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), metadata.getHelperDataNumNeighbors());
 		List<LnsExtraData> helperDatas = handler.makeNextRoundHelperDataFromExtraData2(extraDatas, solsThisRound.size());
 		
 		//prepare inputs to next round
@@ -89,7 +89,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 		List<BytesWritable> outSols = chooseNextRoundSols(solsThisRound, bestSolThisRound, metadata);
 		long nextRoundFinishTime = System.currentTimeMillis() + metadata.getRoundTime();
 		
-		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData(), helperDatas);
+		updateMetadata(metadata, (LnsExtraData)bestSolThisRound.getExtraData(), extraDatas);
 		//write out sols
 		for (BytesWritable outSol : outSols) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

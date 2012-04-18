@@ -21,6 +21,7 @@ public class VrpHadoopMain {
 		int numTasks = Integer.parseInt(args[0]);
 		int k = Math.max(1, numTasks-1);
 		int numRuns = Integer.parseInt(args[1]);
+		int extraNeighbors = 0;
 		int helperNeighbors = 0;
 		//optional args
 		boolean runLocal = false;
@@ -42,13 +43,16 @@ public class VrpHadoopMain {
 			}
 		}
 		if (args.length > 5) {
-			helperNeighbors = Integer.parseInt(args[5]);
+			extraNeighbors = Integer.parseInt(args[5]);
 		}
 		if (args.length > 6) {
-			addFirstNeighbors = Boolean.parseBoolean(args[6]);
+			helperNeighbors = Integer.parseInt(args[6]);
 		}
 		if (args.length > 7) {
-			useBestForAll = Boolean.parseBoolean(args[7]);
+			addFirstNeighbors = Boolean.parseBoolean(args[7]);
+		}
+		if (args.length > 8) {
+			useBestForAll = Boolean.parseBoolean(args[8]);
 		}
 				
 		final int maxDiscrepancies = 5;
@@ -81,7 +85,7 @@ public class VrpHadoopMain {
 		LOG.info("results going to " + dir);
 		long startTime = System.currentTimeMillis();
 		
-		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, helperNeighbors, -1, addFirstNeighbors);
+		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, extraNeighbors, helperNeighbors, addFirstNeighbors);
 
 		master.run(numRuns, initSols, dir, VrpMapper.class, VrpReducer.class, metadata, inputFile.getName());
 		long endTime = System.currentTimeMillis();
