@@ -41,6 +41,8 @@ public class VrpLnsRunner implements PlsRunner {
 			for (List<Integer> neighborhood : neighborhoods) {
 				VrpCpStats stats = new VrpCpStats();
 				VrpSolution partialSol = new VrpSolution(relaxer.buildRoutesWithoutCusts(sol.getRoutes(), neighborhood), neighborhood, problem);
+				//allow an extra route to be added
+				partialSol.getRoutes().add(new ArrayList<Integer>());
 				VrpSolution newSol = solver.solve(partialSol, sol.getToursCost(), solAndStuff.getMaxDiscrepancies(), stats, true);
 				if (newSol != null && Math.abs(newSol.getToursCost() - sol.getToursCost()) > .001) {
 					extraData.addNeighborhood(partialSol);

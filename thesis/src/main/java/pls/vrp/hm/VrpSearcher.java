@@ -112,13 +112,17 @@ public class VrpSearcher {
 					solRoutes.add(routeCustIds);
 				}
 			}
-			stats.reportNodeEvaluated();
+			if (stats != null) {
+				stats.reportNodeEvaluated();
+			}
 			VrpSolution sol = new VrpSolution(solRoutes, problem);
 			if (Math.abs(sol.getToursCost() - curCost) > .001) {
 				LOG.error("costs inconsistent! " + sol.getToursCost() + " != " + curCost);
 				return null;
 			} else if (Math.abs(curCost - bestCost) > .001) {
-				stats.reportNewBestSolution(curCost);
+				if (stats != null) {
+					stats.reportNewBestSolution(curCost);
+				}
 				return sol;
 			} else {
 				return null;
@@ -129,7 +133,9 @@ public class VrpSearcher {
 			return null;
 		}
 		
-		stats.reportNodeEvaluated();
+		if (stats != null) {
+			stats.reportNodeEvaluated();
+		}
 		
 		//determine city whose minimum insert cost is the largest
 		//its insertion points should be ordered

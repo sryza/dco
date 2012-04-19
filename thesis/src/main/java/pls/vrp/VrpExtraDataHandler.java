@@ -1,12 +1,21 @@
 package pls.vrp;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
+
+import pls.SolutionData;
 
 public class VrpExtraDataHandler {
 	private static final Logger LOG = Logger.getLogger(VrpExtraDataHandler.class);
@@ -75,6 +84,35 @@ public class VrpExtraDataHandler {
 			}
 			results.add(new LnsExtraData(neighbsList));
 		}
+		return results;
+	}
+	
+	public Map<SolutionData, LnsExtraData> makeNextRoundHelperDatas3(List<SolutionData> solDatas, List<SolutionData> toMakeFor) 
+		throws IOException {
+		Map<SolutionData, LnsExtraData> results = new HashMap<SolutionData, LnsExtraData>();
+		Map<SolutionData, VrpSolution> solDataSols = new HashMap<SolutionData, VrpSolution>();
+		for (SolutionData solData : solDatas) {
+			BytesWritable bytes = solData.getBestSolutionBytes();
+			ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes(), 0, bytes.getLength());
+			DataInputStream dis = new DataInputStream(bais);
+			VrpPlsSolution plsSol = new VrpPlsSolution();
+			plsSol.readFields(dis);
+			solDataSols.put(solData, plsSol.getSolution());
+		}
+		
+		for (SolutionData solToMakeFor : toMakeFor) {
+			List<List<Integer>> routes = new ArrayList<List<Integer>>();
+			for (SolutionData solData : solDataSols.keySet()) {
+				if (solData != solToMakeFor) {
+					VrpSolution sol = solDataSols.get(solData);
+					routes.addAll(sol.getRoutes());
+				}
+			}
+			Collections.shuffle(routes);
+			LnsExtraData helperData = new LnsExtraData(routes);
+			results.put(solToMakeFor, helperData);
+		}
+		
 		return results;
 	}
 }
