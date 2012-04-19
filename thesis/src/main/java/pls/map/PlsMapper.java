@@ -82,7 +82,6 @@ public abstract class PlsMapper extends MapReduceBase implements Mapper<BytesWri
 				helperData.readFields(dis);
 				runner.setHelperData(helperData);
 				((LnsExtraData)helperData).setMaxNeighborhoods(metadata.getExtraDataNumNeighbors());
-				((LnsExtraData)helperData).setAddFirstNeighborhoods(metadata.getAddFirstNeighborhoods());
 			} catch (Exception ex) {
 				LOG.error("Trouble reading helper data, aborting...", ex);
 				return;

@@ -83,8 +83,14 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			}
 		}
 		VrpExtraDataHandler handler = new VrpExtraDataHandler(new Random(), metadata.getHelperDataNumNeighbors());
-//		List<LnsExtraData> helperDatas = handler.makeNextRoundHelperDataFromExtraData2(extraDatas, solsThisRound.size());
-		Map<SolutionData, LnsExtraData> helperDatasMap = handler.makeNextRoundHelperDatas3(solsThisRound, solsThisRound);
+		
+		List<LnsExtraData> helperDatas = null;
+		Map<SolutionData, LnsExtraData> helperDatasMap = null;
+		if (metadata.getAddFirstNeighborhoods()) {
+			helperDatas = handler.makeNextRoundHelperDataFromExtraData2(extraDatas, solsThisRound.size());
+		} else {
+			helperDatasMap = handler.makeNextRoundHelperDatas3(solsThisRound, solsThisRound);
+		}
 		
 		//prepare inputs to next round
 		LOG.info("Best cost this round: " + bestSolThisRound.getBestCost());
@@ -99,8 +105,12 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 			BytesWritable bytesWritable = outSol.getBestSolutionBytes();
 			dos.write(bytesWritable.getBytes(), 0, bytesWritable.getLength());
 			metadata.write(dos);
-//			Writable helperData = helperDatas.remove(helperDatas.size()-1);
-			Writable helperData = helperDatasMap.get(outSol);
+			Writable helperData;
+			if (metadata.getAddFirstNeighborhoods()) {
+				helperData = helperDatas.remove(helperDatas.size()-1);
+			} else {
+				helperData = helperDatasMap.get(outSol);
+			}
 			LOG.info("About to write helper data with " + ((LnsExtraData)helperData).getNeighborhoods());
 			helperData.write(dos);
 			BytesWritable outData = new BytesWritable(baos.toByteArray());

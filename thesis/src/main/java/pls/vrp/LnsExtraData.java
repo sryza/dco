@@ -16,7 +16,6 @@ public class LnsExtraData implements Writable {
 	
 	private int maxNeighborhoods = 50;
 	private List<List<Integer>> neighborhoods;
-	private boolean addFirstNeighborhoods;
 	
 	private int numHelperSuccessful;
 	private int numHelperTried;
@@ -36,10 +35,6 @@ public class LnsExtraData implements Writable {
 		this.neighborhoods = neighborhoods;
 	}
 	
-	public void setAddFirstNeighborhoods(boolean addFirstNeighborhoods) {
-		this.addFirstNeighborhoods = addFirstNeighborhoods;
-	}
-	
 	public void setMaxNeighborhoods(int maxNeighbs) {
 		maxNeighborhoods = maxNeighbs;
 	}
@@ -49,11 +44,11 @@ public class LnsExtraData implements Writable {
 	}
 	
 	public void addNeighborhood(List<Integer> neighborhood) {
-		if (maxNeighborhoods > 0 && (!addFirstNeighborhoods || neighborhoods.size() < maxNeighborhoods)) {
+		if (maxNeighborhoods > 0 && (neighborhoods.size() < maxNeighborhoods)) {
 			neighborhoods.add(neighborhood);
-			if (neighborhoods.size() > maxNeighborhoods) {
-				neighborhoods.remove(0);
-			}
+//			if (neighborhoods.size() > maxNeighborhoods) {
+//				neighborhoods.remove(0);
+//			}
 		}
 	}
 	
