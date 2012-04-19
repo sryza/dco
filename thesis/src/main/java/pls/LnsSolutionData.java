@@ -53,7 +53,7 @@ public class LnsSolutionData extends SolutionData {
 	}
 
 	@Override
-	public Writable getExtraData() {
+	public LnsExtraData getExtraData() {
 		return extraData;
 	}
 

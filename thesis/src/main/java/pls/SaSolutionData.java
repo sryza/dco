@@ -7,6 +7,8 @@ import java.io.IOException;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
 
+import pls.vrp.LnsExtraData;
+
 
 public class SaSolutionData extends SolutionData {
 	public double cost;
@@ -61,7 +63,7 @@ public class SaSolutionData extends SolutionData {
 	}
 
 	@Override
-	public Writable getExtraData() {
+	public LnsExtraData getExtraData() {
 		// TODO Auto-generated method stub
 		return null;
 	}
