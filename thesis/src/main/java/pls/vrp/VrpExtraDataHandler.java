@@ -95,7 +95,7 @@ public class VrpExtraDataHandler {
 			BytesWritable bytes = solData.getBestSolutionBytes();
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes.getBytes(), 0, bytes.getLength());
 			DataInputStream dis = new DataInputStream(bais);
-			VrpPlsSolution plsSol = new VrpPlsSolution();
+			VrpPlsSolution plsSol = new VrpPlsSolution(false);
 			plsSol.readFields(dis);
 			solDataSols.put(solData, plsSol.getSolution());
 		}

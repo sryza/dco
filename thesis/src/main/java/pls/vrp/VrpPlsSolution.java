@@ -24,7 +24,13 @@ public class VrpPlsSolution implements PlsSolution {
 	
 	private VrpSolution sol;
 	
+	private boolean readProblem = true;
+	
 	public VrpPlsSolution() {
+	}
+	
+	public VrpPlsSolution(boolean readProblem) {
+		this.readProblem = readProblem;
 	}
 	
 	public VrpPlsSolution(VrpSolution sol, int maxIter, int maxEscalation, int relaxationRandomness, int maxDiscrepancies, 
@@ -137,7 +143,10 @@ public class VrpPlsSolution implements PlsSolution {
 				route.add(dis.readInt());
 			}
 		}
-		VrpProblem problem = buildProblemFromStream(dis);
+		VrpProblem problem = null;
+		if (readProblem) {
+			problem = buildProblemFromStream(dis);
+		}
 		sol = new VrpSolution(routes, problem, toursCost);
 		maxIter = dis.readInt();
 		curIter = dis.readInt();
