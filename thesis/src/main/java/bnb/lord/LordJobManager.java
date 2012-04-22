@@ -1,6 +1,9 @@
 package bnb.lord;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,6 +37,7 @@ public class LordJobManager {
 	
 	private boolean failed;
 	private boolean done;
+	
 	
 	public LordJobManager(int jobid, List<BnbNode> unevaluated, Problem problem, List<VassalProxy> vassalProxies, LordJobStats stats) {
 		this.jobid = jobid;
@@ -147,6 +151,18 @@ public class LordJobManager {
 				LOG.info("Computation completed!");
 				LOG.info("Best cost: " + minCost);
 				LOG.info("Stats: \n" + stats.makeReportSummary());
+				
+				//report stats
+				String report = stats.makeReport();
+				File statsFile = new File("/home/sryza/logs/lord" + System.currentTimeMillis() + ".log");
+				try {
+					FileWriter fos = new FileWriter(statsFile);
+					fos.write(report);
+					fos.close();
+				} catch (Exception ex) {
+					LOG.error("Error reporting stats", ex);
+				}
+				LOG.info("Completed writing out stats file");
 			}
 		}
 	}

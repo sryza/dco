@@ -176,19 +176,23 @@ public class VassalRunner implements VassalPublic {
 		
 		public void run() {
 			for (Thread thread : threads) {
+				int nTerminated = 0;
 				try {
 					thread.join();
+					nTerminated++;
+					LOG.info("Thread " + thread.getName() + " terminated, " + (threads.size()-nTerminated) + " remaining.");
 				} catch (InterruptedException ex) {
 					LOG.error("Interrupted while waiting to terminate", ex);
 				}
 			}
+			LOG.info("All task threads terminated");
 			
 			if (statsOs != null) {
 				try {
 					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(statsOs));
 					bw.write(stats.makeReport());
 					bw.close();
-				} catch (IOException ex) {
+				} catch (Exception ex) {
 					LOG.error("Error writing stats to output stream", ex);
 				}
 			}

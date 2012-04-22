@@ -81,10 +81,10 @@ public class VassalJobStats {
 		
 		sb.append(",\n");
 		
-		sb.append("\"askForWork_latencies_stats\":");
-		makeReportOnList(askForWorkLats.getAll(), sb);
+//		sb.append("\"askForWork_latencies_stats\":");
+//		makeReportOnList(askForWorkLats.getAll(), sb);
 		
-		sb.append(",\n");
+//		sb.append(",\n");
 		
 		sb.append("\"numEvaluated\": " + numEvaluated);
 		sb.append(",\n");

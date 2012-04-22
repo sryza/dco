@@ -52,7 +52,7 @@ public class LordJobStats {
 		return sb.toString();
 	}
 	
-	public String makeReport1() {
+	public String makeReport() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{");
 		sb.append("\"totalTime\":" + (finishTime - startTime));
@@ -73,6 +73,9 @@ public class LordJobStats {
 				sb.append(theft.numFailedAttempts+",");
 			}
 		}
+		if (sb.length() > 1) { //remove trailing comma
+			sb.deleteCharAt(sb.length()-1);
+		}
 		sb.append("]");
 		sb.append(",\n");
 		sb.append("\"stealTimes\":[");
@@ -80,6 +83,20 @@ public class LordJobStats {
 			for (WorkTheft theft : list) {
 				sb.append(theft.endTime+",");
 			}
+		}
+		if (sb.length() > 1) { //remove trailing comma
+			sb.deleteCharAt(sb.length()-1);
+		}
+		sb.append("]");
+		sb.append(",\n");
+		sb.append("\"stealsTimeTaken\":[");
+		for (List<WorkTheft> list : workThefts.getLists()) {
+			for (WorkTheft theft : list) {
+				sb.append(theft.timeTaken+",");
+			}
+		}
+		if (sb.length() > 1) { //remove trailing comma
+			sb.deleteCharAt(sb.length()-1);
 		}
 		sb.append("]");
 		sb.append("}");
