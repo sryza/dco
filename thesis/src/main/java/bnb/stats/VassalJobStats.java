@@ -18,6 +18,8 @@ public class VassalJobStats {
 	private ThreadLocalList<Long> toggleWorkingTimes;
 	
 	private ThreadLocalCount totalStealTime;
+	private ThreadLocalList<Long> workStolenTimes;//logged after work has been stolen
+	private ThreadLocalList<Integer> workStealLats;
 	
 	private int numEvaluated;
 	
@@ -30,6 +32,8 @@ public class VassalJobStats {
 		nextNodeStart = new ThreadLocal<Long>();
 		toggleWorkingTimes = new ThreadLocalList<Long>();
 		totalStealTime = new ThreadLocalCount();
+		workStealLats = new ThreadLocalList<Integer>();
+		workStolenTimes = new ThreadLocalList<Long>();
 	}
 	
 	public void reportNextNodeStart() {
@@ -53,6 +57,8 @@ public class VassalJobStats {
 
 	public void reportWorkStolen(int timeTaken) {
 		totalStealTime.add(timeTaken);
+		workStealLats.add(timeTaken);
+		workStolenTimes.add(System.currentTimeMillis());
 	}
 	
 	public void reportWorking() {
@@ -78,32 +84,18 @@ public class VassalJobStats {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\"askForWork_latencies\":");
 		sb.append(askForWorkLats.getAll());
-		
 		sb.append(",\n");
-		
-//		sb.append("\"askForWork_latencies_stats\":");
-//		makeReportOnList(askForWorkLats.getAll(), sb);
-		
-//		sb.append(",\n");
-		
 		sb.append("\"numEvaluated\": " + numEvaluated);
 		sb.append(",\n");
-
-//		sb.append("\"nextNode_latencies_stats\": ");
-//		makeReportOnList(nextNodeLats.getAll(), sb);
-		
-//		sb.append(",\n");
-		
 		List<List<Long>> toggleWorkingLists = toggleWorkingTimes.getLists();
-		
 		sb.append("\"toggleWorkingLists\": " + toggleWorkingLists);
-		
 		sb.append(",\n");
-		
+		sb.append("\"workStealLats\": " + workStealLats.getAll());
+		sb.append(",\n");
+		sb.append("\"workStolenTimes\": " + workStolenTimes.getAll());
+		sb.append(",\n");
 		sb.append("\"totalStealTime\": " + totalStealTime.getCount());
-		
 		sb.append(",\n");
-		
 		sb.append("\"doneTime\": " + doneTime);
 		
 //		

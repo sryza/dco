@@ -1,5 +1,6 @@
 package bnb.stats;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LordJobStats {
@@ -61,7 +62,7 @@ public class LordJobStats {
 		sb.append(",\n");
 		sb.append("\"finish time\": " + finishTime);
 		sb.append(",\n");
-		sb.append("\"numWokStealingThreads\": " + workThefts.getLists().size());
+		sb.append("\"numWorkStealingThreads\": " + workThefts.getLists().size());
 		sb.append(",\n");
 		sb.append("\"totalWorkStealingTime\": " + sumWorkStolenTime());
 		sb.append(",\n");
@@ -121,6 +122,28 @@ public class LordJobStats {
 			sum += list.size();
 		}
 		return sum;
+	}
+	
+	private List<Integer> getWorkStealTimeTakens() {
+		List<Integer> timeTakens = new ArrayList<Integer>();
+		List<List<WorkTheft>> lists = workThefts.getLists();
+		for (List<WorkTheft> list : lists) {
+			for (WorkTheft theft : list) {
+				timeTakens.add(theft.timeTaken);
+			}
+		}
+		return timeTakens;
+	}
+	
+	private List<Long> getWorkStealTimes() {
+		List<Long> times = new ArrayList<Long>();
+		List<List<WorkTheft>> lists = workThefts.getLists();
+		for (List<WorkTheft> list : lists) {
+			for (WorkTheft theft : list) {
+				times.add(theft.endTime);
+			}
+		}
+		return times;
 	}
 	
 	private class WorkTheft {
