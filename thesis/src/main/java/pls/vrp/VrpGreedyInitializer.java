@@ -103,7 +103,7 @@ public class VrpGreedyInitializer {
 			if (minVisitTime > windowEndTimes[nodeId]) {
 				continue;
 			}
-			double timeDiff = minVisitTime - (curLastVisitTime + curLastVisitTime);
+			double timeDiff = minVisitTime - (curLastVisitTime + curLastServiceTime);
 			double urgency = windowEndTimes[nodeId] - (curLastVisitTime + curLastServiceTime + distance);
 			double val = timeDiff * timeDiffWeight + distance * distanceWeight + urgency * urgencyWeight;
 			if (val < bestVal) {
