@@ -24,6 +24,7 @@ public class PlsMetadata implements Writable {
 	private int helperTime;
 	private int regularTime;
 	private int numWorking;
+	private int totalWorkingTime;
 	
 	public PlsMetadata() {
 	}
@@ -57,6 +58,7 @@ public class PlsMetadata implements Writable {
 		helperTime = input.readInt();
 		regularTime = input.readInt();
 		numWorking = input.readInt();
+		totalWorkingTime = input.readInt();
 	}
 	
 	@Override
@@ -77,6 +79,11 @@ public class PlsMetadata implements Writable {
 		output.writeInt(helperTime);
 		output.writeInt(regularTime);
 		output.writeInt(numWorking);
+		output.writeInt(totalWorkingTime);
+	}
+	
+	public int getTotalWorkingTime() {
+		return totalWorkingTime;
 	}
 	
 	public int getK() {
@@ -148,7 +155,7 @@ public class PlsMetadata implements Writable {
 	}
 	
 	public void setRoundStats(int regSuccessful, int regNumTries, int helpSuccessful, int helpNumTries, 
-			double regImprovement, double helpImprovement, int regTime, int helperTime, int numWorking) {
+			double regImprovement, double helpImprovement, int regTime, int helperTime, int numWorking, int totalWorkingTime) {
 		this.bestSolRegularNumSuccessful = regSuccessful;
 		this.bestSolRegularNumTries = regNumTries;
 		this.bestSolHelperNumSuccessful = helpSuccessful;
@@ -158,5 +165,6 @@ public class PlsMetadata implements Writable {
 		this.regularTime = regTime;
 		this.helperTime = helperTime;
 		this.numWorking = numWorking;
+		this.totalWorkingTime = totalWorkingTime;
 	}
 }

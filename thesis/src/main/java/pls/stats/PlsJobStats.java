@@ -83,6 +83,8 @@ public class PlsJobStats {
 		sb.append("\"regularImprovements\":" + compileRegularImprovements());
 		sb.append(",\n");
 		sb.append("\"numWorkings\":" + compileNumWorkings());
+		sb.append(",\n");
+		sb.append("\"totalWorkingTimes\":" + compileTotalWorkingTimes());
 		sb.append("}");
 		return sb.toString();
 	}
@@ -155,6 +157,14 @@ public class PlsJobStats {
 		List<Integer> list = new ArrayList<Integer>();
 		for (PlsMetadata data : plsMetadatas) {
 			list.add(data.getNumWorking());
+		}
+		return list;
+	}
+	
+	private List<Integer> compileTotalWorkingTimes() {
+		List<Integer> list = new ArrayList<Integer>();
+		for (PlsMetadata data : plsMetadatas) {
+			list.add(data.getTotalWorkingTime());
 		}
 		return list;
 	}

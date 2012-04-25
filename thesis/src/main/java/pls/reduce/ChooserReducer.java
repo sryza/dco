@@ -192,11 +192,14 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 	private void updateMetadata(PlsMetadata metadata, LnsExtraData bestExtraData, List<LnsExtraData> otherExtraDatas) {
 		//tally num working
 		int numWorking = 0;
+		int totalRoundTime = 0;
 		for (LnsExtraData extraData : otherExtraDatas) {
 			if (extraData.getRegularTime() > metadata.getRoundTime() / 2) {
 				numWorking++;
 			}
+			totalRoundTime += extraData.getRegularTime() + extraData.getHelperTime();
 		}
+		totalRoundTime += bestExtraData.getRegularTime() + bestExtraData.getHelperTime();
 		if (bestExtraData.getRegularTime() > metadata.getRoundTime() / 2) {
 			numWorking++;
 		}
@@ -207,7 +210,7 @@ public abstract class ChooserReducer extends MapReduceBase implements Reducer<By
 				/*metadata.getHelperNumTries() + */bestExtraData.getNumHelperTried(),
 				/*metadata.getImprovementRegular() + */bestExtraData.getRegularImprovement(),
 				/*metadata.getImprovementHelper() + */bestExtraData.getHelperImprovement(),
-				bestExtraData.getRegularTime(), bestExtraData.getHelperTime(), numWorking);
+				bestExtraData.getRegularTime(), bestExtraData.getHelperTime(), numWorking, totalRoundTime);
 	}
 	
 	public abstract Class<SolutionData> getSolutionDataClass();
