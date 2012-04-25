@@ -1,10 +1,14 @@
 package pls.vrp;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 
 import pls.PlsMaster;
@@ -81,8 +85,7 @@ public class VrpHadoopMain {
 		}
 		
 		PlsMaster master = new PlsMaster(runLocal);
-		String dir = "/users/sryza/testdir/" + System.currentTimeMillis() + "/";
-		LOG.info("results going to " + dir);
+		String dir = "/users/sryza/testdir/";
 		long startTime = System.currentTimeMillis();
 		
 		PlsMetadata metadata = new PlsMetadata(k, bestStartCost, roundTime, useBestForAll, extraNeighbors, helperNeighbors, addFirstNeighbors);
@@ -90,5 +93,5 @@ public class VrpHadoopMain {
 		master.run(numRuns, initSols, dir, VrpMapper.class, VrpReducer.class, metadata, inputFile.getName());
 		long endTime = System.currentTimeMillis();
 		LOG.info("Total time: " + (endTime - startTime));
-	}
+	}	
 }

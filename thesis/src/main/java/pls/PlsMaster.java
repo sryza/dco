@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -14,6 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -30,6 +33,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.log4j.Logger;
 
+import pls.stats.NumberFolderComparator;
 import pls.stats.PlsJobStats;
 import pls.tsp.Greedy;
 import pls.tsp.TspLsCity;
@@ -62,7 +66,8 @@ public class PlsMaster {
 		Configuration conf = new Configuration();
 		
 		FileSystem fs = FileSystem.get(conf);
-		Path dirPath = new Path(dir);
+		Path testDirPath = new Path(dir);
+		Path dirPath = nextDirPath(testDirPath, fs);
 		fs.delete(dirPath, true);
 		
 		//write out initial input file
@@ -230,4 +235,17 @@ public class PlsMaster {
 			stats.reportBestExtraData(bestExtraData);
 		}
 	}
+	
+	private Path nextDirPath(Path dir, FileSystem fs) throws FileNotFoundException, IOException {
+		FileStatus[] statuses = fs.listStatus(dir);
+		if (statuses.length == 0) {
+			return new Path(dir, "0");
+		}
+		Arrays.sort(statuses, new NumberFolderComparator());
+		Path lastPath = statuses[statuses.length-1].getPath();
+		String name = lastPath.getName();
+		int num = Integer.parseInt(name);
+		return new Path(dir, "" + num);
+	}
+
 }
