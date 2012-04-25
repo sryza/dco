@@ -24,6 +24,7 @@ public class PlsJobStats {
 		this.metadata = metadata;
 		this.numMappers = numMappers;
 		this.numRounds = numRounds;
+		this.problemName = problemName;
 	}
 	
 	public void reportRoundTime(int time) {
