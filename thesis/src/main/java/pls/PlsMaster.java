@@ -244,7 +244,7 @@ public class PlsMaster {
 		Arrays.sort(statuses, new NumberFolderComparator());
 		Path lastPath = statuses[statuses.length-1].getPath();
 		String name = lastPath.getName();
-		int num = Integer.parseInt(name);
+		int num = Integer.parseInt(name) + 1;
 		return new Path(dir, "" + num);
 	}
 
