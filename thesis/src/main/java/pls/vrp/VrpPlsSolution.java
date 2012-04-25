@@ -110,11 +110,11 @@ public class VrpPlsSolution implements PlsSolution {
 		dos.writeDouble(sol.getToursCost());
 		dos.writeInt(solId);
 		dos.writeInt(parentSolId);
-		dos.writeInt(sol.getNumVehicles());
+		dos.writeShort(sol.getNumVehicles());
 		for (List<Integer> route : sol.getRoutes()) {
-			dos.writeInt(route.size());
+			dos.writeShort(route.size());
 			for (int custId : route) {
-				dos.writeInt(custId);
+				dos.writeShort(custId);
 			}
 		}
 		
@@ -133,14 +133,14 @@ public class VrpPlsSolution implements PlsSolution {
 		double toursCost = dis.readDouble();
 		solId = dis.readInt();
 		parentSolId = dis.readInt();
-		int numVehicles = dis.readInt();
+		int numVehicles = dis.readShort();
 		List<List<Integer>> routes = new ArrayList<List<Integer>>(numVehicles);
 		for (int i = 0; i < numVehicles; i++) {
-			int numCusts = dis.readInt();
+			int numCusts = dis.readShort();
 			List<Integer> route = new ArrayList<Integer>(numCusts);
 			routes.add(route);
 			for (int j = 0; j < numCusts; j++) {
-				route.add(dis.readInt());
+				route.add((int)dis.readShort());
 			}
 		}
 		VrpProblem problem = null;
@@ -158,6 +158,7 @@ public class VrpPlsSolution implements PlsSolution {
 
 	@Override
 	public int serializedSize() {
+		//TODO: this calculation is incorrect!
 		return 4 //cost
 			+ 4 //numVehicles
 			+ sol.getNumVehicles() * 4 //route sizes
@@ -173,10 +174,10 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	private VrpProblem buildProblemFromStream(DataInput dis) throws IOException {
-		int numCities = dis.readInt();
-		int depotX = dis.readInt();
-		int depotY = dis.readInt();
-		int vehicleCapacity = dis.readInt();
+		int numCities = dis.readShort();
+		int depotX = dis.readShort();
+		int depotY = dis.readShort();
+		int vehicleCapacity = dis.readShort();
 		int[] serviceTimes = new int[numCities];
 		int[] demands = new int[numCities];
 		int[] windowStartTimes = new int[numCities];
@@ -184,12 +185,12 @@ public class VrpPlsSolution implements PlsSolution {
 		int[] xCoors = new int[numCities];
 		int[] yCoors = new int[numCities];
 		for (int i = 0; i < numCities; i++) {
-			demands[i] = dis.readInt();
-			serviceTimes[i] = dis.readInt();
-			windowStartTimes[i] = dis.readInt();
-			windowEndTimes[i] = dis.readInt();
-			xCoors[i] = dis.readInt();
-			yCoors[i] = dis.readInt();
+			demands[i] = dis.readShort();
+			serviceTimes[i] = dis.readShort();
+			windowStartTimes[i] = dis.readShort();
+			windowEndTimes[i] = dis.readShort();
+			xCoors[i] = dis.readShort();
+			yCoors[i] = dis.readShort();
 		}
 		
 		return new VrpProblem(demands, xCoors, yCoors, serviceTimes, windowStartTimes, windowEndTimes,
@@ -197,17 +198,17 @@ public class VrpPlsSolution implements PlsSolution {
 	}
 	
 	public void writeProblemToStream(VrpProblem problem, DataOutput dos) throws IOException {
-		dos.writeInt(problem.getDemands().length);
-		dos.writeInt(problem.getDepotX());
-		dos.writeInt(problem.getDepotY());
-		dos.writeInt(problem.getVehicleCapacity());
+		dos.writeShort(problem.getDemands().length);
+		dos.writeShort(problem.getDepotX());
+		dos.writeShort(problem.getDepotY());
+		dos.writeShort(problem.getVehicleCapacity());
 		for (int i = 0; i < problem.getNumCities(); i++) {
-			dos.writeInt(problem.getDemands()[i]);
-			dos.writeInt(problem.getServiceTimes()[i]);
-			dos.writeInt(problem.getWindowStartTimes()[i]);
-			dos.writeInt(problem.getWindowEndTimes()[i]);
-			dos.writeInt(problem.getXCoors()[i]);
-			dos.writeInt(problem.getYCoors()[i]);
+			dos.writeShort(problem.getDemands()[i]);
+			dos.writeShort(problem.getServiceTimes()[i]);
+			dos.writeShort(problem.getWindowStartTimes()[i]);
+			dos.writeShort(problem.getWindowEndTimes()[i]);
+			dos.writeShort(problem.getXCoors()[i]);
+			dos.writeShort(problem.getYCoors()[i]);
 		}
 	}
 	
