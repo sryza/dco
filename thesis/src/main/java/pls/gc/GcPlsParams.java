@@ -14,11 +14,12 @@ public class GcPlsParams implements Writable {
 	private long finishByTime;
 	private boolean startWithLs;
 	private int lsTime;
+	private boolean reduceShuffle;
 	
 	public GcPlsParams() {
 	}
 	
-	public GcPlsParams(int popSize, int roundTime, int lsTime, int A, double alpha, long finishByTime, boolean startWithLs) {
+	public GcPlsParams(int popSize, int roundTime, int lsTime, int A, double alpha, long finishByTime, boolean startWithLs, boolean reduceShuffle) {
 		this.popSize = popSize;
 		this.roundTime = roundTime;
 		this.lsTime = lsTime;
@@ -26,6 +27,7 @@ public class GcPlsParams implements Writable {
 		this.alpha = alpha;
 		this.finishByTime = finishByTime;
 		this.startWithLs = startWithLs;
+		this.reduceShuffle = reduceShuffle;
 	}
 	
 	@Override
@@ -37,6 +39,7 @@ public class GcPlsParams implements Writable {
 		finishByTime = input.readLong();
 		startWithLs = input.readBoolean();
 		lsTime = input.readInt();
+		reduceShuffle = input.readBoolean();
 	}
 
 	@Override
@@ -48,6 +51,7 @@ public class GcPlsParams implements Writable {
 		output.writeLong(finishByTime);
 		output.writeBoolean(startWithLs);
 		output.writeInt(lsTime);
+		output.writeBoolean(reduceShuffle);
 	}
 	
 	public int getPopulationSize() {
@@ -84,5 +88,9 @@ public class GcPlsParams implements Writable {
 	
 	public int getLsTime() {
 		return lsTime;
+	}
+	
+	public boolean getReduceShuffle() {
+		return reduceShuffle;
 	}
 }

@@ -44,7 +44,7 @@ public class GcMapper extends MapReduceBase implements Mapper<BytesWritable, Byt
 		LOG.info("LS Time=" + params.getLsTime());
 
 		for (int i = 0; i < params.getPopulationSize(); i++) {
-			GcPlsSolution sol = new GcPlsSolution(problem);
+			GcPlsSolution sol = new GcPlsSolution();
 			sol.readFields(dis);
 			sols[i] = sol.getSolution();
 			LOG.info("Received sol with " + sols[i].getNodeColors().length + " nodes");

@@ -24,10 +24,13 @@ public class GcPlsProblem implements Writable {
 	@Override
 	public void readFields(DataInput input) throws IOException {
 		k = input.readInt();
+//		System.out.println("k: " + k);
 		int numNodes = input.readInt();
+//		System.out.println("numNodes: " + numNodes);
 		int[][] nodeNeighbors = new int[numNodes][];
 		for (int i = 0; i < numNodes; i++) {
 			int numNeighbors = input.readInt();
+//			System.out.println("numNeighbors: " + numNeighbors);
 			nodeNeighbors[i] = new int[numNeighbors];
 			for (int j = 0; j < numNeighbors; j++) {
 				nodeNeighbors[i][j] = input.readInt();

@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,8 +13,7 @@ public class Benchmarks {
 	
 	
 	public static void main(String[] args) {
-		bench();
-		bench();
+		new HashSet<Integer>(Arrays.asList(new Integer[] {null}));
 	}
 	
 	public static void bench() {

@@ -4,9 +4,9 @@ public class GcSolution implements Comparable<GcSolution> {
 	private int[] nodeColors;
 	private int cost;
 	
-	public GcSolution(int[] nodeColors) {
-		this.nodeColors = nodeColors;
-	}
+//	public GcSolution(int[] nodeColors) {
+//		this.nodeColors = nodeColors;
+//	}
 	
 	public GcSolution(int[] nodeColors, int cost) {
 		this.nodeColors = nodeColors;

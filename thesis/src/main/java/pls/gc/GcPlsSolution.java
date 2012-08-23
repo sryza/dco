@@ -1,6 +1,5 @@
 package pls.gc;
 
-import gc.GcProblem;
 import gc.GcSolution;
 
 import java.io.DataInput;
@@ -12,17 +11,12 @@ import pls.WritableSolution;
 public class GcPlsSolution implements WritableSolution {
 
 	private GcSolution sol;
-	private GcProblem problem;
 	
 	public GcPlsSolution(GcSolution sol) {
 		this.sol = sol;
 	}
 	
 	public GcPlsSolution() {
-	}
-	
-	public GcPlsSolution(GcProblem problem) {
-		this.problem = problem;
 	}
 	
 	@Override
@@ -32,11 +26,13 @@ public class GcPlsSolution implements WritableSolution {
 		for (int i = 0; i < numNodes; i++) {
 			nodeColors[i] = input.readByte();
 		}
-		if (problem != null) {
-			sol = new GcSolution(nodeColors, problem.getNodeNeighbors());
-		} else {
-			sol = new GcSolution(nodeColors);
-		}
+//		if (problem != null) {
+//			sol = new GcSolution(nodeColors, problem.getNodeNeighbors());
+//		} else {
+//			sol = new GcSolution(nodeColors);
+//		}
+		int cost = input.readInt();
+		sol = new GcSolution(nodeColors, cost);
 	}
 
 	@Override
@@ -46,6 +42,7 @@ public class GcPlsSolution implements WritableSolution {
 		for (int color : colors) {
 			output.writeByte((byte)color);
 		}
+		output.writeInt(sol.getCost());
 	}
 	
 	@Override

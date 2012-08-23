@@ -42,7 +42,9 @@ public class GcReducer extends MapReduceBase implements Reducer<BytesWritable, B
 			numVals++;
 		}
 		
-		Collections.shuffle(sols);
+		if (params.getReduceShuffle()) {
+			Collections.shuffle(sols);
+		}
 		
 		params.setFinishByTime(System.currentTimeMillis() + params.getRoundTime());
 		params.setStartWithLs(false);
