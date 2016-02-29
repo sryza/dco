@@ -11,12 +11,10 @@ public class GcHybridRunner {
 		Arrays.sort(population);
 		while (System.currentTimeMillis() < finishTime) {
 			int parent1Index = rand.nextInt(population.length);
-//			int parent1Index = chooseRandIndex(population.length, rand);
 
 			int parent2Index = parent1Index;
 			while (parent2Index == parent1Index) {
 				parent2Index = rand.nextInt(population.length);
-//				parent2Index = chooseRandIndex(population.length, rand);
 			}
 			
 			GcSolution child = breeder.cross(population[parent1Index], population[parent2Index], problem.getNodeNeighbors(), k);
@@ -42,11 +40,5 @@ public class GcHybridRunner {
 			
 //			population[worstSolIndex] = child;
 		}
-	}
-	
-	private static int chooseRandIndex(int size, Random rand) {
-		double c = rand.nextDouble();
-		double i = (1 + Math.sqrt(1 + 4 * (1-c)*size*(size+1))) / 2;
-		return Math.min((int)i, size-1); //the min is a precaution against weird floating point stuff I don't know about
 	}
 }
